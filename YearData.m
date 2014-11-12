@@ -45,14 +45,20 @@ classdef YearData
         purch_cost_ora_res;
         amt_mature_future_ORA_res;
         amt_mature_future_FCOJ_res;
-        transp_cost_ship_future_FCOJ_res;
+        transp_cost_ship_future_FCOJ_res = zeros(12,71);
         amt_ORA_shipped_grove_res;
-        transp_cost_grove_FLA_res;
-        transp_cost_grove_CAL_res;
-        transp_cost_grove_TEX_res;
-        transp_cost_grove_ARZ_res;
-        transp_cost_grove_BRA_res;
-        transp_cost_grove_SPA_res;
+        transp_cost_grove_proc_FLA_res = zeros(10,48);
+        transp_cost_grove_stor_FLA_res = zeros(71,48);
+        transp_cost_grove_proc_CAL_res = zeros(10,48);
+        transp_cost_grove_stor_CAL_res = zeros(71,48);
+        transp_cost_grove_proc_TEX_res = zeros(10,48);
+        transp_cost_grove_stor_TEX_res = zeros(71,48);
+        transp_cost_grove_proc_ARZ_res = zeros(10,48);
+        transp_cost_grove_stor_ARZ_res = zeros(71,48);
+        transp_cost_grove_proc_BRA_res = zeros(10,48);
+        transp_cost_grove_stor_BRA_res = zeros(71,48);
+        transp_cost_grove_proc_SPA_res = zeros(10,48);
+        transp_cost_grove_stor_SPA_res = zeros(71,48);
         proc_plant_res = containers.Map;
         storage_res = containers.Map;
         sales_week_ORA_res;
@@ -111,9 +117,9 @@ classdef YearData
                 yr.arr_future_dec_ORA = xlsread(filename,'raw_materials','C47:N47');
                 yr.arr_future_dec_FCOJ = xlsread(filename,'raw_materials','C48:N48');
 
-                num_procs = sum((OJ_object.proc_plant_cap ~= 0));
+                num_proc = sum((OJ_object.proc_plant_cap ~= 0));
                 num_stor = sum((OJ_object.storage_cap ~= 0));
-                mat_offset = num_procs + num_stor - 1;
+                mat_offset = num_proc + num_stor - 1;
                 col = char('C' + mat_offset);
                 range = strcat('C6:',col,'11');
 
@@ -124,12 +130,12 @@ classdef YearData
 
 
 
-                col_2 = char('C' + 2*num_procs -1);
+                col_2 = char('C' + 2*num_proc -1);
                 range = strcat('C19:',col_2,'19');
                 raw_manufac = xlsread(filename,'shipping_manufacturing',range);
                 reshape_manufac = reshape(raw_manufac,2,length(raw_manufac)/2);
                 non_zero = find(OJ_object.proc_plant_cap);
-                for i=1:num_procs 
+                for i=1:num_proc 
                     plant = non_zero(i);
                     yr.manufac_proc_plant_dec(:,plant) = reshape_manufac(:,i);
                 end
@@ -145,7 +151,7 @@ classdef YearData
                     yr.reconst_storage_dec(stor,:) = raw_recon(i,:);
                 end
 
-                col = char('C' + 2*num_procs);
+                col = char('C' + 2*num_proc);
 
                 range = strcat('C27:',col,num2str(26+num_stor));
                 [~, ~, data] = xlsread(filename,'shipping_manufacturing',range);
@@ -164,7 +170,7 @@ classdef YearData
                     end
                 end
                 for (i=1:num_stor)
-                    for(j=1:2:2*num_procs)
+                    for(j=1:2:2*num_proc)
                         proc_plant = non_zero((j+1)/2);
                         stor_fac = non_zero2(i);
                         yr.ship_proc_plant_storage_dec(stor_fac, proc_plant).POJ = data(i, j+1);
@@ -181,9 +187,89 @@ classdef YearData
                 
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 % Reading in the results
+                col = char('C' + num_stor - 1);
+                range = strcat('C72:',col,'83');
+                [~, ~, raw_data] = xlsread(filename,'grove',range);
+                raw_data = cell2mat(cellNaNReplace(raw_data,0));
+                for (i=1:num_stor)
+                    yr.transp_cost_ship_future_FCOJ_res(:,non_zero2(i)) = raw_data(:,i);
+                end
+                fla_range_proc = strcat('C98:AX',num2str(98+num_proc - 1));
+                [~, ~, data] = xlsread(filename, 'grove', fla_range_proc);
+                data = cell2mat(cellNaNReplace(data,0));
+                for (i=1:num_proc)
+                    yr.transp_cost_grove_proc_FLA_res(non_zero(i),:) = data(i,:);
+                end
+                fla_range_stor = strcat('C', num2str(98+num_proc),':AX',num2str(98+num_proc +num_stor - 1));
+                [~, ~, data] = xlsread(filename, 'grove', fla_range_stor);
+                data = cell2mat(cellNaNReplace(data,0));
+                for (i=1:num_stor)
+                    yr.transp_cost_grove_stor_FLA_res(non_zero2(i),:) = data(i,:);
+                end
                 
+                cal_range_proc = strcat('C',num2str(98+num_proc+num_stor+1),':AX',num2str(98+2*num_proc+num_stor+1 - 1));
+                [~, ~, data] = xlsread(filename, 'grove', cal_range_proc);
+                data = cell2mat(cellNaNReplace(data,0));
+                for (i=1:num_proc)
+                    yr.transp_cost_grove_proc_CAL_res(non_zero(i),:) = data(i,:);
+                end
+                cal_range_stor = strcat('C', num2str(98+2*num_proc+num_stor+1 - 1+1),':AX',num2str(98+2*num_proc+2*num_stor+1 - 1+1-1));
+                [~, ~, data] = xlsread(filename, 'grove', cal_range_stor);
+                data = cell2mat(cellNaNReplace(data,0));
+                for (i=1:num_stor)
+                    yr.transp_cost_grove_stor_CAL_res(non_zero2(i),:) = data(i,:);
+                end
                 
+                tex_range_proc = strcat('C',num2str(98+2*num_proc+2*num_stor+2),':AX',num2str(98+3*num_proc+2*num_stor+2 - 1));
+                [~, ~, data] = xlsread(filename, 'grove', tex_range_proc);
+                data = cell2mat(cellNaNReplace(data,0));
+                for (i=1:num_proc)
+                    yr.transp_cost_grove_proc_TEX_res(non_zero(i),:) = data(i,:);
+                end
+                tex_range_stor = strcat('C', num2str(98+3*num_proc+2*num_stor+2 - 1 +1),':AX',num2str(98+3*num_proc+3*num_stor+2 - 1 +1 - 1));
+                [~, ~, data] = xlsread(filename, 'grove', tex_range_stor);
+                data = cell2mat(cellNaNReplace(data,0));
+                for (i=1:num_stor)
+                    yr.transp_cost_grove_stor_TEX_res(non_zero2(i),:) = data(i,:);
+                end
+                arz_range_proc = strcat('C',num2str(98+3*num_proc + 3*num_stor + 3),':AX',num2str(98+4*num_proc + 3*num_stor + 3 - 1));
+                [~, ~, data] = xlsread(filename, 'grove', arz_range_proc);
+                data = cell2mat(cellNaNReplace(data,0));
+                for (i=1:num_proc)
+                    yr.transp_cost_grove_proc_ARZ_res(non_zero(i),:) = data(i,:);
+                end
+                arz_range_stor = strcat('C', num2str(98+4*num_proc + 3*num_stor + 3 - 1+1),':AX',num2str(98+4*num_proc + 4*num_stor + 3 - 1+1-1));
+                [~, ~, data] = xlsread(filename, 'grove', arz_range_stor);
+                data = cell2mat(cellNaNReplace(data,0));
+                for (i=1:num_stor)
+                    yr.transp_cost_grove_stor_ARZ_res(non_zero2(i),:) = data(i,:);
+                end
+                bra_range_proc = strcat('C',num2str(98+4*num_proc+4*num_stor+4),':AX',num2str(98+5*num_proc+4*num_stor+4 -1));
+                [~, ~, data] = xlsread(filename, 'grove', bra_range_proc);
+                data = cell2mat(cellNaNReplace(data,0));
+                for (i=1:num_proc)
+                    yr.transp_cost_grove_proc_BRA_res(non_zero(i),:) = data(i,:);
+                end
+                bra_range_stor = strcat('C', num2str(98+5*num_proc+4*num_stor+4 -1+1),':AX',num2str(98+5*num_proc+5*num_stor+4 -1+1-1));
+                [~, ~, data] = xlsread(filename, 'grove', bra_range_stor);
+                data = cell2mat(cellNaNReplace(data,0));
+                for (i=1:num_stor)
+                    yr.transp_cost_grove_stor_BRA_res(non_zero2(i),:) = data(i,:);
+                end
+                spa_range_proc = strcat('C',num2str(98+ 5*num_proc + 5*num_stor + 5),':AX',num2str(98+ 6*num_proc + 5*num_stor + 5 -1));
+                [~, ~, data] = xlsread(filename, 'grove', spa_range_proc);
+                data = cell2mat(cellNaNReplace(data,0));
+                for (i=1:num_proc)
+                    yr.transp_cost_grove_proc_SPA_res(non_zero(i),:) = data(i,:);
+                end
+                bra_range_stor = strcat('C', num2str(98+ 6*num_proc + 5*num_stor + 5 -1+1),':AX',num2str(98+ 6*num_proc + 6*num_stor + 5 -1+1-1));
+                [~, ~, data] = xlsread(filename, 'grove', bra_range_stor);
+                data = cell2mat(cellNaNReplace(data,0));
+                for (i=1:num_stor)
+                    yr.transp_cost_grove_stor_SPA_res(non_zero2(i),:) = data(i,:);
+                end
                 
+                %%%%% Read each of the processing plant tabs
 
 
             end
