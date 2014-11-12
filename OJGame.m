@@ -18,12 +18,13 @@ classdef OJGame
         % inventory in each of the processing plants
         proc_plant_inv = zeros(10,1);
         % inventory in each of the storage locations
-        storage_inv = containers.Map        
+        
+        storage_inv = struct([]);    
         % capacity at each of the processing plants
         proc_plant_cap = zeros(10,1);
                 
         % capacity at each of the storage locations
-        storage_cap = containers.Map
+        storage_cap = zeros(71,1);
         
         % Number of tank cars? and Where they are?
         tank_cars_num = zeros(10,1);
@@ -42,12 +43,22 @@ classdef OJGame
             oj.tank_cars_num(1) = 61; 
             oj.tank_cars_num(5) = 91;
             oj.tank_cars_num(7) = 155;
-            oj.storage_cap('S15') = 40000;
-            oj.storage_cap('S61') = 43000;
-            oj.storage_inv('S15') = struct('ORA', 0, 'POJ', 0, ...
-                                           'FOCJ', 0, 'ROJ', 0);
-            oj.storage_inv('S61') = struct('ORA', 0, 'POJ', 0, ...
-                                           'FOCJ', 0, 'ROJ', 0);
+            oj.storage_cap(4) = 40000;
+            oj.storage_cap(41) = 43000;
+            test = struct('ORA', nan, 'POJ', nan, 'FCOJ', nan, 'ROJ', nan);
+            oj.storage_inv = test;
+            for (i=2:71)
+                oj.storage_inv(i) = test;
+            end
+            oj.storage_inv(4).ORA = 0;
+            oj.storage_inv(4).POJ = 0;
+            oj.storage_inv(4).FCOJ = 0;
+            oj.storage_inv(4).ROJ = 0;
+
+            oj.storage_inv(41).ORA = 0;
+            oj.storage_inv(41).POJ = 0;
+            oj.storage_inv(41).FCOJ = 0;
+            oj.storage_inv(41).ROJ = 0;
         end
         
         % Function to update all the values of the properties. The input 
