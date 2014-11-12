@@ -4,7 +4,7 @@ classdef Decisions
     % properties values of this class to the decisions. This can obviously
     % call other functions or have other inputs from other functions as
     % we deem fit. It can also take as input any sort of metrics and such
-    % that we have calculated from any other function or class. helo mich
+    % that we have calculated from any other function or class. karthik
     
     properties
         % The decisions
