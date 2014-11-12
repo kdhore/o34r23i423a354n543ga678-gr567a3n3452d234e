@@ -8,8 +8,9 @@ classdef OJGame
     %     Which facilities are active
     %       1. Processing Plants
     %       2. Storage 
-    %       3. Tank Cars
+    %       3. Tank Cars - how do these work?
     %     Futures: Keep track of which futures are arriving when
+    %     Also need to standardize abbreviations
     
     properties
         % All these values are equal to the values before the 2004 run.

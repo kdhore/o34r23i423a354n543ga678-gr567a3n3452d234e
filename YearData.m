@@ -9,7 +9,12 @@ classdef YearData
         % These are the properties/matrices of each year. Most likely 
         % can represented by a struct or just a bunch of matrices. We
         % should have two separate structs, one for the decisions of 
+<<<<<<< HEAD
         % that year, and one for the results
+=======
+        % that year, and one for the results - probably just a shitton of
+        % properties instead
+>>>>>>> origin/master
         year;
         proc_plant_dec;
         tank_car_dec;
@@ -82,6 +87,7 @@ classdef YearData
                 % excel file (say it's called data), then set
                 % yr.proc_plant_dec = data
                 yr.year = xlsread(filename,'basic_info','D5:F5');
+<<<<<<< HEAD
                 
                 % Reading in facilities tab
                 [~,~, yr.proc_plant_dec] = xlsread(filename,'facilities','C6:C15');
@@ -99,6 +105,15 @@ classdef YearData
                 yr.future_mark_dec_ORA = cell2mat(cellNaNReplace(yr.future_mark_dec_ORA,0));                  
                 [~, ~, yr.future_mark_dec_FCOJ] = xlsread(filename,'raw_materials','N37:O41');
                 yr.future_mark_dec_FCOJ = cell2mat(cellNaNReplace(yr.future_mark_dec_FCOJ,0));
+=======
+                yr.proc_plant_dec = xlsread(filename,'facilities','C6:C15');
+                yr.tank_car_dec = xlsread(filename,'facilities','C21:C30');
+                yr.storage_dec = xlsread(filename,'facilities','C36:C106');
+                yr.purchase_spotmkt_dec = xlsread(filename,'raw_materials','C6:N11');
+                yr.quant_mult_dec = xlsread(filename,'raw_materials','C17:H22');
+                yr.future_mark_dec_ORA = xlsread(filename,'raw_materials','N31:O35');
+                yr.future_mark_dec_FCOJ = xlsread(filename,'raw_materials','N37:O41');
+>>>>>>> origin/master
                 yr.arr_future_dec_ORA = xlsread(filename,'raw_materials','C47:N47');
                 yr.arr_future_dec_FCOJ = xlsread(filename,'raw_materials','C48:N48');
 
@@ -107,9 +122,14 @@ classdef YearData
                 mat_offset = num_procs + num_stor - 1;
                 col = char('C' + mat_offset);
                 range = strcat('C6:',col,'11');
+<<<<<<< HEAD
                 [~, ~, yr.ship_grove_dec] = xlsread(filename,'shipping_manufacturing',range);
                 yr.ship_grove_dec = cell2mat(cellNaNReplace(yr.ship_grove_dec,0));
                 
+=======
+                yr.ship_grove_dec = xlsread(filename,'shipping_manufacturing',range);
+
+>>>>>>> origin/master
                 col_2 = char('C' + 2*num_procs -1);
                 range = strcat('C19:',col_2,'19');
                 raw_manufac = xlsread(filename,'shipping_manufacturing',range);
@@ -120,9 +140,14 @@ classdef YearData
                     yr.manufac_proc_plant_dec(:,plant) = reshape_manufac(:,i);
                 end
 
+<<<<<<< HEAD
                 range = strcat('C36:','N',num2str(26+num_stor+9));
                 [~, ~, raw_recon] = xlsread(filename,'shipping_manufacturing',range);
                 raw_recon = cell2mat(cellNaNReplace(raw_recon,0));
+=======
+                range = strcat('B36:','N',num2str(26+num_stor+1));
+                raw_recon = xlsread(filename,'shipping_manufacturing',range);
+>>>>>>> origin/master
                 non_zero2 = find(OJ_object.storage_cap);
                 for i=1:num_stor
                     stor = non_zero2(i);
@@ -130,14 +155,22 @@ classdef YearData
                 end
 
                 col = char('C' + 2*num_procs);
+<<<<<<< HEAD
                 range = strcat('C27:',col,num2str(26+num_stor));
                 [~, ~, data] = xlsread(filename,'shipping_manufacturing',range);
                 data = cell2mat(cellNaNReplace(data,0));
+=======
+                range = strcat('C27:',col,num2str(34+num_stor));
+                data = xlsread(filename,'shipping_manufacturing',range);
+>>>>>>> origin/master
                 for i=1:num_stor
                     stor = non_zero2(i);
                     yr.futures_ship_dec(stor) = data(i,1);
                 end
+<<<<<<< HEAD
                 
+=======
+>>>>>>> origin/master
                 ship_break = struct('POJ', nan, 'FCOJ', nan);
                 yr.ship_proc_plant_storage_dec = ship_break;
                 for (i=1:71)
@@ -159,12 +192,15 @@ classdef YearData
                 yr.pricing_POJ_dec = xlsread(filename,'pricing','D15:O21');
                 yr.pricing_ROJ_dec = xlsread(filename,'pricing','D24:O30');
                 yr.pricing_FCOJ_dec = xlsread(filename,'pricing','D33:O39');
+<<<<<<< HEAD
                 
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 % Reading in the results
                 
                 
                 
+=======
+>>>>>>> origin/master
             end
         end 
     end
