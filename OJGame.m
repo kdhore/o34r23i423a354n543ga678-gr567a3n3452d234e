@@ -3,7 +3,7 @@ classdef OJGame
     % orange juice game.
     %   The purpose of this class is to contain information about:
     %     Remaining inventory from previous year in
-    %       1. Processing Plants
+    %       1. Processing Plants helo
     %       2. Storage 
     %     Which facilities are active
     %       1. Processing Plants
