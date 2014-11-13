@@ -66,22 +66,23 @@ classdef YearData
         sales_tons_month_ORA_res;
         sales_rev_month_ORA_res;
         transp_cost_month_ORA_res;
-        sales_POJ_res;
+        sales_week_POJ_res;
         transp_cost_POJ_res;
         sales_tons_month_POJ_res;
         sales_rev_month_POJ_res;
         transp_cost_month_POJ_res;
-        sales_FCOJ_res;
+        sales_week_FCOJ_res;
         transp_cost_FCOJ_res;
         sales_tons_month_FCOJ_res;
         sales_rev_month_FCOJ_res;
         transp_cost_month_FCOJ_res;
-        sales_ROJ_res;
+        sales_week_ROJ_res;
         transp_cost_ROJ_res;
         sales_tons_month_ROJ_res;
         sales_rev_month_ROJ_res;
         transp_cost_month_ROJ_res;
-        market_res;
+        market_res_stats
+        market_res_names;
         
     end
     
@@ -187,6 +188,36 @@ classdef YearData
                 
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 % Reading in the results
+                [~,~, yr.price_orange_spot_res] = xlsread(filename,'grove','C5:N10');
+                yr.price_orange_spot_res = cell2mat(cellNaNReplace(yr.price_orange_spot_res,0));
+
+                [~,~, yr.fx_exch_res] = xlsread(filename,'grove','C14:N15');
+                yr.fx_exch_res = cell2mat(cellNaNReplace(yr.fx_exch_res,0));
+
+                [~,~, yr.us_price_spot_res] = xlsread(filename,'grove','C19:N24');
+                yr.us_price_spot_res = cell2mat(cellNaNReplace(yr.us_price_spot_res,0));
+
+                [~,~, yr.quant_mult_res] = xlsread(filename,'grove','C28:N33');
+                yr.quant_mult_res = cell2mat(cellNaNReplace(yr.quant_mult_res,0));
+
+                [~,~, yr.amt_ora_harv_res] = xlsread(filename,'grove','C38:AX43');
+                yr.amt_ora_harv_res = cell2mat(cellNaNReplace(yr.amt_ora_harv_res,0));
+
+                [~,~, yr.amt_ora_purch_res] = xlsread(filename,'grove','C48:AX53');
+                yr.amt_ora_purch_res = cell2mat(cellNaNReplace(yr.amt_ora_purch_res,0));
+
+                [~,~, yr.purch_cost_ora_res] = xlsread(filename,'grove','C58:AX63');
+                yr.purch_cost_ora_res = cell2mat(cellNaNReplace(yr.purch_cost_ora_res,0));
+
+                [~,~, yr.amt_mature_future_ORA_res] = xlsread(filename,'grove','C67:N67');
+                yr.amt_mature_future_ORA_res = cell2mat(cellNaNReplace(yr.amt_mature_future_ORA_res,0));
+
+                [~,~, yr.amt_mature_future_FCOJ_res] = xlsread(filename,'grove','C68:N68');
+                yr.amt_mature_future_FCOJ_res = cell2mat(cellNaNReplace(yr.amt_mature_future_FCOJ_res,0));
+                
+                [~,~, yr.amt_ORA_shipped_grove_res] = xlsread(filename,'grove','C88:AX93');
+                yr.amt_ORA_shipped_grove_res = cell2mat(cellNaNReplace(yr.amt_ORA_shipped_grove_res,0));
+
                 col = char('C' + num_stor - 1);
                 range = strcat('C72:',col,'83');
                 [~, ~, raw_data] = xlsread(filename,'grove',range);
@@ -270,11 +301,165 @@ classdef YearData
                 end
                 
                 %%%%% Read each of the processing plant tabs
-
-
-            end
+                for (i=1:num_proc)
+                    shtname = char(plantNamesInUse(non_zero(i)));
+                    [~, ~, ora_ship_in] = xlsread(filename,shtname,'D7:AY7');
+                    ora_ship_in = cell2mat(cellNaNReplace(ora_ship_in,0));
+                    [~, ~, ora_toss_out] = xlsread(filename,shtname,'D10:AY10');
+                    ora_toss_out = cell2mat(cellNaNReplace(ora_toss_out,0));
+                    [~, ~, ora_inven] = xlsread(filename, shtname, 'C13:AY17');
+                    ora_inven = cell2mat(cellNaNReplace(ora_inven,0));
+                    [~, ~, manufac_POJ] =  xlsread(filename, shtname, 'D21:AY21');
+                    manufac_POJ = cell2mat(cellNaNReplace(manufac_POJ,0));
+                    [~, ~, manufac_FCOJ] =  xlsread(filename, shtname, 'D22:AY22');
+                    manufac_FCOJ = cell2mat(cellNaNReplace(manufac_FCOJ,0));
+                    [~, ~, manufac_cost_POJ] =  xlsread(filename, shtname, 'D23:AY23');
+                    manufac_cost_POJ = cell2mat(cellNaNReplace(manufac_cost_POJ,0));
+                    [~, ~, manufac_cost_FCOJ] =  xlsread(filename, shtname, 'D24:AY24');
+                    manufac_cost_FCOJ = cell2mat(cellNaNReplace(manufac_cost_FCOJ,0));
+                    [~, ~, tank_car_status] = xlsread(filename,shtname,'C27:AY29');
+                    tank_car_status = cell2mat(cellNaNReplace(tank_car_status,0));
+                    [~, ~, holding_cost] = xlsread(filename,shtname,'D30:AY30');
+                    holding_cost = cell2mat(cellNaNReplace(holding_cost,0));
+                    storage_info = containers.Map;
+                    for (j=1:num_stor)
+                        stor_name = char(storageNamesInUse(non_zero2(j)));
+                        range = strcat('C',num2str(32+(j-1)*11+1),':AY',num2str(32+ j*11));
+                        [~, ~, data] = xlsread(filename,shtname, range);
+                        data = cell2mat(cellNaNReplace(data,0));
+                        storage_info(stor_name) = data;
+                    end
+                    together = struct('ORA_Shipped_In', ora_ship_in, 'ORA_Tossed_Out', ora_toss_out,...
+                                      'ORA_Inventory', ora_inven, 'POJ_Manufactured', manufac_POJ,...
+                                      'FCOJ_Manufactured', manufac_FCOJ, 'Cost_POJ_Manufactured',manufac_cost_POJ,...
+                                      'Cost_FCOJ_Manufactured',manufac_cost_FCOJ, 'Tank_Car_Status', tank_car_status,...
+                                      'Holding_Cost', holding_cost,'Storage_Info', storage_info);
+                    yr.proc_plant_res(shtname) = together;              
+                end
+                for (i=1:num_stor)
+                    shtname = char(storageNamesInUse(non_zero2(i)));
+                   
+                    [~, ~, ora_ship_in] = xlsread(filename,shtname,'D9:AY9');
+                    ora_ship_in = cell2mat(cellNaNReplace(ora_ship_in,0));
+                    [~, ~, poj_ship_in] = xlsread(filename,shtname,'D10:AY13');
+                    poj_ship_in = cell2mat(cellNaNReplace(poj_ship_in,0));
+                    [~, ~, roj_ship_in] = xlsread(filename,shtname,'D14:AY14');
+                    roj_ship_in = cell2mat(cellNaNReplace(roj_ship_in,0));
+                    [~, ~, fcoj_ship_in] = xlsread(filename,shtname,'D15:AY18');
+                    fcoj_ship_in = cell2mat(cellNaNReplace(fcoj_ship_in,0));
+                    [~, ~, ora_toss_out] = xlsread(filename,shtname,'D21:AY24');
+                    ora_toss_out = cell2mat(cellNaNReplace(ora_toss_out,0));
+                    [~, ~, poj_toss_out] = xlsread(filename,shtname,'D25:AY32');
+                    poj_toss_out = cell2mat(cellNaNReplace(poj_toss_out,0));
+                    [~, ~, roj_toss_out] = xlsread(filename,shtname,'D33:AY44');
+                    roj_toss_out = cell2mat(cellNaNReplace(roj_toss_out,0));
+                    [~, ~, fcoj_toss_out] = xlsread(filename,shtname,'D45:AY92');
+                    fcoj_toss_out = cell2mat(cellNaNReplace(fcoj_toss_out,0));
+                    [~, ~, ora_inven] = xlsread(filename,shtname,'C95:AY99');
+                    ora_inven = cell2mat(cellNaNReplace(ora_inven,0));
+                    [~, ~, poj_inven] = xlsread(filename,shtname,'C100:AY108');
+                    poj_inven = cell2mat(cellNaNReplace(poj_inven,0));
+                    [~, ~, roj_inven] = xlsread(filename,shtname,'C109:AY121');
+                    roj_inven = cell2mat(cellNaNReplace(roj_inven,0));
+                    [~, ~, fcoj_inven] = xlsread(filename,shtname,'C122:AY170');
+                    fcoj_inven = cell2mat(cellNaNReplace(fcoj_inven,0));
+                    [~, ~, reconst_fcoj] = xlsread(filename,shtname,'C172:AY172');
+                    reconst_fcoj = cell2mat(cellNaNReplace(reconst_fcoj,0));
+                    [~, ~, ora_sales] = xlsread(filename,shtname,'D175:AY176');
+                    ora_sales = cell2mat(cellNaNReplace(ora_sales,0));
+                    [~, ~, poj_sales] = xlsread(filename,shtname,'D177:AY178');
+                    poj_sales = cell2mat(cellNaNReplace(poj_sales,0));
+                    [~, ~, roj_sales] = xlsread(filename,shtname,'D179:AY180');
+                    roj_sales = cell2mat(cellNaNReplace(roj_sales,0));
+                    [~, ~, fcoj_sales] = xlsread(filename,shtname,'D181:AY182');
+                    fcoj_sales = cell2mat(cellNaNReplace(fcoj_sales,0));
+                    [~, ~, ora_ship_out] = xlsread(filename,shtname,'C185:AY188');
+                    ora_ship_out = cell2mat(cellNaNReplace(ora_ship_out,0));
+                    [~, ~, poj_ship_out] = xlsread(filename,shtname,'C189:AY196');
+                    poj_ship_out = cell2mat(cellNaNReplace(poj_ship_out,0));
+                    [~, ~, roj_ship_out] = xlsread(filename,shtname,'C197:AY208');
+                    roj_ship_out = cell2mat(cellNaNReplace(roj_ship_out,0));
+                    [~, ~, fcoj_ship_out] = xlsread(filename,shtname,'C209:AY256');
+                    fcoj_ship_out = cell2mat(cellNaNReplace(fcoj_ship_out,0));
+                    [~, ~, reconst_cost_stor] = xlsread(filename,shtname,'D259:AY259');
+                    reconst_cost_stor = cell2mat(cellNaNReplace(reconst_cost_stor,0));
+                    [~, ~, hold_cost_stor] = xlsread(filename,shtname,'D260:AY260');
+                    hold_cost_stor = cell2mat(cellNaNReplace(hold_cost_stor,0));
+                    together = struct('ORA_Shipped_In', ora_ship_in, 'POJ_Shipped_In', poj_ship_in,...
+                                      'ROJ_Shipped_In', roj_ship_in, 'FCOJ_Shipped_In', fcoj_ship_in,...
+                                      'ORA_Tossed_Out', ora_toss_out, 'POJ_Tossed_Out', poj_toss_out,...
+                                      'ROJ_Tossed_Out', roj_toss_out, 'FCOJ_Tossed_Out', fcoj_toss_out,...
+                                      'ORA_Inv',ora_inven, 'POJ_Inv',poj_inven,'ROJ_Inv',roj_inven, ...
+                                      'FCOJ_Inv',fcoj_inven, 'Reconstitute_from_FCOJ', reconst_fcoj,...
+                                      'ORA_Sales', ora_sales,'POJ_Sales', poj_sales,'ROJ_Sales', roj_sales, ...
+                                      'FCOJ_Sales', fcoj_sales, 'ORA_Shipped_Out', ora_ship_out,...
+                                      'POJ_Shipped_Out', poj_ship_out, 'ROJ_Shipped_Out', roj_ship_out,...
+                                      'FCOJ_Shipped_Out', fcoj_ship_out, 'Reconstitution_Cost', reconst_cost_stor,...
+                                      'Holding_Cost', hold_cost_stor);
+                    yr.storage_res(shtname) = together;                                  
+                end
+                [~,~, sales_and_transp_cost_weekly_ORA_res] = xlsread(filename,'ORA','D6:CU105');
+                sales_and_transp_cost_weekly_ORA_res = cell2mat(cellNaNReplace(sales_and_transp_cost_weekly_ORA_res,0));
+                
+                for i=1:2:(size(sales_and_transp_cost_weekly_ORA_res,2)-1)
+                    yr.sales_week_ORA_res = [yr.sales_week_ORA_res sales_and_transp_cost_weekly_ORA_res(:,i)];
+                    yr.transp_cost_ORA_res = [yr.transp_cost_ORA_res sales_and_transp_cost_weekly_ORA_res(:,i+1)];
+                end
+                [~,~, yr.sales_tons_month_ORA_res] = xlsread(filename,'grove','D109:O116');
+                yr.sales_tons_month_ORA_res = cell2mat(cellNaNReplace(yr.sales_tons_month_ORA_res,0));
+                [~,~, yr.sales_rev_month_ORA_res] = xlsread(filename,'grove','D120:O127');
+                yr.sales_rev_month_ORA_res = cell2mat(cellNaNReplace(yr.sales_rev_month_ORA_res,0));
+                [~,~, yr.transp_cost_month_ORA_res] = xlsread(filename,'grove','D131:O138');
+                yr.transp_cost_month_ORA_res = cell2mat(cellNaNReplace(yr.transp_cost_month_ORA_res,0));
+                
+                [~,~, sales_and_transp_cost_weekly_POJ_res] = xlsread(filename,'POJ','D6:CU105');
+                sales_and_transp_cost_weekly_POJ_res = cell2mat(cellNaNReplace(sales_and_transp_cost_weekly_POJ_res,0));
+                
+                for i=1:2:(size(sales_and_transp_cost_weekly_POJ_res,2)-1)
+                    yr.sales_week_POJ_res = [yr.sales_week_POJ_res sales_and_transp_cost_weekly_POJ_res(:,i)];
+                    yr.transp_cost_POJ_res = [yr.transp_cost_POJ_res sales_and_transp_cost_weekly_POJ_res(:,i+1)];
+                end
+                [~,~,yr.sales_tons_month_POJ_res] = xlsread(filename,'POJ','D109:O116');
+                yr.sales_tons_month_POJ_res = cell2mat(cellNaNReplace(yr.sales_tons_month_POJ_res,0));
+                [~,~,yr.sales_rev_month_POJ_res] = xlsread(filename,'POJ','D120:O127');
+                yr.sales_rev_month_POJ_res = cell2mat(cellNaNReplace(yr.sales_rev_month_POJ_res,0));
+                [~,~,yr.transp_cost_month_POJ_res] = xlsread(filename,'POJ','D131:O138');
+                yr.transp_cost_month_POJ_res = cell2mat(cellNaNReplace(yr.transp_cost_month_POJ_res,0));               
+                
+                [~,~, sales_and_transp_cost_weekly_FCOJ_res] = xlsread(filename,'FCOJ','D6:CU105');
+                sales_and_transp_cost_weekly_FCOJ_res = cell2mat(cellNaNReplace(sales_and_transp_cost_weekly_FCOJ_res,0));
+                
+                for i=1:2:(size(sales_and_transp_cost_weekly_FCOJ_res,2)-1)
+                    yr.sales_week_FCOJ_res = [yr.sales_week_FCOJ_res sales_and_transp_cost_weekly_FCOJ_res(:,i)];
+                    yr.transp_cost_FCOJ_res = [yr.transp_cost_FCOJ_res sales_and_transp_cost_weekly_FCOJ_res(:,i+1)];
+                end
+                [~,~,yr.sales_tons_month_FCOJ_res] = xlsread(filename,'FCOJ','D109:O116');
+                yr.sales_tons_month_FCOJ_res = cell2mat(cellNaNReplace(yr.sales_tons_month_FCOJ_res,0));
+                [~,~,yr.sales_rev_month_FCOJ_res] = xlsread(filename,'FCOJ','D120:O127');
+                yr.sales_rev_month_FCOJ_res = cell2mat(cellNaNReplace(yr.sales_rev_month_FCOJ_res,0));
+                [~,~,yr.transp_cost_month_FCOJ_res] = xlsread(filename,'FCOJ','D131:O138');
+                yr.transp_cost_month_FCOJ_res = cell2mat(cellNaNReplace(yr.transp_cost_month_FCOJ_res,0)); 
+                
+                [~,~, sales_and_transp_cost_weekly_ROJ_res] = xlsread(filename,'ROJ','D6:CU105');
+                sales_and_transp_cost_weekly_ROJ_res = cell2mat(cellNaNReplace(sales_and_transp_cost_weekly_ROJ_res,0));
+                
+                for i=1:2:(size(sales_and_transp_cost_weekly_ROJ_res,2)-1)
+                    yr.sales_week_ROJ_res = [yr.sales_week_ROJ_res sales_and_transp_cost_weekly_ROJ_res(:,i)];
+                    yr.transp_cost_ROJ_res = [yr.transp_cost_ROJ_res sales_and_transp_cost_weekly_ROJ_res(:,i+1)];
+                end
+                [~,~,yr.sales_tons_month_ROJ_res] = xlsread(filename,'ROJ','D109:O116');
+                yr.sales_tons_month_ROJ_res = cell2mat(cellNaNReplace(yr.sales_tons_month_ROJ_res,0));
+                [~,~,yr.sales_rev_month_ROJ_res] = xlsread(filename,'ROJ','D120:O127');
+                yr.sales_rev_month_ROJ_res = cell2mat(cellNaNReplace(yr.sales_rev_month_ROJ_res,0));
+                [~,~,yr.transp_cost_month_ROJ_res] = xlsread(filename,'ROJ','D131:O138');
+                yr.transp_cost_month_ROJ_res = cell2mat(cellNaNReplace(yr.transp_cost_month_ROJ_res,0)); 
+                [~,~,yr.market_res_names] = xlsread(filename,'market','C2:C101');
+                yr.market_res_names = cell2mat(cellNaNReplace(yr.market_res_names,0));
+                [~,~,yr.market_res_stats] = xlsread(filename,'market','D2:E101');
+                yr.market_res_stats = cell2mat(cellNaNReplace(yr.market_res_stats,0)); 
+            
         end 
     end
-    
+    end 
 end
 

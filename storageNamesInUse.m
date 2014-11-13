@@ -2,7 +2,7 @@ function [ storage_name ] = storageNamesInUse( index )
 
 % Map from index to storage facility name
 %   
-all_names = ['S01';
+all_names = {'S01';
 'S13';
 'S14';
 'S15';
@@ -72,7 +72,7 @@ all_names = ['S01';
 'S96';
 'S97';
 'S98';
-'S99'];
+'S99'};
 
 storage_name = all_names(index);
 end
