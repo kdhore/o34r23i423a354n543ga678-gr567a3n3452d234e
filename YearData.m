@@ -405,11 +405,11 @@ classdef YearData
                     yr.sales_week_ORA_res = [yr.sales_week_ORA_res sales_and_transp_cost_weekly_ORA_res(:,i)];
                     yr.transp_cost_ORA_res = [yr.transp_cost_ORA_res sales_and_transp_cost_weekly_ORA_res(:,i+1)];
                 end
-                [~,~, yr.sales_tons_month_ORA_res] = xlsread(filename,'grove','D109:O116');
+                [~,~, yr.sales_tons_month_ORA_res] = xlsread(filename,'ORA','D109:O116');
                 yr.sales_tons_month_ORA_res = cell2mat(cellNaNReplace(yr.sales_tons_month_ORA_res,0));
-                [~,~, yr.sales_rev_month_ORA_res] = xlsread(filename,'grove','D120:O127');
+                [~,~, yr.sales_rev_month_ORA_res] = xlsread(filename,'ORA','D120:O127');
                 yr.sales_rev_month_ORA_res = cell2mat(cellNaNReplace(yr.sales_rev_month_ORA_res,0));
-                [~,~, yr.transp_cost_month_ORA_res] = xlsread(filename,'grove','D131:O138');
+                [~,~, yr.transp_cost_month_ORA_res] = xlsread(filename,'ORA','D131:O138');
                 yr.transp_cost_month_ORA_res = cell2mat(cellNaNReplace(yr.transp_cost_month_ORA_res,0));
                 
                 [~,~, sales_and_transp_cost_weekly_POJ_res] = xlsread(filename,'POJ','D6:CU105');
