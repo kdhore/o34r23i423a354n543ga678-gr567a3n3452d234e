@@ -31,9 +31,13 @@ classdef YearData
         ship_proc_plant_storage_dec = struct([]);
         reconst_storage_dec = zeros(71,12);
         pricing_ORA_dec;
+        pricing_ORA_weekly_dec;
         pricing_POJ_dec;
+        pricing_POJ_weekly_dec;
         pricing_FCOJ_dec;
+        pricing_FCOJ_weekly_dec;
         pricing_ROJ_dec;
+        pricing_ROJ_weekly_dec;
        
         % Result matrices
         price_orange_spot_res;
@@ -184,6 +188,13 @@ classdef YearData
                 yr.pricing_POJ_dec = xlsread(filename,'pricing','D15:O21');
                 yr.pricing_ROJ_dec = xlsread(filename,'pricing','D24:O30');
                 yr.pricing_FCOJ_dec = xlsread(filename,'pricing','D33:O39');
+                for i = 1:12
+                    j = 4*(i-1)+1;
+                    yr.pricing_ORA_weekly_dec(:,j:j+3) = repmat(yr.pricing_ORA_dec(:,i),1,4);
+                    yr.pricing_POJ_weekly_dec(:,j:j+3) = repmat(yr.pricing_POJ_dec(:,i),1,4);
+                    yr.pricing_ROJ_weekly_dec(:,j:j+3) = repmat(yr.pricing_ROJ_dec(:,i),1,4);
+                    yr.pricing_FCOJ_weekly_dec(:,j:j+3) = repmat(yr.pricing_FCOJ_dec(:,i),1,4);
+                end
 
                 
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -405,11 +416,11 @@ classdef YearData
                     yr.sales_week_ORA_res = [yr.sales_week_ORA_res sales_and_transp_cost_weekly_ORA_res(:,i)];
                     yr.transp_cost_ORA_res = [yr.transp_cost_ORA_res sales_and_transp_cost_weekly_ORA_res(:,i+1)];
                 end
-                [~,~, yr.sales_tons_month_ORA_res] = xlsread(filename,'ORA','D109:O116');
+                [~,~, yr.sales_tons_month_ORA_res] = xlsread(filename,'ORA','D109:O115');
                 yr.sales_tons_month_ORA_res = cell2mat(cellNaNReplace(yr.sales_tons_month_ORA_res,0));
-                [~,~, yr.sales_rev_month_ORA_res] = xlsread(filename,'ORA','D120:O127');
+                [~,~, yr.sales_rev_month_ORA_res] = xlsread(filename,'ORA','D120:O126');
                 yr.sales_rev_month_ORA_res = cell2mat(cellNaNReplace(yr.sales_rev_month_ORA_res,0));
-                [~,~, yr.transp_cost_month_ORA_res] = xlsread(filename,'ORA','D131:O138');
+                [~,~, yr.transp_cost_month_ORA_res] = xlsread(filename,'ORA','D131:O137');
                 yr.transp_cost_month_ORA_res = cell2mat(cellNaNReplace(yr.transp_cost_month_ORA_res,0));
                 
                 [~,~, sales_and_transp_cost_weekly_POJ_res] = xlsread(filename,'POJ','D6:CU105');
@@ -419,11 +430,11 @@ classdef YearData
                     yr.sales_week_POJ_res = [yr.sales_week_POJ_res sales_and_transp_cost_weekly_POJ_res(:,i)];
                     yr.transp_cost_POJ_res = [yr.transp_cost_POJ_res sales_and_transp_cost_weekly_POJ_res(:,i+1)];
                 end
-                [~,~,yr.sales_tons_month_POJ_res] = xlsread(filename,'POJ','D109:O116');
+                [~,~,yr.sales_tons_month_POJ_res] = xlsread(filename,'POJ','D109:O115');
                 yr.sales_tons_month_POJ_res = cell2mat(cellNaNReplace(yr.sales_tons_month_POJ_res,0));
-                [~,~,yr.sales_rev_month_POJ_res] = xlsread(filename,'POJ','D120:O127');
+                [~,~,yr.sales_rev_month_POJ_res] = xlsread(filename,'POJ','D120:O126');
                 yr.sales_rev_month_POJ_res = cell2mat(cellNaNReplace(yr.sales_rev_month_POJ_res,0));
-                [~,~,yr.transp_cost_month_POJ_res] = xlsread(filename,'POJ','D131:O138');
+                [~,~,yr.transp_cost_month_POJ_res] = xlsread(filename,'POJ','D131:O137');
                 yr.transp_cost_month_POJ_res = cell2mat(cellNaNReplace(yr.transp_cost_month_POJ_res,0));               
                 
                 [~,~, sales_and_transp_cost_weekly_FCOJ_res] = xlsread(filename,'FCOJ','D6:CU105');
@@ -433,11 +444,11 @@ classdef YearData
                     yr.sales_week_FCOJ_res = [yr.sales_week_FCOJ_res sales_and_transp_cost_weekly_FCOJ_res(:,i)];
                     yr.transp_cost_FCOJ_res = [yr.transp_cost_FCOJ_res sales_and_transp_cost_weekly_FCOJ_res(:,i+1)];
                 end
-                [~,~,yr.sales_tons_month_FCOJ_res] = xlsread(filename,'FCOJ','D109:O116');
+                [~,~,yr.sales_tons_month_FCOJ_res] = xlsread(filename,'FCOJ','D109:O115');
                 yr.sales_tons_month_FCOJ_res = cell2mat(cellNaNReplace(yr.sales_tons_month_FCOJ_res,0));
-                [~,~,yr.sales_rev_month_FCOJ_res] = xlsread(filename,'FCOJ','D120:O127');
+                [~,~,yr.sales_rev_month_FCOJ_res] = xlsread(filename,'FCOJ','D120:O126');
                 yr.sales_rev_month_FCOJ_res = cell2mat(cellNaNReplace(yr.sales_rev_month_FCOJ_res,0));
-                [~,~,yr.transp_cost_month_FCOJ_res] = xlsread(filename,'FCOJ','D131:O138');
+                [~,~,yr.transp_cost_month_FCOJ_res] = xlsread(filename,'FCOJ','D131:O137');
                 yr.transp_cost_month_FCOJ_res = cell2mat(cellNaNReplace(yr.transp_cost_month_FCOJ_res,0)); 
                 
                 [~,~, sales_and_transp_cost_weekly_ROJ_res] = xlsread(filename,'ROJ','D6:CU105');
@@ -447,11 +458,11 @@ classdef YearData
                     yr.sales_week_ROJ_res = [yr.sales_week_ROJ_res sales_and_transp_cost_weekly_ROJ_res(:,i)];
                     yr.transp_cost_ROJ_res = [yr.transp_cost_ROJ_res sales_and_transp_cost_weekly_ROJ_res(:,i+1)];
                 end
-                [~,~,yr.sales_tons_month_ROJ_res] = xlsread(filename,'ROJ','D109:O116');
+                [~,~,yr.sales_tons_month_ROJ_res] = xlsread(filename,'ROJ','D109:O115');
                 yr.sales_tons_month_ROJ_res = cell2mat(cellNaNReplace(yr.sales_tons_month_ROJ_res,0));
-                [~,~,yr.sales_rev_month_ROJ_res] = xlsread(filename,'ROJ','D120:O127');
+                [~,~,yr.sales_rev_month_ROJ_res] = xlsread(filename,'ROJ','D120:O126');
                 yr.sales_rev_month_ROJ_res = cell2mat(cellNaNReplace(yr.sales_rev_month_ROJ_res,0));
-                [~,~,yr.transp_cost_month_ROJ_res] = xlsread(filename,'ROJ','D131:O138');
+                [~,~,yr.transp_cost_month_ROJ_res] = xlsread(filename,'ROJ','D131:O137');
                 yr.transp_cost_month_ROJ_res = cell2mat(cellNaNReplace(yr.transp_cost_month_ROJ_res,0)); 
                 [~,~,yr.market_res_names] = xlsread(filename,'market','C2:C101');
                 yr.market_res_names = cell2mat(cellNaNReplace(yr.market_res_names,0));
