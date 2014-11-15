@@ -1,0 +1,11 @@
+[~,~, grove2processing_storage_dist] = xlsread('StaticData','G2PS','B2:E82');
+grove2processing_storage_dist = cell2mat(cellNaNReplace(grove2processing_storage_dist,0)); 
+[~,~, processing_and_storage_values] = xlsread('StaticData','G2PS','A2:A82');
+[~,~, grove_names] = xlsread('StaticData','G2PS','B1:E1');
+[~,~, processing2storage_dist] = xlsread('StaticData','P2S','B2:K72');
+processing2storage_dist = cell2mat(cellNaNReplace(processing2storage_dist,0)); 
+[~,~, storage_units] = xlsread('StaticData','P2S','A2:A72');
+[~,~, processing_units] = xlsread('StaticData','P2S','B1:K1');
+[~,~, storage2market_dist] = xlsread('StaticData','S2M','C2:BU101');
+storage2market_dist = cell2mat(cellNaNReplace(storage2market_dist,0)); 
+[~,~, cities] = xlsread('StaticData','S2M','B2:B101');
