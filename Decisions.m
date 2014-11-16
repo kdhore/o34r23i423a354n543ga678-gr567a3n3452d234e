@@ -8,6 +8,29 @@ classdef Decisions
     
     properties
         % The decisions
+        year;
+        proc_plant_dec;
+        tank_car_dec;
+        storage_dec;
+        purchase_spotmkt_dec;
+        quant_mult_dec;
+        future_mark_dec_ORA;
+        future_mark_dec_FCOJ;
+        arr_future_dec_ORA;
+        arr_future_dec_FCOJ;
+        ship_grove_dec;
+        manufac_proc_plant_dec = zeros(2,10);
+        futures_ship_dec = zeros(71,1);
+        ship_proc_plant_storage_dec = struct([]);
+        reconst_storage_dec = zeros(71,12);
+        pricing_ORA_dec;
+        pricing_ORA_weekly_dec;
+        pricing_POJ_dec;
+        pricing_POJ_weekly_dec;
+        pricing_FCOJ_dec;
+        pricing_FCOJ_weekly_dec;
+        pricing_ROJ_dec;
+        pricing_ROJ_weekly_dec;
     end
     
     methods
