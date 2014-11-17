@@ -10,7 +10,7 @@ plants_open = find(OJgameobj.proc_plant_cap);
 proc_plants = cell(length(plants_open),1);
 for i = 1:length(plants_open)
     inventory = [OJgameobj.proc_plant_inv(plants_open(i)).ORA; 0];
-    proc_plants(i) = processingPlant(OJgameobj.proc_plant_cap(i),...
+    proc_plants(i) = processingPlant(plants_open(i),OJgameobj.proc_plant_cap(i),...
                                      decisions.manufac_proc_plant_dec(1,plants_open(i)), ...
                                      0, inventory, 2000, 1000, oj.tank_cars_num(plants_open(i)),...
                                      10);
@@ -104,13 +104,13 @@ end
          shipped_ORA_SPA = decisions.ship_grove_dec(6,j)*0.01*total_ora_shipped(6,i);
          sum_shipped = shipped_ORA_FLA + shipped_ORA_CAL + shipped_ORA_TEX + shipped_ORA_ARZ + ...
                        shipped_ORA_BRA + shipped_ORA_SPA;
-         breakdown = rand(1,1);
+         breakdown = rand;
          if (breakdown < .05)
              breakdown = 1;
          else
              breakdown = 0;
          end
-         proc_plants{j}.iterateWeek(sum_shipped, decisions, breakdown);
+         proc_plants{j}.iterateWeek(sum_shipped, decisions, breakdown, storage_open);
      end
      for j = 1:length(storage)
          shipped_ORA_FLA = decisions.ship_grove_dec(1+length(proc_plants),j)*0.01*total_ora_shipped(1,i);
