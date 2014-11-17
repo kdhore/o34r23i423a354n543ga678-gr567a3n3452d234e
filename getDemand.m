@@ -79,6 +79,9 @@ for i = 1:7 %regions
      figure();
      hold all;
      plot(compiled_prices_ORA, compiled_sales_ORA, 'o', x2, y2);
+     
+     %below, to plot revenue vs. price
+     %plot(compiled_prices_ORA, compiled_sales_ORA, 'o', x2, y2.*x2);
      title(['ORA, Region ', region{i}]);
 
 end
@@ -133,6 +136,7 @@ for i = 1:7 %regions
      figure();
      hold all;
      plot(compiled_prices_POJ, compiled_sales_POJ, 'o', x2, y2);
+     %plot(compiled_prices_POJ, compiled_sales_POJ, 'o', x2, y2.*x2);
      title(['POJ, Region ', region{i}]);
 
 end
@@ -187,6 +191,7 @@ for i = 1:7 %regions
      figure();
      hold all;
      plot(compiled_prices_FCOJ, compiled_sales_FCOJ, 'o', x2, y2);
+     %plot(compiled_prices_FCOJ, compiled_sales_FCOJ, 'o', x2, y2.*x2);
      title(['FCOJ, Region ', region{i}]);
 
 end
@@ -241,6 +246,7 @@ for i = 1:7 %regions
      figure();
      hold all;
      plot(compiled_prices_ROJ, compiled_sales_ROJ, 'o', x2, y2);
+     %plot(compiled_prices_ROJ, compiled_sales_ROJ, 'o', x2, y2.*x2);
      title(['ROJ, Region ', region{i}]);
 
 end
