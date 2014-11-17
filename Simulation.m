@@ -128,14 +128,11 @@ end
              futures_per_week_FCOJ(1:4) = [];
              futures_per_week_FCOJ = [futures_per_week_FCOJ repmat(monthly_amt_shipped(i)/4,1,4)];
          end
-         demand = getDemand(storage{j});
+         demand = getDemand(storage{j}); % will need to give it a price, and do this for all products
          storage{j}.iterateWeek(sum_shipped, futures_per_week_FCOJ(i),decisions, proc_plants, demand);
      end
  end
 
-             
-     
-         
         
     % Transporation costs of shipping for FCOJ futures to storage facilities (input the distance excel file)
     % Transportation costs of shipping for ORA and ORA futures to processing
