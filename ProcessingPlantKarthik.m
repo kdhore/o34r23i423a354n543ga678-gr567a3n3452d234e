@@ -45,6 +45,10 @@ classdef ProcessingPlantKarthik
             end
         end
         
+        function pp = addCapacity(pp, newCapacity)
+            pp.capacity = pp.capacity + newCapacity;
+        end
+        
         % the breakdown parameter refers to whether it was broken down in
         % the previous week, so it did not produce any POJ or FCOJ for this
         % week
