@@ -45,20 +45,31 @@ classdef ProcessingPlantKarthik
             end
         end
         
-        function pp = addCapacity(pp, newCapacity)
-            pp.capacity = pp.capacity + newCapacity;
-        end
-        
         % the breakdown parameter refers to whether it was broken down in
         % the previous week, so it did not produce any POJ or FCOJ for this
         % week
-        function pp = iterateWeek(pp,sum_shipped, decisions, breakdown, storage_open)
-            % aging inventory
-			for i=5:-1:2
-				pp.ora(i) = pp.ora(i-1);
-			end
+        function [ship_out, toss_out, rotten, pojC, fcojC, tankersHoldC] = iterateWeek(pp,sum_shipped, decisions, breakdown, storage_open)
+           
+            ship_out = cell(4,1);
+			toss_out = cell(4,1);
+			rotten = zeros(4,1);
+
+			toss_out{1} = zeros(4,1);
+			toss_out{2} = zeros(8,1);
+			toss_out{3} = zeros(12,1);
+			toss_out{4} = zeros(48,1);
+
+			ship_out{1} = zeros(4,1);
+			ship_out{2} = zeros(8,1);
+			ship_out{3} = zeros(12,1);
+			ship_out{4} = zeros(48,1);
+            
 			% adding newly recieved products to inventory
             if breakdown == 1
+                 % aging inventory
+                for i=5:-1:2
+                    pp.ora(i) = pp.ora(i-1);
+                end
                 pp.ora(1) = sum_shipped;
                 rotten = pp.ora(5);
                 throwaway = max(sum(pp.ora(1:4))-pp.capacity,0);
@@ -76,8 +87,8 @@ classdef ProcessingPlantKarthik
                     i = i - 1;
                 end
                 % Update number of available tankers
+                cameHome = pp.shippingSchedule{1};
                 for i = 1:pp.stor_num
-                    cameHome = pp.shippingSchedule{1};
                     pp.tankersAvailable = pp.tankersAvailable + cameHome{i}.Tankers;
                 end
                 % update the shipping schedule
@@ -88,8 +99,8 @@ classdef ProcessingPlantKarthik
             % If it isn't broken down...
             else
                 % Update number of available tankers
-                for i = 1:pp.stor_num
-                    cameHome = pp.shippingSchedule{1};
+                cameHome = pp.shippingSchedule{1};
+                for i = 1:pp.stor_num    
                     pp.tankersAvailable = pp.tankersAvailable + cameHome{i}.Tankers;
                 end
                 % update the shipping schedule
@@ -97,6 +108,7 @@ classdef ProcessingPlantKarthik
                     pp.shippingSchedule{i} = pp.shippingSchedule{i + 1};
                 end
                 poj = pp.percentPOJ*sum(pp.ora(1:4))/100.0;
+                poj
 				fcoj = pp.percentFCOJ*sum(pp.ora(1:4))/100.0;
 				pp.ora = zeros(5,1);
                 if (poj+fcoj) <= pp.tankersAvailable*30
@@ -239,7 +251,6 @@ classdef ProcessingPlantKarthik
                 end
             end
         end
-    end
-    
+    end   
 end
 
