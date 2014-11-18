@@ -8,6 +8,8 @@ classdef storageFacility2 < handle
 		holdC = 0;
         proc_plant;
         cities;
+        index;
+        proc_num;
 	end
 
 	methods
@@ -72,7 +74,7 @@ classdef storageFacility2 < handle
 		% reconCost is cost spent reconstituting
 		% holdCost is the cost of holding inventory
 		% ROJOut is the amount of ROJ reconstituted, to be used as next week's input
-		function [ship_out, sold, toss_out, rotten, demand, reconCost, holdCost] = iterateWeek(sf, sum_shipped, futures_per_week_FCOJ,decisions, proc_plants, sales)
+		function [ship_out, sold, toss_out, rotten, demand, reconCost, holdCost] = iterateWeek(sf, sum_shipped, futures_per_week_FCOJ,decisions, proc_plants, ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand)
 			% initialize return variables
 			ship_out = cell(4,1);
 			sold = zeros(4,1);
@@ -238,7 +240,10 @@ classdef storageFacility2 < handle
             % remove demand from inventory
             % sales is the total demand for each product among all cities 
             % this storage unit services
-            demand = sales;
+            demand(1) = ORA_demand;
+            demand(2) = POJ_demand;
+            demand(3) = ROJ_demand;
+            demand(4) = FCOJ_demand;
             for i=1:4
                 j = length(sf.inventory{i})-1;
                 while ((demand(i) > 0) && (sum(sf.inventory{i}(1:length(sf.inventory{i})-1))) > 0)
