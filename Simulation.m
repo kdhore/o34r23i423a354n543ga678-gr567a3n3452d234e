@@ -80,7 +80,7 @@ end
  for i = 1:length(storage)
     fraction_shipped = decisions.futures_ship_dec(storage_open(i));
     monthly_amt_shipped = futures_arr_FCOJ*fraction_shipped;
-    cost_per_ton = findGrove2PlantOrStorageDist('FLA', char(storageNamesInUse(storage_open(i))))*0.22; % I hope this function has been called correctly (MICHELLE)
+    cost_per_ton = findGrove2PlantOrStorageDist('FLA', char(storageNamesInUse(storage_open(i))))*0.22; % I hope this function has been called correctly (MICHELLE) FUCK YOU KARTHIK
     cost_shipping_FCOJ_futures(i) = monthly_amt_shipped*cost_per_ton; 
  end
  
