@@ -73,7 +73,7 @@ classdef storageFacility2 < handle
         % at time t
 		% reconCost is cost spent reconstituting
 		% holdCost is the cost of holding inventory
-		function [ship_out, sold, toss_out, rotten, demand, reconCost, holdCost, revRecieved] = iterateWeek(sf, sum_shipped, futures_per_week_FCOJ,proc_plants, ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand)
+		function [ship_out, sold, toss_out, rotten, demand, reconCost, holdCost, revReceived] = iterateWeek(sf, sum_shipped, futures_per_week_FCOJ,proc_plants, ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand)
 			% initialize return variables
 			ship_out = cell(4,1);
 			sold = zeros(4,1);
@@ -132,8 +132,6 @@ classdef storageFacility2 < handle
                 sf.inventory{4}(4) = sf.inventory{2}(4) + newInv{sf.index}.FCOJ_4week;
             end
             
-            % need to add these two variables to the decision class (easier there than
-            % here)
 			sf.inventory{1}(1) = sf.inventory{1}(1) + sum_shipped; 
             
 			% get how much of each product is available
@@ -245,7 +243,7 @@ classdef storageFacility2 < handle
             demand(4) = FCOJ_demand;
             for i=1:4
                 j = length(sf.inventory{i})-1;
-                while ((demand(i) > 0) && (sum(sf.inventory{i}(1:length(sf.inventory{i})-1))) > 0)
+                while ((demand(i) > 0) && (sum(sf.inventory{i}(1:j))) > 0)
                     if (demand(i) > sf.inventory{i}(j))
                         ship_out{i}(j) = sf.inventory{i}(j);
                         demand(i) = demand(i) - sf.inventory{i}(j);
@@ -256,6 +254,27 @@ classdef storageFacility2 < handle
                         demand(i) = 0;
                     end
                     j = j-1;
+                end
+                sold(i) = sum(ship_out{i});
+            end
+            
+            
+            demand = big_D;
+            for i=1:4
+                j = length(sf.inventory{i})-1;
+                for k=1:7
+                    while ((demand(k,i) > 0) && (sum(sf.inventory{i}(1:j))) > 0)
+                        if (demand(k,i) > sf.inventory{i}(j))
+                            ship_out{i}(j) = sf.inventory{i}(j);
+                            demand(k,i) = demand(k,i) - sf.inventory{i}(j);
+                            sf.inventory{i}(j) = 0;
+                        else
+                            ship_out{i}(j) = demand(i);
+                            sf.inventory{i}(j) = sf.inventory{i}(j) - demand(i);
+                            demand(i) = 0;
+                        end
+                        j = j-1;
+                    end
                 end
                 sold(i) = sum(ship_out{i});
             end
