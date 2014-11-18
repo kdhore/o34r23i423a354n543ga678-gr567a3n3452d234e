@@ -27,7 +27,9 @@ for i = 1:length(storage_open)
     storage(i) = storageFacility(OJgameobj.storage_cap(i),... %Need to figure out how this works
                                      need to initialize storage_facility);
 end
-
+cities_match_storage = matchCitiestoStorage(storage_open);
+    
+    
 % Draw grove prices matrix, fx grove => US$ prices, and use actual 
 % quantity purchased and the purchasing cost
     grove_spot = grovePrices(); %Need to write function
@@ -91,7 +93,7 @@ end
          futures_per_week_ORA = [futures_per_week_ORA repmat(futures_arr_ORA(i)/4,1,4)];
  end
  total_ora_shipped = spot_ora_weekly + horzcat(futures_per_week_ORA, zeros(5,48));
- 
+% Calculate costs of ORA shipments from groves to PP and Storage 
 
  % Iterate over all the months
  for i = 1:48
@@ -124,12 +126,14 @@ end
          fraction_shipped_futures = decisions.futures_ship_dec(storage_open(j));
          monthly_amt_shipped = futures_arr_FCOJ*fraction_shipped_futures;
          futures_per_week_FCOJ = zeros(1,48);
-         for (i = 1:12)
+         for h = 1:12
              futures_per_week_FCOJ(1:4) = [];
-             futures_per_week_FCOJ = [futures_per_week_FCOJ repmat(monthly_amt_shipped(i)/4,1,4)];
+             futures_per_week_FCOJ = [futures_per_week_FCOJ repmat(monthly_amt_shipped(h)/4,1,4)];
          end
-         demand = getDemand(storage{j}); % will need to give it a price, and do this for all products
-         storage{j}.iterateWeek(sum_shipped, futures_per_week_FCOJ(i),decisions, proc_plants, demand);
+         indicies = strcomp(char(storageNamesInUse(storage_open(j))),cities_match_storage{:,1});
+         cities = cities_match_storage{indicies,:};
+         [ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, transport_cost] = getDemand(decisions,cities); % will need to give it a price, and do this for all products
+         storage{j}.iterateWeek(sum_shipped, futures_per_week_FCOJ(i),decisions, proc_plants, ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand);
      end
  end
 
