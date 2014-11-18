@@ -40,7 +40,7 @@ classdef ProcessingPlantKarthik
             for i = 1:stor_num
                 storage_schedule{i} = schedule;
             end
-            for i = 1:5
+            for i = 1:6
                 pp.shippingSchedule{i} = storage_schedule;
             end
         end
