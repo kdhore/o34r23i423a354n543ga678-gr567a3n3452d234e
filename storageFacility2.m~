@@ -72,7 +72,7 @@ classdef storageFacility2 < handle
 		% reconCost is cost spent reconstituting
 		% holdCost is the cost of holding inventory
 		% ROJOut is the amount of ROJ reconstituted, to be used as next week's input
-		function [ship_out, sold, toss_out, rotten, demand, reconCost, holdCost] = iterateWeek(sf, sum_shipped, futures_per_week_FCOJ,decisions, proc_plants, sales, time)
+		function [ship_out, sold, toss_out, rotten, demand, reconCost, holdCost] = iterateWeek(sf, sum_shipped, futures_per_week_FCOJ,decisions, proc_plants, sales)
 			% initialize return variables
 			ship_out = cell(4,1);
 			sold = zeros(4,1);
@@ -125,6 +125,7 @@ classdef storageFacility2 < handle
                 
                 % update FCOJ inventories
                 sf.inventory{4}(1) = sf.inventory{2}(1) + newInv{sf.index}.FCOJ_1week + ...
+                    futures_per_week_FCOJ;
                     decisions.futures_FCOJ_toStorages(sf.index,time); % need to add this variable to decisions class
                 sf.inventory{4}(2) = sf.inventory{2}(2) + newInv{sf.index}.FCOJ_2week;
                 sf.inventory{4}(3) = sf.inventory{2}(3) + newInv{sf.index}.FCOJ_3week;
@@ -133,8 +134,8 @@ classdef storageFacility2 < handle
             
             % need to add these two variables to the decision class (easier there than
             % here)
-			sf.inventory{1}(1) = sf.inventory{1}(1) + decisions.ship_groves_storages(sf.index,time)...
-                + decisions.futures_ORA_toStorages(sf.index,time); 
+			sf.inventory{1}(1) = sf.inventory{1}(1) + sum_shipped + ...
+                + futures_per_week_FCOJ; 
             
 			% get how much of each product is available
 			for i=1:length(sf.inventory)

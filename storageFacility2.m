@@ -125,7 +125,7 @@ classdef storageFacility2 < handle
                 
                 % update FCOJ inventories
                 sf.inventory{4}(1) = sf.inventory{2}(1) + newInv{sf.index}.FCOJ_1week + ...
-                    decisions.futures_FCOJ_toStorages(sf.index,time); % need to add this variable to decisions class
+                    futures_per_week_FCOJ;
                 sf.inventory{4}(2) = sf.inventory{2}(2) + newInv{sf.index}.FCOJ_2week;
                 sf.inventory{4}(3) = sf.inventory{2}(3) + newInv{sf.index}.FCOJ_3week;
                 sf.inventory{4}(4) = sf.inventory{2}(4) + newInv{sf.index}.FCOJ_4week;
@@ -133,8 +133,7 @@ classdef storageFacility2 < handle
             
             % need to add these two variables to the decision class (easier there than
             % here)
-			sf.inventory{1}(1) = sf.inventory{1}(1) + sum_shipped + ...
-                + futures_per_week_FCOJ; 
+			sf.inventory{1}(1) = sf.inventory{1}(1) + sum_shipped; 
             
 			% get how much of each product is available
 			for i=1:length(sf.inventory)
