@@ -133,8 +133,6 @@ classdef YearData
                 
 
 
-
-
                 col_2 = char('C' + 2*num_proc -1);
                 range = strcat('C19:',col_2,'19');
                 raw_manufac = xlsread(filename,'shipping_manufacturing',range);
