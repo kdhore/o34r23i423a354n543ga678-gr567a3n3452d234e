@@ -8,6 +8,8 @@ classdef storageFacility2 < handle
 		holdC = 0;
         proc_plant;
         cities;
+        index;
+        proc_num;
 	end
 
 	methods
@@ -71,8 +73,7 @@ classdef storageFacility2 < handle
         % at time t
 		% reconCost is cost spent reconstituting
 		% holdCost is the cost of holding inventory
-		% ROJOut is the amount of ROJ reconstituted, to be used as next week's input
-		function [ship_out, sold, toss_out, rotten, demand, reconCost, holdCost] = iterateWeek(sf, sum_shipped, futures_per_week_FCOJ,decisions, proc_plants, sales)
+		function [ship_out, sold, toss_out, rotten, demand, reconCost, holdCost, revRecieved] = iterateWeek(sf, sum_shipped, futures_per_week_FCOJ,proc_plants, ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand)
 			% initialize return variables
 			ship_out = cell(4,1);
 			sold = zeros(4,1);
@@ -126,7 +127,6 @@ classdef storageFacility2 < handle
                 % update FCOJ inventories
                 sf.inventory{4}(1) = sf.inventory{2}(1) + newInv{sf.index}.FCOJ_1week + ...
                     futures_per_week_FCOJ;
-                    decisions.futures_FCOJ_toStorages(sf.index,time); % need to add this variable to decisions class
                 sf.inventory{4}(2) = sf.inventory{2}(2) + newInv{sf.index}.FCOJ_2week;
                 sf.inventory{4}(3) = sf.inventory{2}(3) + newInv{sf.index}.FCOJ_3week;
                 sf.inventory{4}(4) = sf.inventory{2}(4) + newInv{sf.index}.FCOJ_4week;
@@ -134,8 +134,7 @@ classdef storageFacility2 < handle
             
             % need to add these two variables to the decision class (easier there than
             % here)
-			sf.inventory{1}(1) = sf.inventory{1}(1) + sum_shipped + ...
-                + futures_per_week_FCOJ; 
+			sf.inventory{1}(1) = sf.inventory{1}(1) + sum_shipped; 
             
 			% get how much of each product is available
 			for i=1:length(sf.inventory)
@@ -240,7 +239,10 @@ classdef storageFacility2 < handle
             % remove demand from inventory
             % sales is the total demand for each product among all cities 
             % this storage unit services
-            demand = sales;
+            demand(1) = ORA_demand;
+            demand(2) = POJ_demand;
+            demand(3) = ROJ_demand;
+            demand(4) = FCOJ_demand;
             for i=1:4
                 j = length(sf.inventory{i})-1;
                 while ((demand(i) > 0) && (sum(sf.inventory{i}(1:length(sf.inventory{i})-1))) > 0)

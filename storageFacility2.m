@@ -73,8 +73,7 @@ classdef storageFacility2 < handle
         % at time t
 		% reconCost is cost spent reconstituting
 		% holdCost is the cost of holding inventory
-		% ROJOut is the amount of ROJ reconstituted, to be used as next week's input
-		function [ship_out, sold, toss_out, rotten, demand, reconCost, holdCost] = iterateWeek(sf, sum_shipped, futures_per_week_FCOJ,decisions, proc_plants, ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand)
+		function [ship_out, sold, toss_out, rotten, demand, reconCost, holdCost, revRecieved] = iterateWeek(sf, sum_shipped, futures_per_week_FCOJ,proc_plants, ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand)
 			% initialize return variables
 			ship_out = cell(4,1);
 			sold = zeros(4,1);
