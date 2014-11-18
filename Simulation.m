@@ -10,7 +10,7 @@ plants_open = find(OJgameobj.proc_plant_cap);
 proc_plants = cell(length(plants_open),1);
 for i = 1:length(plants_open)
     inventory = [OJgameobj.proc_plant_inv(plants_open(i)).ORA; 0];
-    proc_plants(i) = processingPlant(plants_open(i),OJgameobj.proc_plant_cap(i),...
+    proc_plants(i) = processingPlantKarthik(plants_open(i),OJgameobj.proc_plant_cap(i),...
                                      decisions.manufac_proc_plant_dec(1,plants_open(i)), ...
                                      0, inventory, 2000, 1000, oj.tank_cars_num(plants_open(i)),...
                                      10);
@@ -24,7 +24,7 @@ for i = 1:length(storage_open)
     storage_POJ = [OJgameobj.storage_inv(storage_open(i)).POJ; 0];
     storage_FCOJ = [OJgameobj.storage_inv(storage_open(i)).FCOJ; 0];
     storage_ROJ = [OJgameobj.storage_inv(storage_open(i)).ROJ; 0];
-    storage(i) = storageFacility(OJgameobj.storage_cap(i),... %Need to figure out how this works
+    storage(i) = storageFacility2(OJgameobj.storage_cap(i),... %Need to figure out how this works
                                      need to initialize storage_facility);
 end
 cities_match_storage = matchCitiestoStorage(storage_open);
@@ -132,7 +132,7 @@ cities_match_storage = matchCitiestoStorage(storage_open);
          end
          indicies = strcomp(char(storageNamesInUse(storage_open(j))),cities_match_storage{:,1});
          cities = cities_match_storage{indicies,:};
-         [ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, transport_cost] = getDemand(decisions,cities); % will need to give it a price, and do this for all products
+         [ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, transport_cost] = getDemand(decisions,cities,i); % will need to give it a price, and do this for all products
          storage{j}.iterateWeek(sum_shipped, futures_per_week_FCOJ(i),decisions, proc_plants, ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand);
      end
  end
