@@ -107,7 +107,7 @@ end
 
 %grovesNum = 4;
 
-storageUnitNum = 5; %number of storage units to use -- can be adjusted <= 21
+storageUnitNum = 3; %number of storage units to use -- can be adjusted <= 21
 
 
 %aggregateDemand = sum(sum(demands)); %can be adjusted with price forecasts
@@ -139,33 +139,41 @@ for i = 1:numStorageUnitsUsed(1,storageUnitNum)
     end
 end
 
+%StorageCombos(:,2) = 1;
+%StorageCombos(:,17) = 1;
+
 
 %%
-procsNum = 2; % <=10
+procsNum = 4; % <=10
 %number of processing plants to be used -- can be adjusted
 
 %calculate all possible combinations of procsNum / 10 sectors in
 %binary
 
-numProcsUsed = [512,768,896,960,992,1008,1016,1020,1022,1023];
-ProcsCombos = zeros(nchoosek(10,procsNum), 10); %permutations of 10 digits
-j = 1;
-for i = 1:numProcsUsed(1,procsNum) 
-    %choice of 10 processing plants; the i loop is until the base 10
-    %representation of the max number. Here, it's 1 + 9 0's (e.g. if it
-    %was a choice of 2 processing plants, it would be 2 1's + 8 0's)
-    %1 storage unit: 512 = bin2dec('1000000000')
-    %2 storage units: 768; etc.
-    
-    x = num2str(dec2bin(i))-'0'; %converted to binary in number representation
-    if sum(x) == procsNum %if the procsNum is being used
-        n = size(x,2); %number of total elements
-        for k = 1:n
-            ProcsCombos(j,10-k+1) = x(1,n-k+1);
-        end
-        j = j+1;
-    end
-end
+ numProcsUsed = [512,768,896,960,992,1008,1016,1020,1022,1023];
+ ProcsCombos = zeros(nchoosek(10,procsNum), 10); %permutations of 10 digits
+% j = 1;
+% for i = 1:numProcsUsed(1,procsNum) 
+%     %choice of 10 processing plants; the i loop is until the base 10
+%     %representation of the max number. Here, it's 1 + 9 0's (e.g. if it
+%     %was a choice of 2 processing plants, it would be 2 1's + 8 0's)
+%     %1 storage unit: 512 = bin2dec('1000000000')
+%     %2 storage units: 768; etc.
+%     
+%     x = num2str(dec2bin(i))-'0'; %converted to binary in number representation
+%     if sum(x) == procsNum %if the procsNum is being used
+%         n = size(x,2); %number of total elements
+%         for k = 1:n
+%             ProcsCombos(j,10-k+1) = x(1,n-k+1);
+%         end
+%         j = j+1;
+%     end
+% end
+
+ProcsCombos(:,1) = 1;
+ProcsCombos(:,2) = 1;
+ProcsCombos(:,5)= 1;
+ProcsCombos(:,7) = 1;
 
 
 
