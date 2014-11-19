@@ -1,5 +1,5 @@
-function [ output_args ] = matchCitiestoStorage( storage_open )
-cities = {'ANY'
+function [ output ] = matchCitiestoStorage( storage_open )
+cities = {'ANY';
 'BOS';
 'CLP';
 'KEE';
