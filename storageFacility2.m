@@ -237,27 +237,27 @@ classdef storageFacility2 < handle
             % remove demand from inventory
             % sales is the total demand for each product among all cities 
             % this storage unit services
-            demand(1) = ORA_demand;
-            demand(2) = POJ_demand;
-            demand(3) = ROJ_demand;
-            demand(4) = FCOJ_demand;
-            for i=1:4
-                j = length(sf.inventory{i})-1;
-                while ((demand(i) > 0) && (sum(sf.inventory{i}(1:j))) > 0)
-                    if (demand(i) > sf.inventory{i}(j))
-                        ship_out{i}(j) = sf.inventory{i}(j);
-                        demand(i) = demand(i) - sf.inventory{i}(j);
-                        sf.inventory{i}(j) = 0;
-                    else
-                        ship_out{i}(j) = demand(i);
-                        sf.inventory{i}(j) = sf.inventory{i}(j) - demand(i);
-                        demand(i) = 0;
-                    end
-                    j = j-1;
-                end
-                sold(i) = sum(ship_out{i});
-            end
-            
+%             demand(1) = ORA_demand;
+%             demand(2) = POJ_demand;
+%             demand(3) = ROJ_demand;
+%             demand(4) = FCOJ_demand;
+%             for i=1:4
+%                 j = length(sf.inventory{i})-1;
+%                 while ((demand(i) > 0) && (sum(sf.inventory{i}(1:j))) > 0)
+%                     if (demand(i) > sf.inventory{i}(j))
+%                         ship_out{i}(j) = sf.inventory{i}(j);
+%                         demand(i) = demand(i) - sf.inventory{i}(j);
+%                         sf.inventory{i}(j) = 0;
+%                     else
+%                         ship_out{i}(j) = demand(i);
+%                         sf.inventory{i}(j) = sf.inventory{i}(j) - demand(i);
+%                         demand(i) = 0;
+%                     end
+%                     j = j-1;
+%                 end
+%                 sold(i) = sum(ship_out{i});
+%             end
+%             
             
             demand = big_D;
             for i=1:4
