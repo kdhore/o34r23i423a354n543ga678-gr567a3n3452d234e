@@ -10,7 +10,7 @@ plants_open = find(OJgameobj.proc_plant_cap);
 proc_plants = cell(length(plants_open),1);
 for i = 1:length(plants_open)
     inventory = [OJgameobj.proc_plant_inv(plants_open(i)).ORA; 0];
-    proc_plants(i) = processingPlant(plants_open(i),OJgameobj.proc_plant_cap(i),...
+    proc_plants(i) = processingPlantKarthik(plants_open(i),OJgameobj.proc_plant_cap(i),...
                                      decisions.manufac_proc_plant_dec(1,plants_open(i)), ...
                                      0, inventory, 2000, 1000, oj.tank_cars_num(plants_open(i)),...
                                      10);
@@ -24,10 +24,12 @@ for i = 1:length(storage_open)
     storage_POJ = [OJgameobj.storage_inv(storage_open(i)).POJ; 0];
     storage_FCOJ = [OJgameobj.storage_inv(storage_open(i)).FCOJ; 0];
     storage_ROJ = [OJgameobj.storage_inv(storage_open(i)).ROJ; 0];
-    storage(i) = storageFacility(OJgameobj.storage_cap(i),... %Need to figure out how this works
+    storage(i) = storageFacility2(OJgameobj.storage_cap(i),... %Need to figure out how this works
                                      need to initialize storage_facility);
 end
-
+cities_match_storage = matchCitiestoStorage(storage_open);
+    
+    
 % Draw grove prices matrix, fx grove => US$ prices, and use actual 
 % quantity purchased and the purchasing cost
     grove_spot = grovePrices(); %Need to write function
@@ -80,7 +82,7 @@ end
  for i = 1:length(storage)
     fraction_shipped = decisions.futures_ship_dec(storage_open(i));
     monthly_amt_shipped = futures_arr_FCOJ*fraction_shipped;
-    cost_per_ton = findGrove2PlantOrStorageDist('FLA', char(storageNamesInUse(storage_open(i))))*0.22; % I hope this function has been called correctly (MICHELLE)
+    cost_per_ton = findGrove2PlantOrStorageDist('FLA', char(storageNamesInUse(storage_open(i))))*0.22; % I hope this function has been called correctly (MICHELLE) FUCK YOU KARTHIK
     cost_shipping_FCOJ_futures(i) = monthly_amt_shipped*cost_per_ton; 
  end
  
@@ -91,7 +93,7 @@ end
          futures_per_week_ORA = [futures_per_week_ORA repmat(futures_arr_ORA(i)/4,1,4)];
  end
  total_ora_shipped = spot_ora_weekly + horzcat(futures_per_week_ORA, zeros(5,48));
- 
+% Calculate costs of ORA shipments from groves to PP and Storage 
 
  % Iterate over all the months
  for i = 1:48
@@ -124,18 +126,17 @@ end
          fraction_shipped_futures = decisions.futures_ship_dec(storage_open(j));
          monthly_amt_shipped = futures_arr_FCOJ*fraction_shipped_futures;
          futures_per_week_FCOJ = zeros(1,48);
-         for (i = 1:12)
+         for h = 1:12
              futures_per_week_FCOJ(1:4) = [];
-             futures_per_week_FCOJ = [futures_per_week_FCOJ repmat(monthly_amt_shipped(i)/4,1,4)];
+             futures_per_week_FCOJ = [futures_per_week_FCOJ repmat(monthly_amt_shipped(h)/4,1,4)];
          end
-         demand = getDemand(storage{j});
-         storage{j}.iterateWeek(sum_shipped, futures_per_week_FCOJ(i),decisions, proc_plants, demand);
+         indicies = strcomp(char(storageNamesInUse(storage_open(j))),cities_match_storage{:,1});
+         cities = cities_match_storage{indicies,:};
+         [ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, transport_cost, big_D] = getDemand(decisions,cities,i); % will need to give it a price, and do this for all products
+         storage{j}.iterateWeek(sum_shipped, futures_per_week_FCOJ(i), decisions, proc_plants, ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand);
      end
  end
 
-             
-     
-         
         
     % Transporation costs of shipping for FCOJ futures to storage facilities (input the distance excel file)
     % Transportation costs of shipping for ORA and ORA futures to processing

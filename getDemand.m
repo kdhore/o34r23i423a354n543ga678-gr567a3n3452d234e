@@ -249,68 +249,22 @@ for i = 1:7 %regions
      plot(compiled_prices_ROJ, compiled_sales_ROJ, 'o', x2, y2.*x2);
      title(['ROJ, Region ', region{i}]);
 
+function [ ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, transport_cost ] = getDemand(cities)
+    % Will return the demand for each city
+    ORA_demand = 0;
+    POJ_demand = 0;
+    FCOJ_demand = 0;
+    ROJ_demand = 0;
+    for i = 1:numel(cities/3)
+       ora = oraDemand(cities{i,1});
+       poj = pojDemand(cities{i,1});
+       fcoj = fcojDemand(cities{i,1});
+       roj = rojDemand(cities{i,1});
+       transport_cost = 1.2*cities{i,3}*(ora+poj+fcoj+roj);
+       ORA_demand = ORA_demand + ora;
+       POJ_demand = POJ_demand + poj;
+       FCOJ_demand = FCOJ_demand + fcoj;
+       ROJ_demand = ROJ_demand + roj;
+    end
 end
 
-
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% THE CODE BELOW THIS LINE IS MICHELLE'S OLD CODE.  I'VE LEFT IT IN HERE
-%%% IN CASE SHE WANTS IT LATER ON
-
-
-% for i = 1:7 %regions
-%     figure;
-%     hold all;
-%     scatter(yr2004.pricing_POJ_weekly_dec(i,:),yr2004.sales_week_POJ_res(i,:));
-%     scatter(yr2005.pricing_POJ_weekly_dec(i,:),yr2005.sales_week_POJ_res(i,:));
-%     scatter(yr2006.pricing_POJ_weekly_dec(i,:),yr2006.sales_week_POJ_res(i,:));
-%     scatter(yr2007.pricing_POJ_weekly_dec(i,:),yr2007.sales_week_POJ_res(i,:));
-%     scatter(yr2008.pricing_POJ_weekly_dec(i,:),yr2008.sales_week_POJ_res(i,:));
-%     scatter(yr2009.pricing_POJ_weekly_dec(i,:),yr2009.sales_week_POJ_res(i,:));
-%     scatter(yr2010.pricing_POJ_weekly_dec(i,:),yr2010.sales_week_POJ_res(i,:));
-%     scatter(yr2011.pricing_POJ_weekly_dec(i,:),yr2011.sales_week_POJ_res(i,:));
-%     scatter(yr2012.pricing_POJ_weekly_dec(i,:),yr2012.sales_week_POJ_res(i,:));
-%     scatter(yr2013.pricing_POJ_weekly_dec(i,:),yr2013.sales_week_POJ_res(i,:));
-%     scatter(yr2014a.pricing_POJ_weekly_dec(i,:),yr2014a.sales_week_POJ_res(i,:));
-%     scatter(yr2014b.pricing_POJ_weekly_dec(i,:),yr2014b.sales_week_POJ_res(i,:));
-%     title('POJ, ' + 'Region i');
-% end
-% 
-% for i = 1:7 %regions
-%     figure;
-%     hold all;
-%     scatter(yr2004.pricing_FCOJ_weekly_dec(i,:),yr2004.sales_week_FCOJ_res(i,:));
-%     scatter(yr2005.pricing_FCOJ_weekly_dec(i,:),yr2005.sales_week_FCOJ_res(i,:));
-%     scatter(yr2006.pricing_FCOJ_weekly_dec(i,:),yr2006.sales_week_FCOJ_res(i,:));
-%     scatter(yr2007.pricing_FCOJ_weekly_dec(i,:),yr2007.sales_week_FCOJ_res(i,:));
-%     scatter(yr2008.pricing_FCOJ_weekly_dec(i,:),yr2008.sales_week_FCOJ_res(i,:));
-%     scatter(yr2009.pricing_FCOJ_weekly_dec(i,:),yr2009.sales_week_FCOJ_res(i,:));
-%     scatter(yr2010.pricing_FCOJ_weekly_dec(i,:),yr2010.sales_week_FCOJ_res(i,:));
-%     scatter(yr2011.pricing_FCOJ_weekly_dec(i,:),yr2011.sales_week_FCOJ_res(i,:));
-%     scatter(yr2012.pricing_FCOJ_weekly_dec(i,:),yr2012.sales_week_FCOJ_res(i,:));
-%     scatter(yr2013.pricing_FCOJ_weekly_dec(i,:),yr2013.sales_week_FCOJ_res(i,:));
-%     scatter(yr2014a.pricing_FCOJ_weekly_dec(i,:),yr2014a.sales_week_FCOJ_res(i,:));
-%     scatter(yr2014b.pricing_FCOJ_weekly_dec(i,:),yr2014b.sales_week_FCOJ_res(i,:));
-%     title('FCOJ, ' + 'Region i');
-% end
-% 
-% for i = 1:7 %regions
-%     figure;
-%     hold all;
-%     scatter(yr2004.pricing_ROJ_weekly_dec(i,:),yr2004.sales_week_ROJ_res(i,:));
-%     scatter(yr2005.pricing_ROJ_weekly_dec(i,:),yr2005.sales_week_ROJ_res(i,:));
-%     scatter(yr2006.pricing_ROJ_weekly_dec(i,:),yr2006.sales_week_ROJ_res(i,:));
-%     scatter(yr2007.pricing_ROJ_weekly_dec(i,:),yr2007.sales_week_ROJ_res(i,:));
-%     scatter(yr2008.pricing_ROJ_weekly_dec(i,:),yr2008.sales_week_ROJ_res(i,:));
-%     scatter(yr2009.pricing_ROJ_weekly_dec(i,:),yr2009.sales_week_ROJ_res(i,:));
-%     scatter(yr2010.pricing_ROJ_weekly_dec(i,:),yr2010.sales_week_ROJ_res(i,:));
-%     scatter(yr2011.pricing_ROJ_weekly_dec(i,:),yr2011.sales_week_ROJ_res(i,:));
-%     scatter(yr2012.pricing_ROJ_weekly_dec(i,:),yr2012.sales_week_ROJ_res(i,:));
-%     scatter(yr2013.pricing_ROJ_weekly_dec(i,:),yr2013.sales_week_ROJ_res(i,:));
-%     scatter(yr2014a.pricing_ROJ_weekly_dec(i,:),yr2014a.sales_week_ROJ_res(i,:));
-%     scatter(yr2014b.pricing_ROJ_weekly_dec(i,:),yr2014b.sales_week_ROJ_res(i,:));
-%     title('ROJ, ' + 'Region i');
-% end
