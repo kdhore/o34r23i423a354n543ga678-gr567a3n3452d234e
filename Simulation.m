@@ -1,7 +1,4 @@
 function [ results ] = Simulation(OJgameobj, decisions)
-%NOTE: WE ACTUALLY NEED TO DO THIS BY CITY, NOT BY REGION BECAUSE
-% DIFFERENT STORAGES CAN SERVE TO DIFFERENT CITIES WITHIN THE SAME REGION
-
 % Take inventory and other information from OJGameobj and initilize
 % facilities
 
@@ -20,17 +17,11 @@ end
 storage_open = find(OJgameobj.storage_cap);
 storage = cell(length(storage_open),1);
 for i = 1:length(storage_open)
-    storage_ORA = [OJgameobj.storage_inv(storage_open(i)).ORA; 0];
-    storage_POJ = [OJgameobj.storage_inv(storage_open(i)).POJ; 0];
-    storage_FCOJ = [OJgameobj.storage_inv(storage_open(i)).FCOJ; 0];
-    storage_ROJ = [OJgameobj.storage_inv(storage_open(i)).ROJ; 0];
-    storage(i) = storageFacility2(OJgameobj.storage_cap(i),... %Need to figure out how this works
-                                     need to initialize storage_facility);
+    storage(i) = storageFacility2(OJgameobj.storage_cap(i),OJgameobj.storage_inv(storage_open(i)),650,60,decision.reconst_storage_dec(storage_open(i),:),storage_open(i),length(plants_open));
 end
 cities_match_storage = matchCitiestoStorage(storage_open);
-    
-    
-% Draw grove prices matrix, fx grove => US$ prices, and use actual 
+       
+% Draw grove prices matrix, fx grove => US$ prices, and use actual
 % quantity purchased and the purchasing cost
     grove_spot = grovePrices(); %Need to write function
     fx = foreignEx(); % Need to write function
@@ -75,8 +66,8 @@ cities_match_storage = matchCitiestoStorage(storage_open);
  futures_cost_FCOJ = decisons.future_mark_dec_FCOJ(:,1).*decisons.future_mark_dec_FCOJ(:,2);
  
  % When are futures arriving
- futures_arr_ORA = repmat(OJgameobj.ora_futures(1).*(decisions.arr_future_dec_ORA*0.01) , 1, 12);
- futures_arr_FCOJ = repmat(OJgameobj.fcoj_futures(1).*(decisions.arr_future_dec_FCOJ*0.01) , 1, 12);
+ futures_arr_ORA = OJgameobj.ora_futures(1).*(decisions.arr_future_dec_ORA*0.01);
+ futures_arr_FCOJ = OJgameobj.fcoj_futures(1).*(decisions.arr_future_dec_FCOJ*0.01);
  % Cost of shipping FCOJ futures
  cost_shipping_FCOJ_futures = zeros(length(storage),1);
  for i = 1:length(storage)
@@ -93,8 +84,23 @@ cities_match_storage = matchCitiestoStorage(storage_open);
          futures_per_week_ORA = [futures_per_week_ORA repmat(futures_arr_ORA(i)/4,1,4)];
  end
  total_ora_shipped = spot_ora_weekly + horzcat(futures_per_week_ORA, zeros(5,48));
-% Calculate costs of ORA shipments from groves to PP and Storage 
-
+% Calculate costs of ORA shipments from groves to PP and Storage
+numPlantsStorage = length(plants_open)+length(storage_open);
+transCost_fromGroves = zeros(numPlantsStorage, 6);
+plantsAndStorage = [plants_open; storage_open];
+for i = 1:6 % loop over groves
+    for j = 1:numPlantsStorage
+        grove = groveIndex(i);
+        PorSindex = plantsAndStorage(j);
+        if (j <= length(plants_open))
+            PorS = char(plantNamesInUse(PorSindex));
+        else
+            PorS = char(storageNamesInUse(PorSindex));
+        end
+        transCost_fromGroves(j,i)= findGrove2PlantOrStorageDist(grove, PorS)*0.22*quant_purch(i,:)*decisions.ship_grove_dec(i,j);
+    end
+end
+    
  % Iterate over all the months
  for i = 1:48
      for j = 1:length(proc_plants)
