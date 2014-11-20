@@ -15,5 +15,5 @@ function [dist] = findPlant2StorageDist(plant,storage)
             k = i;   
         end
     end
-    dist = distdim(processing2storage_dist(j,k),'km','mi');
+    dist = distdim(processing2storage_dist(k,j),'km','mi');
 end

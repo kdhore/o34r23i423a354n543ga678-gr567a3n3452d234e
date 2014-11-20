@@ -15,5 +15,5 @@ function [dist] = findGrove2PlantOrStorageDist(grove,endpoint)
             k = i;   
         end
     end
-    dist = distdim(grove2processing_storage_dist(j,k),'km','mi');
+    dist = distdim(grove2processing_storage_dist(k,j),'km','mi');
 end
