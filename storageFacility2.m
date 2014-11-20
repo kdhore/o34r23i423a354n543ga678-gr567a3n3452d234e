@@ -10,6 +10,7 @@ classdef storageFacility2 < handle
         cities;
         index;
         proc_num;
+        rp;
 	end
 
 	methods
@@ -26,10 +27,14 @@ classdef storageFacility2 < handle
         % Note: If this class should calculate transportation cost from
         % storage to demand, need the cities that this facility services
 		function sf = storageFacility2(cap,inventory,rc,hc,rp,index,proc_num)
-			sf.inventory = inventory;
+			sf.inventory{1} = [inventory.ORA; 0];
+            sf.inventory{2} = [inventory.POJ; 0];
+            sf.inventory{3} = [inventory.ROJ; 0];
+            sf.inventory{4} = [inventory.FCOJ; 0];
 			sf.capacity = cap;
 			sf.reconC = rc;
 			sf.holdC = hc;
+            
 			sf.reconPercent = rp;
             sf.index = index;
             sf.proc_num = proc_num;
@@ -73,7 +78,7 @@ classdef storageFacility2 < handle
         % at time t
 		% reconCost is cost spent reconstituting
 		% holdCost is the cost of holding inventory
-		function [ship_out, sold, toss_out, rotten, demand, reconCost, holdCost, revReceived] = iterateWeek(sf, sum_shipped, futures_per_week_FCOJ,proc_plants, big_D, big_P)
+		function [ship_out, sold, toss_out, rotten, demand, reconCost, holdCost, revReceived] = iterateWeek(sf, sum_shipped, futures_per_week_FCOJ,proc_plants, big_D, big_P, %addtime)
 			% initialize return variables
 			ship_out = cell(4,1);
 			sold = zeros(4,1);
@@ -109,7 +114,7 @@ classdef storageFacility2 < handle
             % FCOJ that can be reconstituted)
 			FCOJRecon = sum(sf.inventory{4}(1:length(sf.inventory{4}))) * sf.reconPercent;
             sf.inventory{3}(1) = FCOJRecon;
-			reconCost = FCOJRecon * sf.reconC;
+			reconCost = FCOJRecon * sf.reconC; %reconC is different per time
 			for i=2:length(sf.inventory{4})
 				sf.inventory{4}(i) = sf.inventory{4}(i)*(1-sf.reconPercent);
             end   
