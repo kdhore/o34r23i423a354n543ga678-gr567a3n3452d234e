@@ -85,7 +85,7 @@ classdef YearData
         sales_tons_month_ROJ_res;
         sales_rev_month_ROJ_res;
         transp_cost_month_ROJ_res;
-        market_res_stats
+        market_res_stats;
         market_res_names;
         
     end

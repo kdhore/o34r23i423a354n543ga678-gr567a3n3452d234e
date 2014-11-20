@@ -73,7 +73,7 @@ classdef storageFacility2 < handle
         % at time t
 		% reconCost is cost spent reconstituting
 		% holdCost is the cost of holding inventory
-		function [ship_out, sold, toss_out, rotten, demand, reconCost, holdCost, revReceived] = iterateWeek(sf, sum_shipped, futures_per_week_FCOJ,proc_plants, ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand)
+		function [ship_out, sold, toss_out, rotten, demand, reconCost, holdCost, revReceived] = iterateWeek(sf, sum_shipped, futures_per_week_FCOJ,proc_plants, big_D, big_P)
 			% initialize return variables
 			ship_out = cell(4,1);
 			sold = zeros(4,1);
@@ -266,12 +266,12 @@ classdef storageFacility2 < handle
                     while ((demand(k,i) > 0) && (sum(sf.inventory{i}(1:j))) > 0)
                         if (demand(k,i) > sf.inventory{i}(j))
                             ship_out{i}(j) = sf.inventory{i}(j);
-                            revReceived = revReceived + ship_out{i}(j)*big_D(k,5);
+                            revReceived = revReceived + ship_out{i}(j)*big_P(k,i);
                             demand(k,i) = demand(k,i) - sf.inventory{i}(j);
                             sf.inventory{i}(j) = 0;
                         else
                             ship_out{i}(j) = demand(k,i);
-                            revReceived = revReceived + ship_out{i}(j)*big_D(k,5);
+                            revReceived = revReceived + ship_out{i}(j)*big_P(k,i);
                             sf.inventory{i}(j) = sf.inventory{i}(j) - demand(k,i);
                             demand(k,i) = 0;
                         end
