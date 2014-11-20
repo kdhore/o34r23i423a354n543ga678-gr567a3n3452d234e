@@ -1,4 +1,4 @@
-function [] = graphs(yeardata, oj_obj)
+function [] = somegraphs(yeardata, oj_obj)
 %Input a YearData object, plot graphs that
 %will be useful to making decisions with our simulator and policies.
 
