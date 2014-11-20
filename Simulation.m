@@ -138,8 +138,8 @@ end
          end
          indicies = strcomp(char(storageNamesInUse(storage_open(j))),cities_match_storage{:,1});
          cities = cities_match_storage{indicies,:};
-         [ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, transport_cost, big_D, big_P] = drawDemand(decisions,cities,i); % will need to give it a price, and do this for all products
-         storage{j}.iterateWeek(sum_shipped, futures_per_week_FCOJ(i), decisions, proc_plants, ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand);
+         [transport_cost, big_D, big_P] = drawDemand(decisions,cities,i); % will need to give it a price, and do this for all products
+         storage{j}.iterateWeek(sum_shipped, futures_per_week_FCOJ(i), proc_plants, big_D, big_P, i);
      end
  end
 
