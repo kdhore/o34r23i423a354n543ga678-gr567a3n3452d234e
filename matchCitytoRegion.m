@@ -1,4 +1,4 @@
-function [ region, region_ind ] = getRegion( city )
+function [ region, region_ind ] = matchCitytoRegion( city )
 %Returns region of city
 if sum(strcmp(city,{'ANY';'BOS';'CLP';'KEE';'LAK';'MBK';'MVY';'PGH';'PHI';'PVD';'RER';'SCR';'SMS';'SUP'})) == 1
     region = 'NE';
