@@ -11,5 +11,4 @@ for i = 1:length(cities)
         output{i} = closest_storage;
     end
 end
-
 end
