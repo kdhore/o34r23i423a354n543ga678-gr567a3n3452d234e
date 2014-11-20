@@ -56,6 +56,7 @@ yr2014b_adjSales_tons_month_ORA_res = yr2014b.sales_tons_month_ORA_res(1:7,:);
 yr2014b_adjPricing_ORA_dec = yr2014b.pricing_ORA_dec;
 ORA_fits = zeros(7, 3);
 for i = 1:7 %regions
+    storage = matchRegiontoStorage(region{i},current_OJ);
     compiled_prices_ORA = [yr2004_adjPricing_ORA_dec(i,:) yr2005_adjPricing_ORA_dec(i,:) yr2006_adjPricing_ORA_dec(i,:)...
         yr2007_adjPricing_ORA_dec(i,:) yr2008_adjPricing_ORA_dec(i,:) yr2009_adjPricing_ORA_dec(i,:) ...
         yr2010_adjPricing_ORA_dec(i,:) yr2011_adjPricing_ORA_dec(i,:) yr2012_adjPricing_ORA_dec(i,:)...
@@ -74,15 +75,15 @@ for i = 1:7 %regions
         end
     end
      ORA_fits(i,:) = polyfit(compiled_prices_ORA, compiled_sales_ORA, 2);
-     x2 = 0:.02:4;
-     y2 = polyval(ORA_fits(i,:),x2);
-     figure();
-     hold all;
+     %x2 = 0:.02:4;
+     %y2 = polyval(ORA_fits(i,:),x2);
+     %figure();
+     %hold all;
      %plot(compiled_prices_ORA, compiled_sales_ORA, 'o', x2, y2);
      
      %below, to plot revenue vs. price
-     plot(compiled_prices_ORA, compiled_sales_ORA, 'o', x2, y2.*x2);
-     title(['ORA, Region ', region{i}]);
+     %plot(compiled_prices_ORA, compiled_sales_ORA, 'o', x2, y2.*x2);
+     %title(['ORA, Region ', region{i}]);
 
 end
 
@@ -131,13 +132,13 @@ for i = 1:7 %regions
         end
     end
      POJ_fits(i,:) = polyfit(compiled_prices_POJ, compiled_sales_POJ, 2);
-     x2 = 0:.02:4;
-     y2 = polyval(POJ_fits(i,:),x2);
-     figure();
-     hold all;
+     %x2 = 0:.02:4;
+     %y2 = polyval(POJ_fits(i,:),x2);
+     %figure();
+     %hold all;
      %plot(compiled_prices_POJ, compiled_sales_POJ, 'o', x2, y2);
-     plot(compiled_prices_POJ, compiled_sales_POJ, 'o', x2, y2.*x2);
-     title(['POJ, Region ', region{i}]);
+     %plot(compiled_prices_POJ, compiled_sales_POJ, 'o', x2, y2.*x2);
+     %title(['POJ, Region ', region{i}]);
 
 end
 
@@ -186,13 +187,13 @@ for i = 1:7 %regions
         end
     end
      FCOJ_fits(i,:) = polyfit(compiled_prices_FCOJ, compiled_sales_FCOJ, 2);
-     x2 = 0:.02:4;
-     y2 = polyval(FCOJ_fits(i,:),x2);
-     figure();
-     hold all;
+     %x2 = 0:.02:4;
+     %y2 = polyval(FCOJ_fits(i,:),x2);
+     %figure();
+     %hold all;
      %plot(compiled_prices_FCOJ, compiled_sales_FCOJ, 'o', x2, y2);
-     plot(compiled_prices_FCOJ, compiled_sales_FCOJ, 'o', x2, y2.*x2);
-     title(['FCOJ, Region ', region{i}]);
+     %plot(compiled_prices_FCOJ, compiled_sales_FCOJ, 'o', x2, y2.*x2);
+     %title(['FCOJ, Region ', region{i}]);
 
 end
 
@@ -241,13 +242,13 @@ for i = 1:7 %regions
         end
     end
      ROJ_fits(i,:) = polyfit(compiled_prices_ROJ, compiled_sales_ROJ, 2);
-     x2 = 0:.02:4;
-     y2 = polyval(ROJ_fits(i,:),x2);
-     figure();
-     hold all;
+     %x2 = 0:.02:4;
+     %y2 = polyval(ROJ_fits(i,:),x2);
+     %figure();
+     %hold all;
      %plot(compiled_prices_ROJ, compiled_sales_ROJ, 'o', x2, y2);
-     plot(compiled_prices_ROJ, compiled_sales_ROJ, 'o', x2, y2.*x2);
-     title(['ROJ, Region ', region{i}]);
+     %plot(compiled_prices_ROJ, compiled_sales_ROJ, 'o', x2, y2.*x2);
+     %title(['ROJ, Region ', region{i}]);
 
-
+end
 
