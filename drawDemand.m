@@ -20,10 +20,10 @@ function [ ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, transport_cost, big_
        big_D(region_ind, 2) = big_D(region_ind, 2) + poj;
        
        fcoj = fcojDemand(cities{i,1}, FCOJ_price, region_ind);
-       big_D(region_ind, 3) = big_D(region_ind, 3) + fcoj;
+       big_D(region_ind, 4) = big_D(region_ind, 3) + fcoj;
        
        roj = rojDemand(cities{i,1}, ROJ_price, region_ind);
-       big_D(region_ind, 4) = big_D(region_ind, 4) + roj;
+       big_D(region_ind, 3) = big_D(region_ind, 4) + roj;
        
        transport_cost = transport_cost + 1.2*cities{i,3}*(ora+poj+fcoj+roj);
        ORA_demand = ORA_demand + ora;
