@@ -74,8 +74,6 @@ classdef storageFacility2 < handle
 		% toss out is everything thrown out due to capacity
 		% rotten is everything that rotted
 		% demand is how much demand is unfulled
-        % sales is the total sales of each product from this storage unit
-        % at time t
 		% reconCost is cost spent reconstituting
 		% holdCost is the cost of holding inventory
 		function [ship_out, sold, toss_out, rotten, demand, reconCost, holdCost, revReceived] = iterateWeek(sf, sum_shipped, futures_per_week_FCOJ,proc_plants, big_D, big_P, time)
@@ -96,6 +94,7 @@ classdef storageFacility2 < handle
 			ship_out{4} = zeros(48,1);
 
 			avails = zeros(4,1);
+            revReceived = zeros(4,1);
             
 			% age inventory 1 week
 			for i=1:length(sf.inventory)
@@ -114,7 +113,7 @@ classdef storageFacility2 < handle
             % FCOJ that can be reconstituted)
 			FCOJRecon = sum(sf.inventory{4}(1:length(sf.inventory{4}))) * sf.reconPercent(ceil(time/4));
             sf.inventory{3}(1) = FCOJRecon;
-			reconCost = FCOJRecon * sf.reconC; %reconC is different per time
+			reconCost = FCOJRecon * sf.reconC;
 			for i=2:length(sf.inventory{4})
 				sf.inventory{4}(i) = sf.inventory{4}(i)*(1-sf.reconPercent);
             end   
@@ -271,12 +270,12 @@ classdef storageFacility2 < handle
                     while ((demand(k,i) > 0) && (sum(sf.inventory{i}(1:j))) > 0)
                         if (demand(k,i) > sf.inventory{i}(j))
                             ship_out{i}(j) = sf.inventory{i}(j);
-                            revReceived = revReceived + ship_out{i}(j)*big_P(k,i);
+                            revReceived(i) = revReceived(i) + ship_out{i}(j)*big_P(k,i);
                             demand(k,i) = demand(k,i) - sf.inventory{i}(j);
                             sf.inventory{i}(j) = 0;
                         else
                             ship_out{i}(j) = demand(k,i);
-                            revReceived = revReceived + ship_out{i}(j)*big_P(k,i);
+                            revReceived(i) = revReceived(i) + ship_out{i}(j)*big_P(k,i);
                             sf.inventory{i}(j) = sf.inventory{i}(j) - demand(k,i);
                             demand(k,i) = 0;
                         end
