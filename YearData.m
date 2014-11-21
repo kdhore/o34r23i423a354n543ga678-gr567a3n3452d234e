@@ -21,8 +21,18 @@ classdef YearData
         storage_dec;
         purchase_spotmkt_dec;
         quant_mult_dec;
-        future_mark_dec_ORA;
-        future_mark_dec_FCOJ;
+        future_mark_dec_ORA_current;
+        future_mark_dec_ORA_current1;
+        future_mark_dec_ORA_current2;
+        future_mark_dec_ORA_current3;
+        future_mark_dec_ORA_current4;
+        future_mark_dec_ORA_current5;
+        future_mark_dec_FCOJ_current;
+        future_mark_dec_FCOJ_current1;
+        future_mark_dec_FCOJ_current2;
+        future_mark_dec_FCOJ_current3;
+        future_mark_dec_FCOJ_current4;
+        future_mark_dec_FCOJ_current5;
         arr_future_dec_ORA;
         arr_future_dec_FCOJ;
         ship_grove_dec;
@@ -112,10 +122,32 @@ classdef YearData
                 [~, ~, yr.purchase_spotmkt_dec] = xlsread(filename,'raw_materials','C6:N11');
                 yr.purchase_spotmkt_dec = cell2mat(cellNaNReplace(yr.purchase_spotmkt_dec,0));  
                 yr.quant_mult_dec = xlsread(filename,'raw_materials','C17:H22');
-                [~, ~, yr.future_mark_dec_ORA] = xlsread(filename,'raw_materials','N31:O35');
-                yr.future_mark_dec_ORA = cell2mat(cellNaNReplace(yr.future_mark_dec_ORA,0));                  
-                [~, ~, yr.future_mark_dec_FCOJ] = xlsread(filename,'raw_materials','N37:O41');
-                yr.future_mark_dec_FCOJ = cell2mat(cellNaNReplace(yr.future_mark_dec_FCOJ,0));
+                
+                [~, ~, yr.future_mark_dec_ORA_current] = xlsread(filename,'raw_materials','D30:M30');
+                yr.future_mark_dec_ORA_current = cell2mat(cellNaNReplace(yr.future_mark_dec_ORA_current,0));
+                [~, ~, yr.future_mark_dec_ORA_current1] = xlsread(filename,'raw_materials','F31:O31');
+                yr.future_mark_dec_ORA_current1 = cell2mat(cellNaNReplace(yr.future_mark_dec_ORA_current1,0));
+                [~, ~, yr.future_mark_dec_ORA_current2] = xlsread(filename,'raw_materials','H32:O32');
+                yr.future_mark_dec_ORA_current2 = cell2mat(cellNaNReplace(yr.future_mark_dec_ORA_current2,0));
+                [~, ~, yr.future_mark_dec_ORA_current3] = xlsread(filename,'raw_materials','J33:O33');
+                yr.future_mark_dec_ORA_current3 = cell2mat(cellNaNReplace(yr.future_mark_dec_ORA_current3,0));
+                [~, ~, yr.future_mark_dec_ORA_current4] = xlsread(filename,'raw_materials','L34:O34');
+                yr.future_mark_dec_ORA_current4= cell2mat(cellNaNReplace(yr.future_mark_dec_ORA_current4,0));
+                [~, ~, yr.future_mark_dec_ORA_current5] = xlsread(filename,'raw_materials','N35:O35');
+                yr.future_mark_dec_ORA_current5= cell2mat(cellNaNReplace(yr.future_mark_dec_ORA_current5,0));
+                
+                [~, ~, yr.future_mark_dec_FCOJ_current] = xlsread(filename,'raw_materials','D36:O36');
+                yr.future_mark_dec_FCOJ_current = cell2mat(cellNaNReplace(yr.future_mark_dec_FCOJ_current,0));
+                [~, ~, yr.future_mark_dec_FCOJ_current1] = xlsread(filename,'raw_materials','F37:O37');
+                yr.future_mark_dec_FCOJ_current1 = cell2mat(cellNaNReplace(yr.future_mark_dec_FCOJ_current1,0));
+                [~, ~, yr.future_mark_dec_FCOJ_current2] = xlsread(filename,'raw_materials','H38:O38');
+                yr.future_mark_dec_FCOJ_current2 = cell2mat(cellNaNReplace(yr.future_mark_dec_FCOJ_current2,0));
+                [~, ~, yr.future_mark_dec_FCOJ_current3] = xlsread(filename,'raw_materials','J39:O39');
+                yr.future_mark_dec_FCOJ_current3 = cell2mat(cellNaNReplace(yr.future_mark_dec_FCOJ_current3,0));
+                [~, ~, yr.future_mark_dec_FCOJ_current4] = xlsread(filename,'raw_materials','L40:O40');
+                yr.future_mark_dec_FCOJ_current4= cell2mat(cellNaNReplace(yr.future_mark_dec_FCOJ_current4,0));
+                [~, ~, yr.future_mark_dec_FCOJ_current5] = xlsread(filename,'raw_materials','N41:O41');
+                yr.future_mark_dec_FCOJ_current5= cell2mat(cellNaNReplace(yr.future_mark_dec_FCOJ_current5,0));
 
                 yr.arr_future_dec_ORA = xlsread(filename,'raw_materials','C47:N47');
                 yr.arr_future_dec_FCOJ = xlsread(filename,'raw_materials','C48:N48');
