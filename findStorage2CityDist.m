@@ -15,5 +15,5 @@ function [dist] = findStorage2CityDist(storage,city)
             k = i;   
         end
     end
-    dist = distdim(storage2market_dist(k,j),'km','mi');
+    dist = storage2market_dist(k,j);
 end
