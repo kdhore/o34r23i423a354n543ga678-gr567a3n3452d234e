@@ -136,7 +136,7 @@ classdef YearData
                 [~, ~, yr.future_mark_dec_ORA_current5] = xlsread(filename,'raw_materials','N35:O35');
                 yr.future_mark_dec_ORA_current5= cell2mat(cellNaNReplace(yr.future_mark_dec_ORA_current5,0));
                 
-                [~, ~, yr.future_mark_dec_FCOJ_current] = xlsread(filename,'raw_materials','D36:O36');
+                [~, ~, yr.future_mark_dec_FCOJ_current] = xlsread(filename,'raw_materials','D36:M36');
                 yr.future_mark_dec_FCOJ_current = cell2mat(cellNaNReplace(yr.future_mark_dec_FCOJ_current,0));
                 [~, ~, yr.future_mark_dec_FCOJ_current1] = xlsread(filename,'raw_materials','F37:O37');
                 yr.future_mark_dec_FCOJ_current1 = cell2mat(cellNaNReplace(yr.future_mark_dec_FCOJ_current1,0));
