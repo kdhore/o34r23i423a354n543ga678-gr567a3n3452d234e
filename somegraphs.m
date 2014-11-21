@@ -55,14 +55,22 @@ sumTranspoPOJ = sum(yeardata.transp_cost_POJ_res,1);
 sumTranspoROJ = sum(yeardata.transp_cost_ROJ_res,1);
 sumTranspoFCOJ = sum(yeardata.transp_cost_FCOJ_res,1);
 figure();
+plot(weeks, sumTranspoORA./sumSalesORA,'r', weeks, sumTranspoPOJ./sumSalesPOJ,'b',weeks, ...
+    sumTranspoROJ./sumSalesROJ,'m',weeks, sumTranspoFCOJ./sumSalesFCOJ,'k');
+xlabel('Weeks');
+ylabel('Transportation Cost');
+title(strcat(yeardata.year, ' Transportation Cost (per unit) of Product over Weeks'));
+legend('ORA','POJ','ROJ','FCOJ');
+
+figure();
 plot(weeks, sumTranspoORA,'r', weeks, sumTranspoPOJ,'b',weeks, ...
     sumTranspoROJ,'m',weeks, sumTranspoFCOJ,'k');
 xlabel('Weeks');
 ylabel('Transportation Cost');
-title(strcat(yeardata.year, ' Transportation Cost of Product over Weeks'));
+title(strcat(yeardata.year, ' Transportation Cost (gross) of Product over Weeks'));
 legend('ORA','POJ','ROJ','FCOJ');
 
-%%
+% %
 %plot monthly pricing vs. monthly sales for each item in each region
 months = zeros(1,12);
 for i = 1:12
