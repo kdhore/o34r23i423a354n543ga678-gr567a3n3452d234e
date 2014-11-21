@@ -3,6 +3,10 @@ function [results, proc_plants, storage] = Simulation(OJgameobj, decisions)
 % facilities
 storage2market = load('storage2market_dist.mat');
 s2m = genvarname('storage2market_dist');
+grove2processing_storage = load('grove2processing_store_dist.mat');
+g2ps = genvarname('grove2processing_store_dist');
+plant2storage = load('plant2storage_dist.mat');
+p2s = genvarname('plant2storage_dist');
 
 %Processing plants
 plants_open = find(OJgameobj.proc_plant_cap);
@@ -81,13 +85,14 @@ cities_match_storage = matchCitiestoStorage(storage_open, storage2market.(s2m));
  futures_arr_FCOJ = fcoj_futures.*(decisions.arr_future_dec_FCOJ*0.01);
  
  % Cost of shipping FCOJ futures
- cost_shipping_FCOJ_futures = zeros(length(storage),1);
+ cost_shipping_FCOJ_futures = zeros(12,length(storage));
  for i = 1:length(storage)
     % Fraction of total FCOJ arriving at florida grove that are being shipped to storage facitlity (storage_open(i)) 
     fraction_shipped = decisions.futures_ship_dec(storage_open(i));
     monthly_amt_shipped = futures_arr_FCOJ*fraction_shipped;
-    cost_per_ton = findGrove2PlantOrStorageDist('FLA', char(storageNamesInUse(storage_open(i))))*0.22; % I hope this function has been called correctly (MICHELLE) FUCK YOU KARTHIK
-    cost_shipping_FCOJ_futures(i,:) = monthly_amt_shipped*cost_per_ton; 
+    cost_per_ton = grove2processing_storage.(g2ps)(storage_open(i),1);
+    %cost_per_ton = findGrove2PlantOrStorageDist('FLA', char(storageNamesInUse(storage_open(i))))*0.22; % I hope this function has been called correctly (MICHELLE) FUCK YOU KARTHIK
+    cost_shipping_FCOJ_futures(:,i) = monthly_amt_shipped'.*cost_per_ton; 
  end
  
  transCostfromGroves_FCOJ = sum(sum(cost_shipping_FCOJ_futures));
@@ -95,10 +100,10 @@ cities_match_storage = matchCitiestoStorage(storage_open, storage2market.(s2m));
   % Transporation of oranges shipped from groves weekly
  futures_per_week_ORA = zeros(1,48);
  for i = 1:12
-         futures_per_week_ORA(1:4) = [];
-         futures_per_week_ORA = [futures_per_week_ORA repmat(futures_arr_ORA(i)/4,1,4)];
+     j = 4*(i-1)+1;
+     futures_per_week_ORA(1,j:j+3) = repmat(futures_arr_ORA(i)/4,1,4);
  end
- total_ora_shipped = spot_ora_weekly + horzcat(futures_per_week_ORA, zeros(5,48));
+ total_ora_shipped = spot_ora_weekly + vertcat(futures_per_week_ORA, zeros(5,48));
 % Calculate costs of ORA shipments from groves to PP and Storage
 numPlantsStorage = length(plants_open)+length(storage_open);
 transCost_fromGroves = zeros(numPlantsStorage, 6);

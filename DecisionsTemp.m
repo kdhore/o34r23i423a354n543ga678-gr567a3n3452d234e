@@ -52,6 +52,8 @@ classdef DecisionsTemp < handle
         dec.future_mark_dec_FCOJ_current3 = yrDataObj.future_mark_dec_FCOJ_current3;
         dec.future_mark_dec_FCOJ_current4 = yrDataObj.future_mark_dec_FCOJ_current4;
         dec.future_mark_dec_FCOJ_current5 = yrDataObj.future_mark_dec_FCOJ_current5;
+        dec.arr_future_dec_ORA = yrDataObj.arr_future_dec_ORA;
+        dec.arr_future_dec_FCOJ = yrDataObj.arr_future_dec_FCOJ;
         dec.ship_grove_dec = yrDataObj.ship_grove_dec;
         dec.manufac_proc_plant_dec = yrDataObj.manufac_proc_plant_dec;
         dec.futures_ship_dec = yrDataObj.futures_ship_dec;
