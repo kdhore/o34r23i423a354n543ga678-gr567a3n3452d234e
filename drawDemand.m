@@ -1,4 +1,4 @@
-function [ ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, transport_cost, big_D, big_P ] = drawDemand(decisions,cities,week)
+function [ ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, transport_cost, big_D, big_P ] = drawDemand(decisions,cities,week,demand_city_ORA, demand_city_POJ, demand_city_ROJ, demand_city_FCOJ )
     % Will return the demand for each city
     ORA_demand = 0;
     POJ_demand = 0;
@@ -11,18 +11,18 @@ function [ ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, transport_cost, big_
     FCOJ_price = decisions.pricing_FCOJ_weekly_dec(:,week);
     ROJ_price = decisions.pricing_ROJ_weekly_dec(:,week);
     big_P = [ORA_price, POJ_price, FCOJ_price, ROJ_price];
-    for i = 1:numel(cities/3)
+    for i = 1:numel(cities)/3
        [region, region_ind] = matchCitytoRegion(cities{i,1});
-       ora = oraDemand(cities{i,1}, ORA_price, region_ind);
+       ora = oraDemand(cities{i,1}, ORA_price, region_ind, demand_city_ORA);
        big_D(region_ind, 1) = big_D(region_ind, 1) + ora; 
        
-       poj = pojDemand(cities{i,1}, POJ_price, region_ind);
+       poj = pojDemand(cities{i,1}, POJ_price, region_ind,  demand_city_POJ);
        big_D(region_ind, 2) = big_D(region_ind, 2) + poj;
        
-       fcoj = fcojDemand(cities{i,1}, FCOJ_price, region_ind);
+       fcoj = fcojDemand(cities{i,1}, FCOJ_price, region_ind, demand_city_FCOJ);
        big_D(region_ind, 4) = big_D(region_ind, 3) + fcoj;
        
-       roj = rojDemand(cities{i,1}, ROJ_price, region_ind);
+       roj = rojDemand(cities{i,1}, ROJ_price, region_ind, demand_city_ROJ);
        big_D(region_ind, 3) = big_D(region_ind, 4) + roj;
        
        transport_cost = transport_cost + 1.2*cities{i,3}*(ora+poj+fcoj+roj);

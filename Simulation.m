@@ -3,10 +3,28 @@ function [results, proc_plants, storage] = Simulation(OJgameobj, decisions)
 % facilities
 storage2market = load('storage2market_dist.mat');
 s2m = genvarname('storage2market_dist');
-grove2processing_storage = load('grove2processing_store_dist.mat');
-g2ps = genvarname('grove2processing_store_dist');
+grove2processing_storage = load('grove2processing_storage.mat');
+g2ps = genvarname('grove2processing_storage_dist');
+grove2processing_storage = grove2processing_storage.(g2ps);
+grove2processing_storage = cell2mat(grove2processing_storage);
+grove2processing_storage = [grove2processing_storage, grove2processing_storage(:,1), grove2processing_storage(:,1)];  
 plant2storage = load('plant2storage_dist.mat');
-p2s = genvarname('plant2storage_dist');
+p2s = genvarname('processing2storage_dist');
+plant2storage = plant2storage.(p2s);
+demand_city_ORA = load('demand_city_ORA.mat');
+dc_ora = genvarname('ORA_means_by_city');
+demand_city_ORA = demand_city_ORA.(dc_ora);
+demand_city_POJ = load('demand_city_POJ.mat');
+dc_poj = genvarname('POJ_means_by_city');
+demand_city_POJ = demand_city_POJ.(dc_poj);
+demand_city_ROJ = load('demand_city_ROJ.mat');
+dc_roj = genvarname('ROJ_means_by_city');
+demand_city_ROJ = demand_city_ROJ.(dc_roj);
+demand_city_FCOJ = load('demand_city_FCOJ.mat');
+dc_fcoj = genvarname('FCOJ_means_by_city');
+demand_city_FCOJ = demand_city_FCOJ.(dc_fcoj);
+
+
 
 %Processing plants
 plants_open = find(OJgameobj.proc_plant_cap);
@@ -52,6 +70,9 @@ cities_match_storage = matchCitiestoStorage(storage_open, storage2market.(s2m));
         end
     end
  quant_purch = decisions.purchase_spotmkt_dec.*act_quant_mult;
+ % THIS MAY NOT ALWAYS BE WHAT WE EXPECT - if there is a hurricane or
+ % something in one of the groves, we may purchase less than we requested
+ % bc not enough is available
  
  spot_ora_weekly = zeros(6, 48);
  for i = 1:12  
@@ -63,7 +84,7 @@ cities_match_storage = matchCitiestoStorage(storage_open, storage2market.(s2m));
      j = 4*(i-1)+1;
      price_weekly_lb(:,j:j+3) = repmat(adj_USP(:,i),1,4);
  end
- price_weekly_ton = price_weekly_lb*2000; %convmass function
+ price_weekly_ton = price_weekly_lb*2000;
      
  purch_cost_weekly = spot_ora_weekly.*price_weekly_ton;
  ORA_purch_cost = sum(sum(purch_cost_weekly));
@@ -90,7 +111,7 @@ cities_match_storage = matchCitiestoStorage(storage_open, storage2market.(s2m));
     % Fraction of total FCOJ arriving at florida grove that are being shipped to storage facitlity (storage_open(i)) 
     fraction_shipped = decisions.futures_ship_dec(storage_open(i));
     monthly_amt_shipped = futures_arr_FCOJ*fraction_shipped;
-    cost_per_ton = grove2processing_storage.(g2ps)(storage_open(i),1);
+    cost_per_ton = 0.22*grove2processing_storage(10 + storage_open(i),1);
     %cost_per_ton = findGrove2PlantOrStorageDist('FLA', char(storageNamesInUse(storage_open(i))))*0.22; % I hope this function has been called correctly (MICHELLE) FUCK YOU KARTHIK
     cost_shipping_FCOJ_futures(:,i) = monthly_amt_shipped'.*cost_per_ton; 
  end
@@ -110,14 +131,12 @@ transCost_fromGroves = zeros(numPlantsStorage, 6);
 plantsAndStorage = [plants_open; storage_open];
 for i = 1:6 % loop over groves
     for j = 1:numPlantsStorage
-        grove = groveIndex(i);
-        PorSindex = plantsAndStorage(j);
         if (j <= length(plants_open))
-            PorS = char(plantNamesInUse(PorSindex));
+            PorSindex = plantsAndStorage(j);
         else
-            PorS = char(storageNamesInUse(PorSindex));
+            PorSindex = plantsAndStorage(j)+10;
         end
-        transCost_fromGroves(j,i)= findGrove2PlantOrStorageDist(grove, PorS)*0.22*sum(quant_purch(i,:))*decisions.ship_grove_dec(i,j);
+        transCost_fromGroves(j,i) = grove2processing_storage(PorSindex, i)*0.22*sum(total_ora_shipped(i,:))*decisions.ship_grove_dec(i,j)*0.01;
     end
 end
 
@@ -157,19 +176,19 @@ transCostfromGroves_ORA = sum(sum(transCost_fromGroves));
          [POJ_man(i), FCOJ_man(i), tankersHoldC(i), transCfromPlants_tank(i), transCfromPlants_carrier(i), rottenProc(i), toss_outProc(i)] = proc_plants{j}.iterateWeek(sum_shipped, decisions, breakdown, storage_open);
      end
      for j = 1:length(storage)
-         shipped_ORA_FLA = decisions.ship_grove_dec(1+length(proc_plants),j)*0.01*total_ora_shipped(1,i);
-         shipped_ORA_CAL = decisions.ship_grove_dec(2+length(proc_plants),j)*0.01*total_ora_shipped(2,i);
-         shipped_ORA_TEX = decisions.ship_grove_dec(3+length(proc_plants),j)*0.01*total_ora_shipped(3,i);
-         shipped_ORA_ARZ = decisions.ship_grove_dec(4+length(proc_plants),j)*0.01*total_ora_shipped(4,i);
-         shipped_ORA_BRA = decisions.ship_grove_dec(5+length(proc_plants),j)*0.01*total_ora_shipped(5,i);
-         shipped_ORA_SPA = decisions.ship_grove_dec(6+length(proc_plants),j)*0.01*total_ora_shipped(6,i);
+         shipped_ORA_FLA = decisions.ship_grove_dec(1,j+length(proc_plants))*0.01*total_ora_shipped(1,i);
+         shipped_ORA_CAL = decisions.ship_grove_dec(2,j+length(proc_plants))*0.01*total_ora_shipped(2,i);
+         shipped_ORA_TEX = decisions.ship_grove_dec(3,j+length(proc_plants))*0.01*total_ora_shipped(3,i);
+         shipped_ORA_ARZ = decisions.ship_grove_dec(4,j+length(proc_plants))*0.01*total_ora_shipped(4,i);
+         shipped_ORA_BRA = decisions.ship_grove_dec(5,j+length(proc_plants))*0.01*total_ora_shipped(5,i);
+         shipped_ORA_SPA = decisions.ship_grove_dec(6,j+length(proc_plants))*0.01*total_ora_shipped(6,i);
          sum_shipped = shipped_ORA_FLA + shipped_ORA_CAL + shipped_ORA_TEX + shipped_ORA_ARZ + ...
                        shipped_ORA_BRA + shipped_ORA_SPA;
          fraction_shipped_futures = decisions.futures_ship_dec(storage_open(j));
          monthly_amt_futures_shipped_FCOJ = futures_arr_FCOJ*fraction_shipped_futures;
-         indicies = strcmp(char(storageNamesInUse(storage_open(j))),cities_match_storage{:,1});
-         cities = cities_match_storage{indicies,:};
-         [transport2cities_cost(i), big_D, big_P] = drawDemand(decisions,cities,i); % will need to give it a price, and do this for all products
+         indicies = strcmp(char(storageNamesInUse(storage_open(j))),cities_match_storage(:,2));
+         cities = cities_match_storage(indicies,:);
+         [transport2cities_cost(i), big_D, big_P] = drawDemand(decisions,cities,i, demand_city_ORA, demand_city_POJ, demand_city_ROJ, demand_city_FCOJ); % will need to give it a price, and do this for all products
          [~, sold(:,i), toss_outStor(:,i), rottenStor(:,i), excessDemand, ROJ_man(i), holdCost(i), revReceived(:,i)] = storage{j}.iterateWeek(sum_shipped, (monthly_amt_futures_shipped_FCOJ(ceil(i/4)))/4, proc_plants, big_D, big_P, i);
      end
  end

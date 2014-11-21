@@ -5,6 +5,10 @@ load('storage2market_dist.mat');
 load('cities.mat');
 load('storage_units.mat');
 load('processing2storage.mat');
+load('demand_city_ORA.mat');
+load('demand_city_POJ.mat');
+load('demand_city_ROJ.mat');
+load('demand_city_FCOJ.mat');
 
 % Pick the year you want to start with:
 initial_str = 'MomPop2004Results.xlsm';
