@@ -49,7 +49,7 @@ title(strcat(yeardata.year, ' Sales of Product over Weeks'));
 legend('ORA','POJ','ROJ','FCOJ');
 
 %%
-%plot transportation costs of each product over the year (weeks)
+%plot transportation costs of each product over the year (in weeks)
 sumTranspoORA = sum(yeardata.transp_cost_ORA_res,1);
 sumTranspoPOJ = sum(yeardata.transp_cost_POJ_res,1);
 sumTranspoROJ = sum(yeardata.transp_cost_ROJ_res,1);
