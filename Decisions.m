@@ -4,7 +4,7 @@ classdef Decisions
     % properties values of this class to the decisions. This can obviously
     % call other functions or have other inputs from other functions as
     % we deem fit. It can also take as input any sort of metrics and such
-    % that we have calculated from any other function or class. karthik
+    % that we have calculated from any other function or class. 
     
     properties
         % The decisions
@@ -134,12 +134,26 @@ classdef Decisions
                 % assign the buying quantity (tons per week in a month)
                 % either manually or by looping through locations/months
                 
-                Decisions.demandStorage = zeros(length(stor_open),1);
-                for i = 1:length(stor_open)
-                    
+                Decisions.demandStorageORA = zeros(length(stor_open),12);
+                Decisions.demandStoragePOJ = zeros(length(stor_open),12);
+                Decisions.demandStorageROJ = zeros(length(stor_open),12);
+                Decisions.demandStorageFCOJ = zeros(length(stor_open),12);
                 
-                
-                
+                for month = 1:12
+                    for  i = 1:7
+                        for j = 1:length(stor_open)
+                         if(strcmp(matchRegiontoStorage(i,OJ_Object),...
+                                stor_open(j)) == 1) 
+                             Decisions.demandStorageORA(j) = ...
+                              Decisions.demandStorageORA(j) + ...
+                              getDemand(1,i,Decisions.pricing_ORA_dec(i,month))
+                         end
+                        end
+                    end
+                end
+                      
+                                
+               
                 %  Manually set the multipliers equal to matrix
                 %  where each row is grove location (FLA, CAL, TEX, ARZ,
                 %  BRA, SPA respectively) and each column alternates
