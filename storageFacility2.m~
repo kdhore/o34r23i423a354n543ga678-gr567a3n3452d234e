@@ -275,7 +275,7 @@ classdef storageFacility2 < handle
                             sf.inventory{i}(j) = 0;
                         else
                             ship_out{i}(j) = demand(k,i);
-                            revReceived(i) = revReceived + ship_out{i}(j)*big_P(k,i);
+                            revReceived(i) = revReceived(i) + ship_out{i}(j)*big_P(k,i);
                             sf.inventory{i}(j) = sf.inventory{i}(j) - demand(k,i);
                             demand(k,i) = 0;
                         end

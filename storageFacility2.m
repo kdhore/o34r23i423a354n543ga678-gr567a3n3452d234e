@@ -76,7 +76,7 @@ classdef storageFacility2 < handle
 		% demand is how much demand is unfulled
 		% reconCost is cost spent reconstituting
 		% holdCost is the cost of holding inventory
-		function [ship_out, sold, toss_out, rotten, demand, reconCost, holdCost, revReceived] = iterateWeek(sf, sum_shipped, futures_per_week_FCOJ,proc_plants, big_D, big_P, time)
+		function [ship_out, sold, toss_out, rotten, demand, ROJman, holdCost, revReceived] = iterateWeek(sf, sum_shipped, futures_per_week_FCOJ,proc_plants, big_D, big_P, time)
 			% initialize return variables
 			ship_out = cell(4,1);
 			sold = zeros(4,1);
@@ -111,9 +111,9 @@ classdef storageFacility2 < handle
             % week's rotten inventory wouldn't have been reconstituted, but
             % means we include this week's rotten inventory in the total
             % FCOJ that can be reconstituted)
-			FCOJRecon = sum(sf.inventory{4}(1:length(sf.inventory{4}))) * sf.reconPercent(ceil(time/4));
-            sf.inventory{3}(1) = FCOJRecon;
-			reconCost = FCOJRecon * sf.reconC;
+			ROJman = sum(sf.inventory{4}(1:length(sf.inventory{4}))) * sf.reconPercent(ceil(time/4));
+            sf.inventory{3}(1) = ROJman;
+			%reconCost = FCOJRecon * sf.reconC;
 			for i=2:length(sf.inventory{4})
 				sf.inventory{4}(i) = sf.inventory{4}(i)*(1-sf.reconPercent);
             end   
