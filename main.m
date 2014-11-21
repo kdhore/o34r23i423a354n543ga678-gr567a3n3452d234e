@@ -1,43 +1,53 @@
 % This is the main script.  Everyone can go fuck themselves.
 
+% Load all the shit.
+load('storage2market_dist.mat');
+load('cities.mat');
+load('storage_units.mat');
+load('processing2storage.mat');
+load('demand_city_ORA.mat');
+load('demand_city_POJ.mat');
+load('demand_city_ROJ.mat');
+load('demand_city_FCOJ.mat');
+
 % Pick the year you want to start with:
-%initial_str = 'MomPop2004Results.xlsm';
-initial_str = 'oriangagrande2014Results.xlsm';
+initial_str = 'MomPop2004Results.xlsm';
+%initial_str = 'oriangagrande2014Results.xlsm';
 
 %Initalize the first OJGame Object
 ojObject = OJGame(initial_str);
 
 if sum(strcmp(initial_str, 'MomPop2004Results.xlsm')) == 1
-    yr2004_MomPop = YearData('MomPop2004Results.xlsm', ojObject);
-    ojObject.update(yr2004_MomPop);
-    save('yr2004.mat','yr2004_MomPop');
-    yr2005_MomPop = YearData('MomPop2005Results.xlsm', ojObject);
-    ojObject.update(yr2005_MomPop);
-    save('yr2005.mat','yr2005_MomPop');
-    yr2006_MomPop = YearData('MomPop2006Results.xlsm', ojObject);
-    ojObject.update(yr2006_MomPop);
-    save('yr2006.mat','yr2006_MomPop');
-    yr2007_MomPop = YearData('MomPop2007Results.xlsm', ojObject);
-    ojObject.update(yr2007_MomPop);
-    save('yr2007.mat','yr2007_MomPop');
-    yr2008_MomPop = YearData('MomPop2008Results.xlsm', ojObject);
-    ojObject.update(yr2008_MomPop);
-    save('yr2008.mat','yr2008_MomPop');
-    yr2009_MomPop = YearData('MomPop2009Results.xlsm', ojObject);
-    ojObject.update(yr2009_MomPop);
-    save('yr2009.mat','yr2009_MomPop');
-    yr2010_MomPop = YearData('MomPop2010Results.xlsm', ojObject);
-    ojObject.update(yr2010_MomPop);
-    save('yr2010.mat','yr2010_MomPop');
-    yr2011_MomPop = YearData('MomPop2011Results.xlsm', ojObject);
-    ojObject.update(yr2011_MomPop);
-    save('yr2011.mat','yr2011_MomPop');
-    yr2012_MomPop = YearData('MomPop2012Results.xlsm', ojObject);
-    ojObject.update(yr2012_MomPop);
-    save('yr2012.mat','yr2012_MomPop');
-    yr2013_MomPop = YearData('MomPop2013Results.xlsm', ojObject);
-    ojObject.update(yr2013_MomPop);
-    save('yr2013.mat','yr2013_MomPop');
+    yr2004 = YearData('MomPop2004Results.xlsm', ojObject);
+    ojObject.update(yr2004);
+    save('yr2004.mat','yr2004');
+    yr2005 = YearData('MomPop2005Results.xlsm', ojObject);
+    ojObject.update(yr2005);
+    save('yr2005.mat','yr2005');
+    yr2006 = YearData('MomPop2006Results.xlsm', ojObject);
+    ojObject.update(yr2006);
+    save('yr2006.mat','yr2006');
+    yr2007 = YearData('MomPop2007Results.xlsm', ojObject);
+    ojObject.update(yr2007);
+    save('yr2007.mat','yr2007');
+    yr2008 = YearData('MomPop2008Results.xlsm', ojObject);
+    ojObject.update(yr2008);
+    save('yr2008.mat','yr2008');
+    yr2009 = YearData('MomPop2009Results.xlsm', ojObject);
+    ojObject.update(yr2009);
+    save('yr2009.mat','yr2009');
+    yr2010 = YearData('MomPop2010Results.xlsm', ojObject);
+    ojObject.update(yr2010);
+    save('yr2010.mat','yr2010');
+    yr2011 = YearData('MomPop2011Results.xlsm', ojObject);
+    ojObject.update(yr2011);
+    save('yr2011.mat','yr2011');
+    yr2012 = YearData('MomPop2012Results.xlsm', ojObject);
+    ojObject.update(yr2012);
+    save('yr2012.mat','yr2012');
+    yr2013 = YearData('MomPop2013Results.xlsm', ojObject);
+    ojObject.update(yr2013);
+    save('yr2013.mat','yr2013');
 else
     yr2014a_orianga = YearData('oriangagrande2014aResults.xlsm', ojObject);
     save('yr2014a.mat','yr2014a_orianga');
@@ -54,8 +64,8 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 load('yr2014.mat')
 ojObject = OJGame(initial_str);
-ojObject.update(yr2014_orianga);
+%ojObject.update(yr2014_orianga);
 
-decisions = Decision(ojObject);
+decisions = DecisionsTemp(yr2004);
 
     

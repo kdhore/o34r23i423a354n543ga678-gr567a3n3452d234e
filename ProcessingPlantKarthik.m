@@ -21,7 +21,7 @@ classdef ProcessingPlantKarthik
 	end
     
     methods
-        function pp = processingPlant(index, capacity, percentPOJ, breakdown, ora, pojC, fcojC, tankers, tankerCost, stor_num)
+        function pp = ProcessingPlantKarthik(index, capacity, percentPOJ, breakdown, ora, pojC, fcojC, tankers, tankerCost, stor_num)
             schedule = struct('POJ_1Week', nan, 'POJ_2Week', nan, 'POJ_3Week', nan, 'POJ_4Week', nan, ...
                               'FCOJ_1Week', nan, 'FCOJ_2Week', nan,'FCOJ_3Week', nan, 'FCOJ_4Week', nan,...
                               'Tankers', nan, 'Carriers', nan);
@@ -53,6 +53,7 @@ classdef ProcessingPlantKarthik
             shipped_out_cost_carrier = 0;
             poj = 0;
             fcoj = 0;
+            tankersHoldC = 0;
             %pojC = 0;
             %fcojC = 0;
 			% adding newly recieved products to inventory
@@ -105,7 +106,7 @@ classdef ProcessingPlantKarthik
 				pp.ora = zeros(5,1);
                 if (poj+fcoj) <= pp.tankersAvailable*30
                     oneWeek = pp.shippingSchedule{3};            
-                    for j = 1:num_stor
+                    for j = 1:pp.stor_num
                         stor = storage_open(j);
                         stor_percentPOJ = decisions.ship_proc_plant_storage_dec(stor, pp.index).POJ;
                         stor_percentFCOJ = decisions.ship_proc_plant_storage_dec(stor, pp.index).FCOJ;
@@ -182,7 +183,7 @@ classdef ProcessingPlantKarthik
                         end
                     end
                     % Allocate the remaining flow to independent carriers
-                    while j <= num_stor
+                    while j <= pp.stor_num
                         stor = storage_open(j);
                         stor_percentPOJ = decisions.ship_proc_plant_storage_dec(stor, pp.index).POJ;
                         stor_percentFCOJ = decisions.ship_proc_plant_storage_dec(stor, pp.index).FCOJ;
