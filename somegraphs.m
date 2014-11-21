@@ -70,7 +70,7 @@ ylabel('Transportation Cost');
 title(strcat(yeardata.year, ' Transportation Cost (gross) of Product over Weeks'));
 legend('ORA','POJ','ROJ','FCOJ');
 
-% %
+%%
 %plot monthly pricing vs. monthly sales for each item in each region
 months = zeros(1,12);
 for i = 1:12
