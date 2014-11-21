@@ -149,7 +149,16 @@ classdef OJGame
             
         end
         
+        function obj = updatefromSim(obj,decision, proc_plants, storage)
+            obj.year_start = obj.year_start + 1;
+            plants_open = find(obj.proc_plant_cap);
+            for i=1:length(plants_open)
+                obj.proc_plant_inv(plants_open(i)).ORA = proc_plants{i}.ora;
+            end
+            
+        end
+        
     end
-    
 end
+    
 

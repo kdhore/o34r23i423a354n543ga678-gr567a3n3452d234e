@@ -56,6 +56,6 @@ load('yr2014.mat')
 ojObject = OJGame(initial_str);
 ojObject.update(yr2014_orianga);
 
-decisions = Decision(ojObject, 
+decisions = Decision(ojObject);
 
     

@@ -27,10 +27,10 @@ classdef storageFacility2 < handle
         % Note: If this class should calculate transportation cost from
         % storage to demand, need the cities that this facility services
 		function sf = storageFacility2(cap,inventory,rc,hc,rp,index,proc_num)
-			sf.inventory{1} = [inventory.ORA; 0];
-            sf.inventory{2} = [inventory.POJ; 0];
-            sf.inventory{3} = [inventory.ROJ; 0];
-            sf.inventory{4} = [inventory.FCOJ; 0];
+			sf.inventory{1} = [inventory.ORA];
+            sf.inventory{2} = [inventory.POJ];
+            sf.inventory{3} = [inventory.ROJ];
+            sf.inventory{4} = [inventory.FCOJ];
 			sf.capacity = cap;
 			sf.reconC = rc;
 			sf.holdC = hc;
