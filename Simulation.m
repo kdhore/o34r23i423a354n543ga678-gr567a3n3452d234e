@@ -1,8 +1,8 @@
 function [results, proc_plants, storage] = Simulation(OJgameobj, decisions)
 % Take inventory and other information from OJGameobj and initilize
 % facilities
-test = load('storage2market_dist.mat');
-x = genvarname('storage2market_dist');
+storage2market = load('storage2market_dist.mat');
+s2m = genvarname('storage2market_dist');
 
 %Processing plants
 plants_open = find(OJgameobj.proc_plant_cap);
@@ -19,7 +19,7 @@ for i = 1:length(storage_open)
     storage{i} = storageFacility2(OJgameobj.storage_cap(i),OJgameobj.storage_inv(storage_open(i)),650,60,decisions.reconst_storage_dec(storage_open(i),:),storage_open(i),length(plants_open));
 end
 
-cities_match_storage = matchCitiestoStorage(storage_open, test.(x));
+cities_match_storage = matchCitiestoStorage(storage_open, storage2market.(s2m));
        
 % Draw grove prices matrix, fx grove => US$ prices, and use actual
 % quantity purchased and the purchasing cost
@@ -50,19 +50,19 @@ cities_match_storage = matchCitiestoStorage(storage_open, test.(x));
  quant_purch = decisions.purchase_spotmkt_dec.*act_quant_mult;
  
  spot_ora_weekly = zeros(6, 48);
- for i = 1:12
-     spot_ora_weekly(:,1) = [];
-     spot_ora_weekly = [spot_ora_weekly repmat(quant_purch(:,i),1,4)];
+ for i = 1:12  
+     j = 4*(i-1)+1;
+     spot_ora_weekly(:,j:j+3) = repmat(quant_purch(:,i),1,4);
  end
- price_weekly = zeros(6,48);
- for i = 1:12
-     price_weekly(:,1) = [];
-     price_weekly = [price_weekly repmat(adj_USP(:,i),1,4)];
+ price_weekly_lb = zeros(6,48);
+ for i = 1:12  
+     j = 4*(i-1)+1;
+     price_weekly_lb(:,j:j+3) = repmat(adj_USP(:,i),1,4);
  end
+ price_weekly_ton = price_weekly_lb*2000; %convmass function
      
- purch_cost_weekly = spot_ora_weekly.*price_weekly;
+ purch_cost_weekly = spot_ora_weekly.*price_weekly_ton;
  ORA_purch_cost = sum(sum(purch_cost_weekly));
- ORA_purch_cost2 = sum(sum(quant_purch.*adj_USP*4));
  
  % Calculate the futures arriving and cost
  ora_futures = 0;

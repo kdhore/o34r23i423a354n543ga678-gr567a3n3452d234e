@@ -1,4 +1,4 @@
-function [ output ] = matchCitiestoStorage( storage_open, bam )
+function [ output ] = matchCitiestoStorage( storage_open, distances )
 cities = {'ANY';'BOS';'CLP';'KEE';'LAK';'MBK';'MVY';'PGH';'PHI';'PVD';'RER';'SCR';'SMS';'SUP';'CRS';'CVE';...
     'CWV';'DTN';'FRY';'HIP';'JTC';'LXK';'MAO';'MAY';'MSD';'MSP';'MTH';'RCH';'RRN';'SHK';'TIL';'CHR';...
     'DAY';'FPR';'FSC';'GRN';'HVA';'JFL';'MTG';'OCL';'PAN';'WPB';'YEM';'ABL';'BYO';'CED';'CUP';'ELK';...
@@ -12,7 +12,7 @@ for i = 1:numel(cities)
     closest_storage = '';
     short_dist = 9999999999;
     for j = 1:length(storage_open)
-        distance = cell2mat(bam(i, storage_open(j)));
+        distance = cell2mat(distances(i, storage_open(j)));
         if (distance(1) < short_dist)
             short_dist = distance(1);
             closest_storage = char(storageNamesInUse(storage_open(j)));
