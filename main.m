@@ -1,5 +1,11 @@
 % This is the main script.  Everyone can go fuck themselves.
 
+% Load all the shit.
+load('storage2market_dist.mat');
+load('cities.mat');
+load('storage_units.mat');
+load('processing2storage.mat');
+
 % Pick the year you want to start with:
 initial_str = 'MomPop2004Results.xlsm';
 %initial_str = 'oriangagrande2014Results.xlsm';
@@ -54,8 +60,8 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 load('yr2014.mat')
 ojObject = OJGame(initial_str);
-ojObject.update(yr2014_orianga);
+%ojObject.update(yr2014_orianga);
 
-decisions = Decision(ojObject);
+decisions = DecisionsTemp(yr2004);
 
     

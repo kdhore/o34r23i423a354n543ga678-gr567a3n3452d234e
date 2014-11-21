@@ -1,25 +1,25 @@
 function [results, proc_plants, storage] = Simulation(OJgameobj, decisions)
 % Take inventory and other information from OJGameobj and initilize
 % facilities
+test = load('storage2market_dist.mat');
+x = genvarname('storage2market_dist');
 
 %Processing plants
 plants_open = find(OJgameobj.proc_plant_cap);
 proc_plants = cell(length(plants_open),1);
 for i = 1:length(plants_open)
     inventory = [OJgameobj.proc_plant_inv(plants_open(i)).ORA];
-    proc_plants{i} = processingPlantKarthik(plants_open(i),OJgameobj.proc_plant_cap(i),...
-                                     decisions.manufac_proc_plant_dec(1,plants_open(i)), ...
-                                     0, inventory, 2000, 1000, oj.tank_cars_num(plants_open(i)),...
-                                     10);
+    proc_plants{i} = ProcessingPlantKarthik(plants_open(i),OJgameobj.proc_plant_cap(i),    decisions.manufac_proc_plant_dec(1,plants_open(i)), 0, inventory,  2000, 1000, OJgameobj.tank_cars_num(plants_open(i)), 10, length(find(OJgameobj.storage_cap)));
 end
 
 % Storage facilities
 storage_open = find(OJgameobj.storage_cap);
 storage = cell(length(storage_open),1);
 for i = 1:length(storage_open)
-    storage{i} = storageFacility2(OJgameobj.storage_cap(i),OJgameobj.storage_inv(storage_open(i)),650,60,decision.reconst_storage_dec(storage_open(i),:),storage_open(i),length(plants_open));
+    storage{i} = storageFacility2(OJgameobj.storage_cap(i),OJgameobj.storage_inv(storage_open(i)),650,60,decisions.reconst_storage_dec(storage_open(i),:),storage_open(i),length(plants_open));
 end
-cities_match_storage = matchCitiestoStorage(storage_open);
+
+cities_match_storage = matchCitiestoStorage(storage_open, test.(x));
        
 % Draw grove prices matrix, fx grove => US$ prices, and use actual
 % quantity purchased and the purchasing cost
@@ -48,6 +48,7 @@ cities_match_storage = matchCitiestoStorage(storage_open);
         end
     end
  quant_purch = decisions.purchase_spotmkt_dec.*act_quant_mult;
+ 
  spot_ora_weekly = zeros(6, 48);
  for i = 1:12
      spot_ora_weekly(:,1) = [];
@@ -55,14 +56,19 @@ cities_match_storage = matchCitiestoStorage(storage_open);
  end
  price_weekly = zeros(6,48);
  for i = 1:12
-     price_weekly(1:4,1) = [];
+     price_weekly(:,1) = [];
      price_weekly = [price_weekly repmat(adj_USP(:,i),1,4)];
  end
      
  purch_cost_weekly = spot_ora_weekly.*price_weekly;
  ORA_purch_cost = sum(sum(purch_cost_weekly));
+ ORA_purch_cost2 = sum(sum(quant_purch.*adj_USP*4));
  
  % Calculate the futures arriving and cost
+ ora_futures = 0;
+ fcoj_futures = 0;
+ futures_cost_ORA =0;
+ futures_cost_FCOJ = 0;
  for i = 1:5
      ora_futures = ora_futures + OJgameobj.ora_futures_current(2*(i-1)+2);
      fcoj_futures = fcoj_futures + OJgameobj.fcoj_futures_current(2*(i-1)+2);
@@ -252,7 +258,7 @@ materialsCost = [ORA_purch_cost; futures_cost_ORA; futures_cost_FCOJ; transCostf
 manCost = [pojManCost; fcojManCost; reconCost];
 transCost = [totTransCfromPlants_tank; totTransCfromPlants_carrier; totHoldCost; totTransport2cities_cost];
 maintainenceCost = [proc_plants_main; costs_new_plants; proc_plant_cap_costs; storage_main; costs_new_storage; storage_cap_costs; totTankHoldCost; tankCar_purchase_costs]; %decisions
-results = cell{9,1};
+results = cell(9,1);
 results{1} = sales;
 results{2} = materialsAcqLos;
 results{3} = futures;

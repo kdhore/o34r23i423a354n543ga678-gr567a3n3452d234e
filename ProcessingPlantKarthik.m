@@ -21,7 +21,7 @@ classdef ProcessingPlantKarthik
 	end
     
     methods
-        function pp = processingPlant(index, capacity, percentPOJ, breakdown, ora, pojC, fcojC, tankers, tankerCost, stor_num)
+        function pp = ProcessingPlantKarthik(index, capacity, percentPOJ, breakdown, ora, pojC, fcojC, tankers, tankerCost, stor_num)
             schedule = struct('POJ_1Week', nan, 'POJ_2Week', nan, 'POJ_3Week', nan, 'POJ_4Week', nan, ...
                               'FCOJ_1Week', nan, 'FCOJ_2Week', nan,'FCOJ_3Week', nan, 'FCOJ_4Week', nan,...
                               'Tankers', nan, 'Carriers', nan);

@@ -35,7 +35,7 @@ classdef DecisionsTemp < handle
     end
     
     methods
-        function dec = updateDecisions(yrDataObj)
+        function dec = DecisionsTemp(yrDataObj)
         dec.year = yrDataObj.year;
         dec.proc_plant_dec = yrDataObj.proc_plant_dec;
         dec.tank_car_dec = yrDataObj.tank_car_dec;
