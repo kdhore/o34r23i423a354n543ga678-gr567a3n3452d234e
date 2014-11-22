@@ -39,6 +39,10 @@ classdef Decisions
         function Decisions = Decision(filename,OJ_object)
             if nargin > 0
                 
+                % For now this needs to be MANUALLY updated 
+                YearDataRecord = [yr2004, yr2005, yr2006, yr2007, yr2008,...
+                    yr2009, yr2010, yr2011, yr2012, yr2013];
+                
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 % Reading in pricing tab
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -53,8 +57,6 @@ classdef Decisions
                 % Set the prices of each product either manually or by
                 % looping through the regions and the months
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                
-                
                 
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 % Assigning decisions to the facilities tab
@@ -75,8 +77,6 @@ classdef Decisions
                 % yr.storage_dec(i) = capacity;
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
-                
-                
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 % Reading in shipping_manufacturing tab
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -89,11 +89,13 @@ classdef Decisions
                 % from the OJ object.
                 plants_open = find(OJ_object.proc_plant_cap);
                 stor_open = find(OJ_object.storage_cap);
-                Decisions.ship_grove_dec = zeros(6, length(plants_open) + length(stor_open));
+                Decisions.ship_grove_dec = zeros(6, length(plants_open) +...
+                    length(stor_open));
                 % Set these percentages manually %
                 
                 % Processing plants manufacturing decisions
-                Decisions.manufac_proc_plant_dec = struct('POJ', nan, 'FCOJ', nan);
+                Decisions.manufac_proc_plant_dec =...
+                    struct('POJ', nan, 'FCOJ', nan);
                 for i = 1:length(plants_open)
                     Decisions.manufac_proc_plant_dec(1,i).POJ = % ORA into POJ
                     Decisions.manufac_proc_plant_dec(1,i).FCOJ = % ORA into FCOJ
@@ -201,8 +203,6 @@ classdef Decisions
                     end
                 end
                 
-                Decisions.ship_grove_dec = zeros(6, length(plants_open) + length(stor_open));
-                % Set these percentages manually %
                 
                 Decisions.demandGroveORA = zeros(6,12);
                 index1 = 0;
@@ -233,7 +233,7 @@ classdef Decisions
                             Decisions.ship_grove_dec(length(plants_open)+index2,month));
                     end
                 end
-                                
+                
                 % Finally, set the value of the decisions
                 for i = 1:6
                     for j = 1:12
@@ -242,26 +242,48 @@ classdef Decisions
                     end
                 end
                 
-                %  Manually set the multipliers equal to matrix
+                %  Set the multipliers equal to matrix
                 %  where each row is grove location (FLA, CAL, TEX, ARZ,
                 %  BRA, SPA respectively) and each column alternates
                 %  between being the "multiplier value" and the "price"
                 Decisions.quant_mult_dec = zeros(6,6);
+                mean_grove_prices = zeros(6,1);
+                stdev_grove_prices = zeros(6,1);
                 
-                % If i = geographic location
-                % Set price values
-                % yr.quant_mult_dec(i,2) = % price 1
-                % yr.quant_mult_dec(i,4) = % price 2
-                % yr.quant_mult_dec(i,6) = % price 3
+                for j = 1:6
+                    for i = 1:length(YearDataRecord)
+                        mean_grove_prices(j) = mean_grove_price(j) + ...
+                            mean(YearDataRecord(i).us_price_spot_res(j,:));
+                        stdev_grove_prices(j) = stdev_grove_prices(j) + ...
+                            var(YearDataRecord(i).us_price_spot_res(j,:));
+                    end
+                    mean_grove_prices(j) = mean_grove_prices(j)...
+                        /length(YearDataRecord);
+                    stdev_grove_prices(j) = sqrt(stdev_grove_prices(j)...
+                        /length(YearDataRecord));
+                end
                 
+                % These are the parameters to determine the price
+                % boundaries
+                phi1 = -1;
+                phi2 = 1;
+                phi3 = 3;
                 
+                for i = 1:6
+                    Decisions.quant_mult_dec(i,2) = mean_grove_prices(i)+...
+                        phi1*stdev_grove_prices(i);
+                    Decisions.quant_mult_dec(i,4) = mean_grove_prices(i)+...
+                        phi2*stdev_grove_prices(i);
+                    Decisions.quant_mult_dec(i,6) = mean_grove_prices(i)+...
+                        phi3*stdev_grove_prices(i);
+                end              
                 
-                % Set multipler values
-                % yr.quant_mult_dec(i,1) = % multipler if price < price 1
-                % yr.quant_mult_dec(i,3) = % multipler if price 1 < price < price 2
-                % yr.quant_mult_dec(i,5) = % multipler if price 2 < price < price 3
-                % Repeat for all locations i = FLA, CAL, TEX, ARZ,
-                %  BRA, SPA
+                % Set multipler values (for now manually set - could be tuned)
+                for i = 1:6
+                    Decisions.quant_mult_dec(i,1) = 1.2;
+                    Decisions.quant_mult_dec(i,3) = 1;
+                    Decisions.quant_mult_dec(i,5) = 0.8;
+                end
                 
                 %  Set the amount (in tons) of ORA futures to
                 %  purchase in each year from the year after the current to
