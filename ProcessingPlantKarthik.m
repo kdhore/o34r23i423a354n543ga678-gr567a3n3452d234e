@@ -94,27 +94,26 @@ classdef ProcessingPlantKarthik
                     end
                     i = i - 1;
                 end
+                % update the shipping schedule
+                for i = 1:1:5
+                    obj.shippingSchedule{i} = obj.shippingSchedule{i + 1};
+                end
                 % Update number of available tankers
                 cameHome = obj.shippingSchedule{1};
                 for i = 1:obj.stor_num
-                    obj.tankersAvailable = obj.tankersAvailable + cameHome{i}.Tankers;
+                    obj.tankersAvailable = obj.tankersAvailable + cameHome{i}.Tankers - obj.shippingSchedule{2}{i}.Tankers;
                 end
+            % If it isn't broken down...
+            else
                 % update the shipping schedule
                 for i = 1:1:5
                     obj.shippingSchedule{i} = obj.shippingSchedule{i + 1};
                 end
-                
-            % If it isn't broken down...
-            else
                 % Update number of available tankers
                 cameHome = obj.shippingSchedule{1};
                 for i = 1:obj.stor_num    
-                    obj.tankersAvailable = obj.tankersAvailable + cameHome{i}.Tankers;
-                end
-                % update the shipping schedule
-                for i = 1:1:5
-                    obj.shippingSchedule{i} = obj.shippingSchedule{i + 1};
-                end
+                    obj.tankersAvailable = obj.tankersAvailable + cameHome{i}.Tankers - obj.shippingSchedule{2}{i}.Tankers;
+                end                
                 obj.poj = obj.percentPOJ*sum(obj.ora(1:4))/100.0;
                 %pojC = poj*pp.pojCost;
 				obj.fcoj = obj.percentFCOJ*sum(obj.ora(1:4))/100.0;
@@ -130,36 +129,37 @@ classdef ProcessingPlantKarthik
                         obj.shippingSchedule{3}{j}.FCOJ_1Week = stor_percentFCOJ*0.01*obj.fcoj;
                         obj.shippingSchedule{3}{j}.Tankers = ceil((stor_percentPOJ*0.01*obj.poj + stor_percentFCOJ*0.01*obj.fcoj)/30);
                         obj.shipped_out_cost_tank = obj.shipped_out_cost_tank + 36*obj.shippingSchedule{3}{j}.Tankers*findPlant2StorageDist(char(plantNamesInUse(obj.index)),char(storageNamesInUse(storage_open(j))));
-                        obj.tankersAvailable = obj.tankersAvailable - obj.shippingSchedule{3}{j}.Tankers;
                         obj.tankersHoldC = obj.tankersAvailable*obj.tankerCost;
+                        
                     end 
                 else
                     sent = 0; j = 1;
                     % Allocate as much as possible to tankers
                     %oneWeek = obj.shippingSchedule{3};
-                    while obj.tankersAvailable > 0       
+                    temp_tankers = obj.tankersAvailable;
+                    while temp_tankers > 0       
                         stor = storage_open(j);
                         stor_percentPOJ = decisions.ship_proc_plant_storage_dec(stor, obj.index).POJ;
                         stor_percentFCOJ = decisions.ship_proc_plant_storage_dec(stor, obj.index).FCOJ;
-                        if (stor_percentPOJ*0.01*obj.poj + stor_percentFCOJ*0.01*obj.fcoj) < obj.tankersAvailable*30
+                        if (stor_percentPOJ*0.01*obj.poj + stor_percentFCOJ*0.01*obj.fcoj) < temp_tankers*30
                            obj.shippingSchedule{3}{j}.POJ_1Week = stor_percentPOJ*0.01*obj.poj;
                             obj.shippingSchedule{3}{j}.FCOJ_1Week = stor_percentFCOJ*0.01*obj.fcoj;
                             obj.shippingSchedule{3}{j}.Tankers = ceil((stor_percentPOJ*0.01*obj.poj + stor_percentFCOJ*0.01*obj.fcoj)/30);
                             obj.shipped_out_cost_tank = obj.shipped_out_cost_tank + 36*obj.shippingSchedule{3}{j}.Tankers*findPlant2StorageDist(char(plantNamesInUse(obj.index)),char(storageNamesInUse(storage_open(j))));
-                            obj.tankersAvailable = obj.tankersAvailable - obj.shippingSchedule{3}{j}.Tankers;
+                            temp_tankers = temp_tankers - obj.shippingSchedule{3}{j}.Tankers;
                             sent = sent + stor_percentPOJ*0.01*obj.poj + stor_percentFCOJ*0.01*obj.fcoj;
                             j = j + 1;
                         else
-                            tankerAmount = obj.tankersAvailable*30;
-                            obj.shipped_out_cost_tank = obj.shipped_out_cost_tank + 36*obj.tankersAvailable*findPlant2StorageDist(char(plantNamesInUse(obj.index)),char(storageNamesInUse(storage_open(j))));
+                            tankerAmount = temp_tankers*30;
+                            obj.shipped_out_cost_tank = obj.shipped_out_cost_tank + 36*temp_tankers*findPlant2StorageDist(char(plantNamesInUse(obj.index)),char(storageNamesInUse(storage_open(j))));
                             POJsentviaTanker = (stor_percentPOJ*0.01*obj.poj)/((stor_percentPOJ*0.01*obj.poj) + (stor_percentFCOJ*0.01*obj.fcoj))*tankerAmount;
                             FCOJsentviaTanker = (stor_percentFCOJ*0.01*obj.fcoj)/((stor_percentPOJ*0.01*obj.poj) + (stor_percentFCOJ*0.01*obj.fcoj))*tankerAmount;
                             obj.shippingSchedule{3}{j}.POJ_1Week = POJsentviaTanker;
                             obj.shippingSchedule{3}{j}.FCOJ_1Week = FCOJsentviaTanker;
                             obj.shippingSchedule{3}{j}.Tankers = ceil((POJsentviaTanker + FCOJsentviaTanker)/30);
-                            obj.tankersAvailable = obj.tankersAvailable - obj.shippingSchedule{3}{j}.Tankers;
+                            temp_tankers = temp_tankers - obj.shippingSchedule{3}{j}.Tankers;
                             POJlefttobeSent = stor_percentPOJ*0.01*obj.poj - POJsentviaTanker;
-                            FCOJlefttobeSent = stor_percentFCOJ*0.01*obj.fcoj - POJsentviaTanker;
+                            FCOJlefttobeSent = stor_percentFCOJ*0.01*obj.fcoj - FCOJsentviaTanker;
                             distance = findPlant2StorageDist(char(plantNamesInUse(obj.index)),char(storageNamesInUse(storage_open(j))));
                             obj.shipped_out_cost_carrier = obj.shipped_out_cost_carrier + 0.65*(FCOJlefttobeSent+POJlefttobeSent)*distance;
                             if distance < 2000

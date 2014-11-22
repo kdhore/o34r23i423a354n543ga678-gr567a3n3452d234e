@@ -174,6 +174,27 @@ transCostfromGroves_ORA = sum(sum(transCost_fromGroves));
              breakdown = 0;
          end
          breakdown = 0;
+         if i == 14 && j ==2
+             breakdown = 1;
+         end
+         if i == 17 && j ==2
+             breakdown = 1;
+         end
+         if i == 48 && j ==2
+             breakdown = 1;
+         end
+         if i == 43 && j == 1
+             breakdown = 1;
+         end
+         if i ==8 && j == 3 
+             breakdown = 1;
+         end
+         if i ==39 && j == 3 
+             breakdown = 1;
+         end
+         if i ==24 && j == 3 
+             breakdown = 1;
+         end
          proc_plants{j} = proc_plants{j}.iterateWeek(sum_shipped, decisions, breakdown, storage_open);
          POJ_man(j,i) = proc_plants{j}.poj;
          FCOJ_man(j,i) = proc_plants{j}.fcoj;
