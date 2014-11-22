@@ -1,16 +1,25 @@
 classdef storageFacility2 < handle
 
 	properties
-		capacity = 0;
+		capacity;
 		inventory = cell(4,1);
-		reconPercent = 0;
-		reconC = 0;
-		holdC = 0;
+		reconPercent;
+		reconC;
+		holdC;
         proc_plant;
-        cities;
+        %cities;
         index;
         proc_num;
         rp;
+        ship_out;
+        sold;
+        toss_out;
+        rotten;
+        excessDemand; 
+        ROJman; 
+        holdCost; 
+        revReceived; 
+        transCost;
 	end
 
 	methods
@@ -34,10 +43,18 @@ classdef storageFacility2 < handle
 			sf.capacity = cap;
 			sf.reconC = rc;
 			sf.holdC = hc;
-            
 			sf.reconPercent = rp;
             sf.index = index;
             sf.proc_num = proc_num;
+            sf.ship_out = cell(4,1);
+            sf.sold = zeros(4,1);
+            sf.toss_out = cell(4,1);
+            sf.rotten = zeros(4,1);
+            sf.excessDemand = 0; 
+            sf.ROJman = 0; 
+            sf.holdCost = 0; 
+            sf.revReceived = zeros(4,1); 
+            sf.transCost = 0;
 		end
 
 		function setReconPercent(sf, newPercent)
@@ -76,25 +93,23 @@ classdef storageFacility2 < handle
 		% demand is how much demand is unfulled
 		% reconCost is cost spent reconstituting
 		% holdCost is the cost of holding inventory
-		function [ship_out, sold, toss_out, rotten, demand, ROJman, holdCost, revReceived] = iterateWeek(sf, sum_shipped, futures_per_week_FCOJ,proc_plants, big_D, big_P, time, ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, cities)
+		function sf = iterateWeek(sf, sum_shipped, futures_per_week_FCOJ,proc_plants, big_D, big_P, time, ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, cities, sim_index)
 			% initialize return variables
-			ship_out = cell(4,1);
-			sold = zeros(4,1);
-			toss_out = cell(4,1);
-			rotten = zeros(4,1);
+			sf.sold = zeros(4,1);
+			sf.rotten = zeros(4,1);
 
-			toss_out{1} = zeros(4,1);
-			toss_out{2} = zeros(8,1);
-			toss_out{3} = zeros(12,1);
-			toss_out{4} = zeros(48,1);
+			sf.toss_out{1} = zeros(4,1);
+			sf.toss_out{2} = zeros(8,1);
+			sf.toss_out{3} = zeros(12,1);
+			sf.toss_out{4} = zeros(48,1);
 
-			ship_out{1} = zeros(4,1);
-			ship_out{2} = zeros(8,1);
-			ship_out{3} = zeros(12,1);
-			ship_out{4} = zeros(48,1);
+			sf.ship_out{1} = zeros(4,1);
+			sf.ship_out{2} = zeros(8,1);
+			sf.ship_out{3} = zeros(12,1);
+			sf.ship_out{4} = zeros(48,1);
 
 			avails = zeros(4,1);
-            revReceived = zeros(4,1);
+            sf.revReceived = zeros(4,1);
             
 			% age inventory 1 week
 			for i=1:length(sf.inventory)
@@ -103,7 +118,7 @@ classdef storageFacility2 < handle
 					sf.inventory{i}(j) = sf.inventory{i}(j-1);
 				end
 				sf.inventory{i}(1) = 0;
-				rotten(i) = sf.inventory{i}(m);
+				sf.rotten(i) = sf.inventory{i}(m);
             end
             
             % add any reconstituted OJ in last week to inventory (it's okay
@@ -111,11 +126,11 @@ classdef storageFacility2 < handle
             % week's rotten inventory wouldn't have been reconstituted, but
             % means we include this week's rotten inventory in the total
             % FCOJ that can be reconstituted)
-			ROJman = sum(sf.inventory{4}(1:length(sf.inventory{4}))) * sf.reconPercent(ceil(time/4));
-            sf.inventory{3}(1) = ROJman;
+			sf.ROJman = sum(sf.inventory{4}(1:length(sf.inventory{4}))) * sf.reconPercent(ceil(time/4));
+            sf.inventory{3}(1) = sf.ROJman;
 			%reconCost = FCOJRecon * sf.reconC;
 			for i=2:length(sf.inventory{4})
-				sf.inventory{4}(i) = sf.inventory{4}(i)*(1-sf.reconPercent);
+				sf.inventory{4}(i) = sf.inventory{4}(i)*(1-sf.reconPercent(ceil(time/4)));
             end   
             
 			% add in new inventory
@@ -123,17 +138,17 @@ classdef storageFacility2 < handle
                 pp = proc_plants{i};
                 newInv = pp.shippingSchedule{2};
                 % update POJ inventories
-                sf.inventory{2}(1) = sf.inventory{2}(1) + newInv{sf.index}.POJ_1week;
-                sf.inventory{2}(2) = sf.inventory{2}(2) + newInv{sf.index}.POJ_2week;
-                sf.inventory{2}(3) = sf.inventory{2}(3) + newInv{sf.index}.POJ_3week;
-                sf.inventory{2}(4) = sf.inventory{2}(4) + newInv{sf.index}.POJ_4week;
+                sf.inventory{2}(1) = sf.inventory{2}(1) + newInv{sim_index}.POJ_1Week;
+                sf.inventory{2}(2) = sf.inventory{2}(2) + newInv{sim_index}.POJ_2Week;
+                sf.inventory{2}(3) = sf.inventory{2}(3) + newInv{sim_index}.POJ_3Week;
+                sf.inventory{2}(4) = sf.inventory{2}(4) + newInv{sim_index}.POJ_4Week;
                 
                 % update FCOJ inventories
-                sf.inventory{4}(1) = sf.inventory{2}(1) + newInv{sf.index}.FCOJ_1week + ...
+                sf.inventory{4}(1) = sf.inventory{2}(1) + newInv{sim_index}.FCOJ_1Week + ...
                     futures_per_week_FCOJ;
-                sf.inventory{4}(2) = sf.inventory{2}(2) + newInv{sf.index}.FCOJ_2week;
-                sf.inventory{4}(3) = sf.inventory{2}(3) + newInv{sf.index}.FCOJ_3week;
-                sf.inventory{4}(4) = sf.inventory{2}(4) + newInv{sf.index}.FCOJ_4week;
+                sf.inventory{4}(2) = sf.inventory{2}(2) + newInv{sim_index}.FCOJ_2Week;
+                sf.inventory{4}(3) = sf.inventory{2}(3) + newInv{sim_index}.FCOJ_3Week;
+                sf.inventory{4}(4) = sf.inventory{2}(4) + newInv{sim_index}.FCOJ_4Week;
             end
             
 			sf.inventory{1}(1) = sf.inventory{1}(1) + sum_shipped; 
@@ -162,20 +177,20 @@ classdef storageFacility2 < handle
 				if (i < 5)
 					avail = sf.inventory{1}(lo - i) + sf.inventory{2}(lp - i) + sf.inventory{3}(lr - i) + sf.inventory{4}(lf - i);
 					if (avail <= overCap) 
-						toss_out{1}(lo - i) = sf.inventory{1}(lo - i);
-						toss_out{2}(lp - i) = sf.inventory{2}(lp - i);
-						toss_out{3}(lr - i) = sf.inventory{3}(lr - i);
-						toss_out{4}(lf - i) = sf.inventory{4}(lf - i);
+						sf.toss_out{1}(lo - i) = sf.inventory{1}(lo - i);
+						sf.toss_out{2}(lp - i) = sf.inventory{2}(lp - i);
+						sf.toss_out{3}(lr - i) = sf.inventory{3}(lr - i);
+						sf.toss_out{4}(lf - i) = sf.inventory{4}(lf - i);
 						sf.inventory{1}(lo - i) = 0;
 						sf.inventory{2}(lp - i) = 0;
 						sf.inventory{3}(lr - i) = 0;
 						sf.inventory{4}(lf - i) = 0;
 						overCap = overCap - avail;
 					else
-						toss_out{1}(lo - i) = overCap*sf.inventory{1}(lo - i)/avail;
-						toss_out{2}(lp - i) = overCap*sf.inventory{2}(lp - i)/avail;
-						toss_out{3}(lr - i) = overCap*sf.inventory{3}(lr - i)/avail;
-						toss_out{4}(lf - i) = overCap*sf.inventory{4}(lf - i)/avail;
+						sf.toss_out{1}(lo - i) = overCap*sf.inventory{1}(lo - i)/avail;
+						sf.toss_out{2}(lp - i) = overCap*sf.inventory{2}(lp - i)/avail;
+						sf.toss_out{3}(lr - i) = overCap*sf.inventory{3}(lr - i)/avail;
+						sf.toss_out{4}(lf - i) = overCap*sf.inventory{4}(lf - i)/avail;
 						sf.inventory{1}(lo - i) = sf.inventory{1}(lo - i) - overCap*sf.inventory{1}(lo - i)/avail;
 						sf.inventory{2}(lp - i) = sf.inventory{2}(lp - i) - overCap*sf.inventory{2}(lp - i)/avail;
 						sf.inventory{3}(lr - i) = sf.inventory{3}(lr - i) - overCap*sf.inventory{3}(lr - i)/avail;
@@ -186,17 +201,17 @@ classdef storageFacility2 < handle
 				elseif (i < 9)
 					avail = sf.inventory{2}(lp - i) + sf.inventory{3}(lr - i) + sf.inventory{4}(lf - i);
 					if (avail <= overCap)
-						toss_out{2}(lp - i) = sf.inventory{2}(lp - i);
-						toss_out{3}(lr - i) = sf.inventory{3}(lr - i);
-						toss_out{4}(lf - i) = sf.inventory{4}(lf - i);
+						sf.toss_out{2}(lp - i) = sf.inventory{2}(lp - i);
+						sf.toss_out{3}(lr - i) = sf.inventory{3}(lr - i);
+						sf.toss_out{4}(lf - i) = sf.inventory{4}(lf - i);
 						sf.inventory{2}(lp - i) = 0;
 						sf.inventory{3}(lr - i) = 0;
 						sf.inventory{4}(lf - i) = 0;
 						overCap = overCap - avail;
 					else
-						toss_out{2}(lp - i) = overCap*sf.inventory{2}(lp - i)/avail;
-						toss_out{3}(lr - i) = overCap*sf.inventory{3}(lr - i)/avail;
-						toss_out{4}(lf - i) = overCap*sf.inventory{4}(lf - i)/avail;
+						sf.toss_out{2}(lp - i) = overCap*sf.inventory{2}(lp - i)/avail;
+						sf.toss_out{3}(lr - i) = overCap*sf.inventory{3}(lr - i)/avail;
+						sf.toss_out{4}(lf - i) = overCap*sf.inventory{4}(lf - i)/avail;
 						sf.inventory{2}(lp - i) = sf.inventory{2}(lp - i) - overCap*sf.inventory{2}(lp - i)/avail;
 						sf.inventory{3}(lr - i) = sf.inventory{3}(lr - i) - overCap*sf.inventory{4}(lr - i)/avail;
 						sf.inventory{4}(lf - i) = sf.inventory{4}(lf - i) - overCap*sf.inventory{4}(lf - i)/avail;
@@ -206,28 +221,28 @@ classdef storageFacility2 < handle
 				elseif (i < 13)
 					avail = sf.inventory{3}(lr - i) + sf.inventory{4}(lf - i);
 					if (avail <= overCap)
-						toss_out{3}(lr - i) = sf.inventory{3}(lr - i);
-						toss_out{4}(lf - i) = sf.inventory{4}(lf - i);
+						sf.toss_out{3}(lr - i) = sf.inventory{3}(lr - i);
+						sf.toss_out{4}(lf - i) = sf.inventory{4}(lf - i);
 						sf.inventory{3}(lr - i) = 0;
 						sf.inventory{4}(lf - i) = 0;
 						overCap = overCap - avail;
 					else
 						sf.inventory{3}(lr - i) = sf.inventory{3}(lr - i) - overCap*sf.inventory{3}(lr - i)/avail;
 						sf.inventory{4}(lf - i) = sf.inventory{4}(lf - i) - overCap*sf.inventory{4}(lf - i)/avail;
-						toss_out{3}(lr - i) = overCap*sf.inventory{3}(lr - i)/avail;
-						toss_out{4}(lf - i) = overCap*sf.inventory{4}(lf - i)/avail;
+						sf.toss_out{3}(lr - i) = overCap*sf.inventory{3}(lr - i)/avail;
+						sf.toss_out{4}(lf - i) = overCap*sf.inventory{4}(lf - i)/avail;
 						overCap = 0;
 					end
 
 				elseif (i < 49)
 					avail = sf.inventory{4}(lf - i);
 					if (avail <= overCap)
-						toss_out{4}(lf - i) = sf.inventory{4}(lf - i);
+						sf.toss_out{4}(lf - i) = sf.inventory{4}(lf - i);
 						sf.inventory{4}(lf - i) = 0;
 						overCap = overCap - avail;
 					else
 						sf.inventory{4}(lf - i) = sf.inventory{4}(lf - i) - overCap;
-						toss_out{4}(lf - i) = overCap*sf.inventory{4}(lf - i)/avail;
+						sf.toss_out{4}(lf - i) = overCap*sf.inventory{4}(lf - i)/avail;
 						overCap = 0;
 					end
 
@@ -264,30 +279,32 @@ classdef storageFacility2 < handle
 %             
             
             demand = big_D;
+            sf.transCost = 0;
             for i=1:4
-                j = length(sf.inventory{i})-1;
                 for k=1:length(cities)
+                    j = length(sf.inventory{i})-1;
                     while ((demand(k,i) > 0) && (sum(sf.inventory{i}(1:j))) > 0)
                         if (demand(k,i) > sf.inventory{i}(j))
-                            ship_out{i}(j) = sf.inventory{i}(j);
-                            transCost = transCost + ship_out{i}(j)*cities{k,3}*0.
-                            revReceived(i) = revReceived(i) + ship_out{i}(j)*big_P(k,i);
+                            sf.ship_out{i}(j) = sf.ship_out{i}(j) + sf.inventory{i}(j);
+                            sf.transCost = sf.transCost + sf.ship_out{i}(j)*cities{k,3}*0.22;
+                            sf.revReceived(i) = sf.revReceived(i) + sf.ship_out{i}(j)*big_P(k,i);
                             demand(k,i) = demand(k,i) - sf.inventory{i}(j);
                             sf.inventory{i}(j) = 0;
                         else
-                            ship_out{i}(j) = demand(k,i);
-                            revReceived(i) = revReceived(i) + ship_out{i}(j)*big_P(k,i);
+                            sf.ship_out{i}(j) = sf.ship_out{i}(j) + demand(k,i);
+                            sf.transCost = sf.transCost + sf.ship_out{i}(j)*cities{k,3}*0.22;
+                            sf.revReceived(i) = sf.revReceived(i) + sf.ship_out{i}(j)*big_P(k,i);
                             sf.inventory{i}(j) = sf.inventory{i}(j) - demand(k,i);
                             demand(k,i) = 0;
                         end
                         j = j-1;
                     end
                 end
-                sold(i) = sum(ship_out{i});
+                sf.sold(i) = sum(sf.ship_out{i});
             end
-            
+            sf.excessDemand = demand;
             % get holding cost
-			holdCost = (sum(avails) - sum(sold))*sf.holdC;
+			sf.holdCost = (sum(avails) - sum(sf.sold))*sf.holdC;
 		end
 	end
 end
