@@ -1,4 +1,4 @@
-classdef OJGame 
+classdef OJGame
     % This class holds all the information of the current state of our
     % orange juice game.
     %   The purpose of this class is to contain information about:
@@ -70,7 +70,7 @@ classdef OJGame
             for (i=2:10)
                 oj.proc_plant_inv(i) = test_1;
             end
-            test = struct('ORA', nan, 'POJ', nan, 'FCOJ', nan, 'ROJ', nan);
+            test = struct('ORA', nan, 'POJ', nan, 'ROJ', nan, 'FCOJ', nan);
             oj.storage_inv = test;
             for (i=2:71)
                 oj.storage_inv(i) = test;
@@ -80,8 +80,8 @@ classdef OJGame
                 index = storage_open(i);
                 oj.storage_inv(index).ORA = zeros(5,1);
                 oj.storage_inv(index).POJ = zeros(9,1);
-                oj.storage_inv(index).FCOJ = zeros(13,1);
-                oj.storage_inv(index).ROJ = zeros(49,1);
+                oj.storage_inv(index).ROJ = zeros(13,1);
+                oj.storage_inv(index).FCOJ = zeros(49,1);
             end
             [~, ~, oj.ora_futures_current] = xlsread(filename,'raw_materials','D30:M30');
             oj.ora_futures_current = cell2mat(cellNaNReplace(oj.ora_futures_current,0));
@@ -126,10 +126,10 @@ classdef OJGame
                 obj.storage_inv(stor_open(i)).ORA = inventory_ora(1:5,49);
                 inventory_poj = YearData.storage_res(stor_name).POJ_Inv;
                 obj.storage_inv(stor_open(i)).POJ = inventory_poj(1:9,49);
-                inventory_fcoj = YearData.storage_res(stor_name).FCOJ_Inv;
-                obj.storage_inv(stor_open(i)).FCOJ = inventory_fcoj(1:49,49);
                 inventory_roj = YearData.storage_res(stor_name).ROJ_Inv;
                 obj.storage_inv(stor_open(i)).ROJ = inventory_roj(1:13,49);
+                inventory_fcoj = YearData.storage_res(stor_name).FCOJ_Inv;
+                obj.storage_inv(stor_open(i)).FCOJ = inventory_fcoj(1:49,49);
             end
             obj.futures_years = obj.futures_years + 1;
             obj.ora_futures_current = YearData.future_mark_dec_ORA_current1;
