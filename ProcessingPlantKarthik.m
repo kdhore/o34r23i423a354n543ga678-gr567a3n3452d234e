@@ -103,6 +103,7 @@ classdef ProcessingPlantKarthik
                 for i = 1:obj.stor_num
                     obj.tankersAvailable = obj.tankersAvailable + cameHome{i}.Tankers - obj.shippingSchedule{2}{i}.Tankers;
                 end
+                obj.tankersHoldC = obj.tankersAvailable*obj.tankerCost;
             % If it isn't broken down...
             else
                 % update the shipping schedule
@@ -113,7 +114,8 @@ classdef ProcessingPlantKarthik
                 cameHome = obj.shippingSchedule{1};
                 for i = 1:obj.stor_num    
                     obj.tankersAvailable = obj.tankersAvailable + cameHome{i}.Tankers - obj.shippingSchedule{2}{i}.Tankers;
-                end                
+                end
+                obj.tankersHoldC = obj.tankersAvailable*obj.tankerCost;
                 obj.poj = obj.percentPOJ*sum(obj.ora(1:4))/100.0;
                 %pojC = poj*pp.pojCost;
 				obj.fcoj = obj.percentFCOJ*sum(obj.ora(1:4))/100.0;
@@ -129,7 +131,6 @@ classdef ProcessingPlantKarthik
                         obj.shippingSchedule{3}{j}.FCOJ_1Week = stor_percentFCOJ*0.01*obj.fcoj;
                         obj.shippingSchedule{3}{j}.Tankers = ceil((stor_percentPOJ*0.01*obj.poj + stor_percentFCOJ*0.01*obj.fcoj)/30);
                         obj.shipped_out_cost_tank = obj.shipped_out_cost_tank + 36*obj.shippingSchedule{3}{j}.Tankers*findPlant2StorageDist(char(plantNamesInUse(obj.index)),char(storageNamesInUse(storage_open(j))));
-                        obj.tankersHoldC = obj.tankersAvailable*obj.tankerCost;
                         
                     end 
                 else

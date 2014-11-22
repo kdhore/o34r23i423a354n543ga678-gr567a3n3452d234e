@@ -7,6 +7,7 @@ classdef storageFacility2 < handle
 		reconC;
 		holdC;
         proc_plant;
+        roj_temp;
         %cities;
         index;
         proc_num;
@@ -55,6 +56,7 @@ classdef storageFacility2 < handle
             sf.holdCost = 0; 
             sf.revReceived = zeros(4,1); 
             sf.transCost = 0;
+            sf.roj_temp = zeros(48,1);
 		end
 
 		function setReconPercent(sf, newPercent)
@@ -111,28 +113,6 @@ classdef storageFacility2 < handle
 			avails = zeros(4,1);
             sf.revReceived = zeros(4,1);
             
-			% age inventory 1 week
-			for i=1:length(sf.inventory)
-				m = length(sf.inventory{i});
-				for j=m:-1:2
-					sf.inventory{i}(j) = sf.inventory{i}(j-1);
-				end
-				sf.inventory{i}(1) = 0;
-				sf.rotten(i) = sf.inventory{i}(m);
-            end
-            
-            % add any reconstituted OJ in last week to inventory (it's okay
-            % that we have already aged the inventory one week - last
-            % week's rotten inventory wouldn't have been reconstituted, but
-            % means we include this week's rotten inventory in the total
-            % FCOJ that can be reconstituted)
-			sf.ROJman = sum(sf.inventory{4}(1:length(sf.inventory{4}))) * sf.reconPercent(ceil(time/4));
-            sf.inventory{3}(1) = sf.ROJman;
-			%reconCost = FCOJRecon * sf.reconC;
-			for i=2:length(sf.inventory{4})
-				sf.inventory{4}(i) = sf.inventory{4}(i)*(1-sf.reconPercent(ceil(time/4)));
-            end   
-            
 			% add in new inventory
             for i = 1:sf.proc_num
                 pp = proc_plants{i};
@@ -151,7 +131,12 @@ classdef storageFacility2 < handle
                 sf.inventory{4}(4) = sf.inventory{4}(4) + newInv{sim_index}.FCOJ_4Week;
             end
             
-			sf.inventory{1}(1) = sf.inventory{1}(1) + sum_shipped; 
+            for i = 2:length(sf.inventory{4})
+                sf.inventory{4}(i) = sf.inventory{4}(i) - sf.roj_temp(i-1);
+            end
+            
+			sf.inventory{1}(1) = sf.inventory{1}(1) + sum_shipped;
+            sf.inventory{3}(1) = sf.inventory{3}(1) + sum(sf.roj_temp);
             
 			% get how much of each product is available
 			for i=1:length(sf.inventory)
@@ -250,11 +235,18 @@ classdef storageFacility2 < handle
 					a = 'debugging needed'
 				end
 				i = i + 1;
-            end         
+            end     
+             
+            sf.ROJman = sf.roj_temp;
+             % store in temp variable what we make from this week FCOJ
+             for i = 1:length(sf.roj_temp)
+                 sf.roj_temp(i) = sf.inventory{4}(i)* sf.reconPercent(ceil(time/4));
+             end
             
+            % satisfy demand from FCOJ - ROJ
             demand = big_D;
             sf.transCost = 0;
-            for i=1:4
+            for i=1:3
                 for k=1:length(cities)
                     j = length(sf.inventory{i})-1;
                     while ((demand(k,i) > 0) && (sum(sf.inventory{i}(1:j))) > 0)
@@ -276,9 +268,44 @@ classdef storageFacility2 < handle
                 end
                 sf.sold(i) = sum(sf.ship_out{i});
             end
+            
+            i = 4;
+            for k=1:length(cities)
+                j = length(sf.inventory{i})-1;
+                    while ((demand(k,i) > 0) && (sum((sf.inventory{i}(1:j)))-sum(sf.roj_temp)) > 0)
+                        if (demand(k,i) > sf.inventory{i}(j)-sf.roj_temp(j))
+                            sf.ship_out{i}(j) = sf.ship_out{i}(j) + sf.inventory{i}(j)-sf.roj_temp(j);
+                            demand(k,i) = demand(k,i) - (sf.inventory{i}(j)-sf.roj_temp(j));
+                            sf.transCost = sf.transCost + (sf.inventory{i}(j)-sf.roj_temp(j))*cities{k,3}*0.22;
+                            sf.revReceived(i) = sf.revReceived(i) + (sf.inventory{i}(j)-sf.roj_temp(j))*big_P(k,i)*2000;
+                            sf.inventory{i}(j) = 0;
+                        else
+                            sf.ship_out{i}(j) = sf.ship_out{i}(j) + demand(k,i);
+                            sf.transCost = sf.transCost + demand(k,i)*cities{k,3}*1.2;
+                            sf.revReceived(i) = sf.revReceived(i) + demand(k,i)*big_P(k,i)*2000;
+                            sf.inventory{i}(j) = sf.inventory{i}(j) - demand(k,i);
+                            demand(k,i) = 0;
+                        end
+                        j = j-1;
+                    end
+                end
+            sf.sold(4) = sum(sf.ship_out{4});
+                
             sf.excessDemand = demand;
             % get holding cost
 			sf.holdCost = (sum(avails) - sum(sf.sold))*sf.holdC;
+            
+            % age inventory 1 week
+			for i=1:length(sf.inventory)
+				m = length(sf.inventory{i});
+				for j=m:-1:2
+					sf.inventory{i}(j) = sf.inventory{i}(j-1);
+				end
+				sf.inventory{i}(1) = 0;
+				sf.rotten(i) = sf.inventory{i}(m);
+            end
+            
+            
 		end
 	end
 end

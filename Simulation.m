@@ -173,28 +173,43 @@ transCostfromGroves_ORA = sum(sum(transCost_fromGroves));
          else
              breakdown = 0;
          end
-         breakdown = 0;
-         if i == 14 && j ==2
-             breakdown = 1;
-         end
-         if i == 17 && j ==2
-             breakdown = 1;
-         end
-         if i == 48 && j ==2
-             breakdown = 1;
-         end
-         if i == 43 && j == 1
-             breakdown = 1;
-         end
-         if i ==8 && j == 3 
-             breakdown = 1;
-         end
-         if i ==39 && j == 3 
-             breakdown = 1;
-         end
-         if i ==24 && j == 3 
-             breakdown = 1;
-         end
+         %breakdown = 0;
+%          if i == 14 && j ==2
+%              breakdown = 1;
+%          end
+%          if i == 17 && j ==2
+%              breakdown = 1;
+%          end
+%          if i == 48 && j ==2
+%              breakdown = 1;
+%          end
+%          if i == 43 && j == 1
+%              breakdown = 1;
+%          end
+%          if i ==8 && j == 3 
+%              breakdown = 1;
+%          end
+%          if i ==39 && j == 3 
+%              breakdown = 1;
+%          end
+%          if i ==24 && j == 3 
+%              breakdown = 1;
+%          end
+%          if i == 17 && j == 2
+%              sum_shipped = 849.1962;
+%          end
+%          if i == 19 && j == 2
+%              sum_shipped = 851.0874;
+%          end
+%          if i == 27 && j == 2
+%              sum_shipped = 1219.53;
+%          end
+%          if i == 29 && j == 2
+%              sum_shipped = 860.365;
+%          end
+%          if i == 18 && j == 2
+%              sum_shipped = 850.143;
+%          end
          proc_plants{j} = proc_plants{j}.iterateWeek(sum_shipped, decisions, breakdown, storage_open);
          POJ_man(j,i) = proc_plants{j}.poj;
          FCOJ_man(j,i) = proc_plants{j}.fcoj;
