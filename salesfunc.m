@@ -50,7 +50,11 @@ for x = 1:12 %for each month
             total = sum(sum(Data(90:100,startIndex:startIndex+3)));
             
         end
-        percentageMonths(cities,x) = sumMonthCity/total;
+        if total ~= 0
+            percentageMonths(cities,x) = sumMonthCity/total;
+        else
+            percentageMonths(cities,x) = 0;
+        end
     end
 end
 
@@ -85,7 +89,11 @@ for cities = 1:100 %for each city
         total = sum(sum(Data(90:100,1:48)));
         
     end
-    percentageYears(cities,1) = sumYearCity/total;
+    if total ~= 0
+        percentageYears(cities,1) = sumYearCity/total;
+    else
+        percentageYears(cities,1) = 0;  
+    end
 end
 
 end

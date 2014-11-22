@@ -188,8 +188,9 @@ transCostfromGroves_ORA = sum(sum(transCost_fromGroves));
          monthly_amt_futures_shipped_FCOJ = futures_arr_FCOJ*fraction_shipped_futures;
          indicies = strcmp(char(storageNamesInUse(storage_open(j))),cities_match_storage(:,2));
          cities = cities_match_storage(indicies,:);
-         [transport2cities_cost(i), big_D, big_P] = drawDemand(decisions,cities,i, demand_city_ORA, demand_city_POJ, demand_city_ROJ, demand_city_FCOJ); % will need to give it a price, and do this for all products
-         [~, sold(:,i), toss_outStor(:,i), rottenStor(:,i), excessDemand, ROJ_man(i), holdCost(i), revReceived(:,i)] = storage{j}.iterateWeek(sum_shipped, (monthly_amt_futures_shipped_FCOJ(ceil(i/4)))/4, proc_plants, big_D, big_P, i);
+         name = char(storageNamesInUse(storage_open(j)));
+         [ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, transport2cities_cost(i), big_D, big_P] = drawDemand(decisions,cities,i, demand_city_ORA, demand_city_POJ, demand_city_ROJ, demand_city_FCOJ, decisions.storage_res(name)); % will need to give it a price, and do this for all products
+         [~, sold(:,i), toss_outStor(:,i), rottenStor(:,i), excessDemand, ROJ_man(i), holdCost(i), revReceived(:,i)] = storage{j}.iterateWeek(sum_shipped, (monthly_amt_futures_shipped_FCOJ(ceil(i/4)))/4, proc_plants, big_D, big_P, i, ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand);
      end
  end
  totPOJ_man = sum(POJ_man); 

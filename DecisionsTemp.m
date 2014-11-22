@@ -31,7 +31,7 @@ classdef DecisionsTemp < handle
         pricing_FCOJ_weekly_dec;
         pricing_ROJ_dec;
         pricing_ROJ_weekly_dec;
-        
+        storage_res;
     end
     
     methods
@@ -67,6 +67,7 @@ classdef DecisionsTemp < handle
         dec.pricing_FCOJ_weekly_dec = yrDataObj.pricing_FCOJ_weekly_dec;
         dec.pricing_ROJ_dec = yrDataObj.pricing_ROJ_dec;
         dec.pricing_ROJ_weekly_dec = yrDataObj.pricing_ROJ_weekly_dec;
+        dec.storage_res = yrDataObj.storage_res;
                
         end
     end
