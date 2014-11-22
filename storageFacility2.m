@@ -286,14 +286,14 @@ classdef storageFacility2 < handle
                     while ((demand(k,i) > 0) && (sum(sf.inventory{i}(1:j))) > 0)
                         if (demand(k,i) > sf.inventory{i}(j))
                             sf.ship_out{i}(j) = sf.ship_out{i}(j) + sf.inventory{i}(j);
-                            sf.transCost = sf.transCost + sf.ship_out{i}(j)*cities{k,3}*0.22;
-                            sf.revReceived(i) = sf.revReceived(i) + sf.ship_out{i}(j)*big_P(k,i);
                             demand(k,i) = demand(k,i) - sf.inventory{i}(j);
+                            sf.transCost = sf.transCost + sf.inventory{i}(j)*cities{k,3}*0.22;
+                            sf.revReceived(i) = sf.revReceived(i) + sf.inventory{i}(j)*big_P(k,i);
                             sf.inventory{i}(j) = 0;
                         else
                             sf.ship_out{i}(j) = sf.ship_out{i}(j) + demand(k,i);
-                            sf.transCost = sf.transCost + sf.ship_out{i}(j)*cities{k,3}*0.22;
-                            sf.revReceived(i) = sf.revReceived(i) + sf.ship_out{i}(j)*big_P(k,i);
+                            sf.transCost = sf.transCost + demand(k,i)*cities{k,3}*1.2;
+                            sf.revReceived(i) = sf.revReceived(i) + demand(k,i)*big_P(k,i);
                             sf.inventory{i}(j) = sf.inventory{i}(j) - demand(k,i);
                             demand(k,i) = 0;
                         end
