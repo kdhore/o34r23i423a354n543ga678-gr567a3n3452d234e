@@ -44,6 +44,13 @@ classdef ProcessingPlantKarthik
 			pp.fcojCost = fcojC;
             storage_schedule = cell(1, stor_num);
             pp.stor_num = stor_num;
+            pp.poj = 0;
+            pp.fcoj = 0;
+            pp.tankersHoldC = 0;
+            pp.shipped_out_cost_tank = 0;
+            pp.shipped_out_cost_carrier = 0;
+            pp.rotten = 0;
+            pp.throwaway = 0;
             for i = 1:stor_num
                 storage_schedule{i} = schedule;
             end
@@ -55,113 +62,115 @@ classdef ProcessingPlantKarthik
         % the breakdown parameter refers to whether it was broken down in
         % the previous week, so it did not produce any POJ or FCOJ for this
         % week
-        function pp  = iterateWeek(pp,sum_shipped, decisions, breakdown, storage_open)
-            pp.shipped_out_cost_tank = 0;
-            pp.shipped_out_cost_carrier = 0;
-            pp.poj = 0;
-            pp.fcoj = 0;
-            pp.tankersHoldC = 0;
+        function obj = iterateWeek(obj,sum_shipped, decisions, breakdown, storage_open)
+            obj.poj = 0;
+            obj.fcoj = 0;
+            obj.tankersHoldC = 0;
+            obj.shipped_out_cost_tank = 0;
+            obj.shipped_out_cost_carrier = 0;
+            obj.rotten = 0;
+            obj.throwaway = 0;
             %pojC = 0;
             %fcojC = 0;
 			% adding newly recieved products to inventory
             if breakdown == 1
                  % aging inventory
                 for i=5:-1:2
-                    pp.ora(i) = pp.ora(i-1);
+                    obj.ora(i) = obj.ora(i-1);
                 end
-                pp.ora(1) = sum_shipped;
-                pp.rotten = pp.ora(5);
-                pp.throwaway = max(sum(pp.ora(1:4))-pp.capacity,0);
-                over = pp.throwaway;
+                obj.ora(1) = sum_shipped;
+                obj.rotten = obj.ora(5);
+                obj.throwaway = max(sum(obj.ora(1:4))-obj.capacity,0);
+                over = obj.throwaway;
 			% tossing out anything over capacity in order of first to rot
                 i = 4;
                 while over > 0
-                    if pp.ora(i) > over
-                        pp.ora(i) = pp.ora(i) - over;
+                    if obj.ora(i) > over
+                        obj.ora(i) = obj.ora(i) - over;
                         over = 0;
                     else
-                        over = over - pp.ora(i);
-                        pp.ora(i) = 0;
+                        over = over - obj.ora(i);
+                        obj.ora(i) = 0;
                     end
                     i = i - 1;
                 end
                 % Update number of available tankers
-                cameHome = pp.shippingSchedule{1};
-                for i = 1:pp.stor_num
-                    pp.tankersAvailable = pp.tankersAvailable + cameHome{i}.Tankers;
+                cameHome = obj.shippingSchedule{1};
+                for i = 1:obj.stor_num
+                    obj.tankersAvailable = obj.tankersAvailable + cameHome{i}.Tankers;
                 end
                 % update the shipping schedule
                 for i = 1:1:5
-                    pp.shippingSchedule{i} = pp.shippingSchedule{i + 1};
+                    obj.shippingSchedule{i} = obj.shippingSchedule{i + 1};
                 end
                 
             % If it isn't broken down...
             else
                 % Update number of available tankers
-                cameHome = pp.shippingSchedule{1};
-                for i = 1:pp.stor_num    
-                    pp.tankersAvailable = pp.tankersAvailable + cameHome{i}.Tankers;
+                cameHome = obj.shippingSchedule{1};
+                for i = 1:obj.stor_num    
+                    obj.tankersAvailable = obj.tankersAvailable + cameHome{i}.Tankers;
                 end
                 % update the shipping schedule
                 for i = 1:1:5
-                    pp.shippingSchedule{i} = pp.shippingSchedule{i + 1};
+                    obj.shippingSchedule{i} = obj.shippingSchedule{i + 1};
                 end
-                pp.poj = pp.percentPOJ*sum(pp.ora(1:4))/100.0;
+                obj.poj = obj.percentPOJ*sum(obj.ora(1:4))/100.0;
                 %pojC = poj*pp.pojCost;
-				pp.fcoj = pp.percentFCOJ*sum(pp.ora(1:4))/100.0;
+				obj.fcoj = obj.percentFCOJ*sum(obj.ora(1:4))/100.0;
                 %fcojC = fcoj*pp.fcojCost;
-				pp.ora = zeros(5,1);
-                if (pp.poj+pp.fcoj) <= pp.tankersAvailable*30
-                    oneWeek = pp.shippingSchedule{3};            
-                    for j = 1:pp.stor_num
+				obj.ora = zeros(5,1);
+                if (obj.poj+obj.fcoj) <= obj.tankersAvailable*30
+                    oneWeek = obj.shippingSchedule{3};            
+                    for j = 1:obj.stor_num
                         stor = storage_open(j);
-                        stor_percentPOJ = decisions.ship_proc_plant_storage_dec(stor, pp.index).POJ;
-                        stor_percentFCOJ = decisions.ship_proc_plant_storage_dec(stor, pp.index).FCOJ;
-                        oneWeek{j}.POJ_1Week = stor_percentPOJ*0.01*pp.poj;
-                        oneWeek{j}.FCOJ_1Week = stor_percentFCOJ*0.01*pp.fcoj;
-                        oneWeek{j}.Tankers = ceil((stor_percentPOJ*0.01*pp.poj + stor_percentFCOJ*0.01*fcoj)/30);
-                        pp.shipped_out_cost_tank = pp.shipped_out_cost_tank + 36*oneWeek{j}.Tankers*findPlant2StorageDist(char(plantNamesInUse(pp.index)),char(storageNamesInUse(storage_open(j))));
-                        pp.tankersAvailable = pp.tankersAvailable - oneWeek{j}.Tankers;
-                        pp.tankersHoldC = pp.tankersAvailable*pp.tankerCost;
+                        stor_percentPOJ = decisions.ship_proc_plant_storage_dec(stor, obj.index).POJ;
+                        stor_percentFCOJ = decisions.ship_proc_plant_storage_dec(stor, obj.index).FCOJ;
+                        oneWeek{j}.POJ_1Week = stor_percentPOJ*0.01*obj.poj;
+                        oneWeek{j}.FCOJ_1Week = stor_percentFCOJ*0.01*obj.fcoj;
+                        oneWeek{j}.Tankers = ceil((stor_percentPOJ*0.01*obj.poj + stor_percentFCOJ*0.01*obj.fcoj)/30);
+                        obj.shipped_out_cost_tank = obj.shipped_out_cost_tank + 36*oneWeek{j}.Tankers*findPlant2StorageDist(char(plantNamesInUse(obj.index)),char(storageNamesInUse(storage_open(j))));
+                        obj.tankersAvailable = obj.tankersAvailable - oneWeek{j}.Tankers;
+                        obj.tankersHoldC = obj.tankersAvailable*obj.tankerCost;
                     end 
                 else
-                    overflow = poj+fcoj - pp.tankersAvailable*30;
+                    obj.overflow = obj.poj+obj.fcoj - obj.tankersAvailable*30;
                     sent = 0; j = 1;
                     % Allocate as much as possible to tankers
-                    oneWeek = pp.shippingSchedule{3};
-                    while pp.tankersAvailable > 0       
+                    oneWeek = obj.shippingSchedule{3};
+                    while obj.tankersAvailable > 0       
                         stor = storage_open(j);
-                        stor_percentPOJ = decisions.ship_proc_plant_storage_dec(stor, pp.index).POJ;
-                        stor_percentFCOJ = decisions.ship_proc_plant_storage_dec(stor, pp.index).FCOJ;
-                        if (stor_percentPOJ*0.01*poj + stor_percentFCOJ*0.01*fcoj) < pp.tankersAvailable*30
-                            oneWeek{j}.POJ_1Week = stor_percentPOJ*0.01*poj;
-                            oneWeek{j}.FCOJ_1Week = stor_percentFCOJ*0.01*fcoj;
-                            oneWeek{j}.Tankers = ceil((stor_percentPOJ*0.01*poj + stor_percentFCOJ*0.01*fcoj)/30);
-                            shipped_out_cost_tank = shipped_out_cost_tank + 36*oneWeek{j}.Tankers*findPlant2StorageDist(char(plantNamesInUse(pp.index)),char(storageNamesInUse(storage_open(j))));
-                            pp.tankersAvailable = pp.tankersAvailable - oneWeek{j}.Tankers;
-                            sent = sent + stor_percentPOJ*0.01*poj + stor_percentFCOJ*0.01*fcoj;
+                        stor_percentPOJ = decisions.ship_proc_plant_storage_dec(stor, obj.index).POJ;
+                        stor_percentFCOJ = decisions.ship_proc_plant_storage_dec(stor, obj.index).FCOJ;
+                        if (stor_percentPOJ*0.01*obj.poj + stor_percentFCOJ*0.01*obj.fcoj) < obj.tankersAvailable*30
+                            oneWeek{j}.POJ_1Week = stor_percentPOJ*0.01*obj.poj;
+                            oneWeek{j}.FCOJ_1Week = stor_percentFCOJ*0.01*obj.fcoj;
+                            oneWeek{j}.Tankers = ceil((stor_percentPOJ*0.01*obj.poj + stor_percentFCOJ*0.01*obj.fcoj)/30);
+                            obj.shipped_out_cost_tank = obj.shipped_out_cost_tank + 36*oneWeek{j}.Tankers*findPlant2StorageDist(char(plantNamesInUse(obj.index)),char(storageNamesInUse(storage_open(j))));
+                            obj.tankersAvailable = obj.tankersAvailable - oneWeek{j}.Tankers;
+                            sent = sent + stor_percentPOJ*0.01*obj.poj + stor_percentFCOJ*0.01*obj.fcoj;
                             j = j + 1;
                         else
-                            tankerAmount = pp.tankersAvailable*30;
-                            shipped_out_cost_tanker = shipped_out_cost_tanker + 36*pp.tankersAvailable*findPlant2StorageDist(char(plantNamesInUse(pp.index)),char(storageNamesInUse(storage_open(j))));
-                            POJsentviaTanker = (stor_percentPOJ*0.01*poj)/((stor_percentPOJ*0.01*poj) + (stor_percentFCOJ*0.01*fcoj))*tankerAmount;
-                            FCOJsentviaTanker = (stor_percentFCOJ*0.01*fcoj)/((stor_percentPOJ*0.01*poj) + (stor_percentFCOJ*0.01*fcoj))*tankerAmount;
+                            tankerAmount = obj.tankersAvailable*30;
+                            shipped_out_cost_tanker = shipped_out_cost_tanker + 36*obj.tankersAvailable*findPlant2StorageDist(char(plantNamesInUse(obj.index)),char(storageNamesInUse(storage_open(j))));
+                            POJsentviaTanker = (stor_percentPOJ*0.01*obj.poj)/((stor_percentPOJ*0.01*obj.poj) + (stor_percentFCOJ*0.01*obj.fcoj))*tankerAmount;
+                            FCOJsentviaTanker = (stor_percentFCOJ*0.01*obj.fcoj)/((stor_percentPOJ*0.01*obj.poj) + (stor_percentFCOJ*0.01*obj.fcoj))*tankerAmount;
                             oneWeek{j}.POJ_1Week = POJsentviaTanker;
                             oneWeek{j}.FCOJ_1Week = FCOJsentviaTanker;
                             oneWeek{j}.Tankers = ceil((POJsentviaTanker + FCOJsentviaTanker)/30);
-                            pp.tankersAvailable = pp.tankersAvailable - oneWeek{j}.Tankers;
-                            POJlefttobeSent = stor_percentPOJ*0.01*poj - POJsentviaTanker;
-                            FCOJlefttobeSent = stor_percentFCOJ*0.01*fcoj - POJsentviaTanker;
-                            distance = findPlant2StorageDist(char(plantNamesInUse(pp.index)),char(storageNamesInUse(storage_open(j))));
+                            obj.tankersAvailable = obj.tankersAvailable - oneWeek{j}.Tankers;
+                            POJlefttobeSent = stor_percentPOJ*0.01*obj.poj - POJsentviaTanker;
+                            FCOJlefttobeSent = stor_percentFCOJ*0.01*obj.fcoj - POJsentviaTanker;
+                            distance = findPlant2StorageDist(char(plantNamesInUse(obj.index)),char(storageNamesInUse(storage_open(j))));
                             shipped_out_cost_carriers = shipped_out_cost_carriers + 0.65*(FCOJlefttobeSent+POJlefttobeSent)*distance;
                             if distance < 2000
                                 delay = rand;
                                 if (delay < 0.09)
-                                    threeWeek = pp.shippingSchedule{5};
+                                    threeWeek = obj.shippingSchedule{5};
                                     threeWeek{j}.POJ_3Week = threeWeek{j}.POJ_3Week + POJlefttobeSent;
                                     threeWeek{j}.FCOJ_3Week = threeWeek{j}.FCOJ_3Week + FCOJlefttobeSent;
                                 elseif (delay < 0.3)
-                                    twoWeek = pp.shippingSchedule{4};
+                                    twoWeek = obj.shippingSchedule{4};
                                     twoWeek{j}.POJ_2Week = twoWeek{j}.POJ_2Week + POJlefttobeSent;
                                     twoWeek{j}.FCOJ_2Week = twoWeek{j}.FCOJ_2Week + FCOJlefttobeSent;
                                 else 
@@ -172,15 +181,15 @@ classdef ProcessingPlantKarthik
                             else
                                 delay = rand;
                                 if (delay < 0.09)
-                                    fourWeek = pp.shippingSchedule{6};
+                                    fourWeek = obj.shippingSchedule{6};
                                     fourWeek{j}.POJ_4Week = POJlefttobeSent;
                                     fourWeek{j}.FCOJ_4Week = FCOJlefttobeSent;
                                 elseif (delay < 0.3)
-                                    threeWeek = pp.shippingSchedule{5};
+                                    threeWeek = obj.shippingSchedule{5};
                                     threeWeek{j}.POJ_3Week = threeWeek{j}.POJ_3Week + POJlefttobeSent;
                                     threeWeek{j}.FCOJ_3Week = threeWeek{j}.FCOJ_3Week + FCOJlefttobeSent;
                                 else
-                                    twoWeek = pp.shippingSchedule{4};
+                                    twoWeek = obj.shippingSchedule{4};
                                     twoWeek{j}.POJ_2Week = twoWeek{j}.POJ_2Week + POJlefttobeSent;
                                     twoWeek{j}.FCOJ_2Week = twoWeek{j}.FCOJ_2Week + FCOJlefttobeSent;
                                 end
@@ -190,22 +199,22 @@ classdef ProcessingPlantKarthik
                         end
                     end
                     % Allocate the remaining flow to independent carriers
-                    while j <= pp.stor_num
+                    while j <= obj.stor_num
                         stor = storage_open(j);
-                        stor_percentPOJ = decisions.ship_proc_plant_storage_dec(stor, pp.index).POJ;
-                        stor_percentFCOJ = decisions.ship_proc_plant_storage_dec(stor, pp.index).FCOJ;
-                        POJtobeSent = stor_percentPOJ*0.01*poj;
-                        FCOJtobeSent = stor_percentFCOJ*0.01*fcoj;
-                        distance = findPlant2StorageDist(char(plantNamesInUse(pp.index)),char(storageNamesInUse(storage_open(j))));
-                        shipped_out_cost_carrier = shipped_out_cost_carrier + 0.65*distance*(FCOJtobeSent+POJtobeSent);
+                        stor_percentPOJ = decisions.ship_proc_plant_storage_dec(stor, obj.index).POJ;
+                        stor_percentFCOJ = decisions.ship_proc_plant_storage_dec(stor, obj.index).FCOJ;
+                        POJtobeSent = stor_percentPOJ*0.01*obj.poj;
+                        FCOJtobeSent = stor_percentFCOJ*0.01*obj.fcoj;
+                        distance = findPlant2StorageDist(char(plantNamesInUse(obj.index)),char(storageNamesInUse(storage_open(j))));
+                        obj.shipped_out_cost_carrier = obj.shipped_out_cost_carrier + 0.65*distance*(FCOJtobeSent+POJtobeSent);
                         if distance < 2000
                            delay = rand;
                            if (delay < 0.09)
-                               threeWeek = pp.shippingSchedule{5};
+                               threeWeek = obj.shippingSchedule{5};
                                threeWeek{j}.POJ_3Week = threeWeek{j}.POJ_3Week + POJtobeSent;
                                threeWeek{j}.FCOJ_3Week = threeWeek{j}.FCOJ_3Week + FCOJtobeSent;
                            elseif (delay < 0.3)
-                               twoWeek = pp.shippingSchedule{4};
+                               twoWeek = obj.shippingSchedule{4};
                                twoWeek{j}.POJ_2Week = twoWeek{j}.POJ_2Week + POJtobeSent;
                                twoWeek{j}.FCOJ_2Week = twoWeek{j}.FCOJ_2Week + FCOJtobeSent;
                             else 
@@ -216,15 +225,15 @@ classdef ProcessingPlantKarthik
                          else
                             delay = rand;
                             if (delay < 0.09)
-                               fourWeek = pp.shippingSchedule{6};
+                               fourWeek = obj.shippingSchedule{6};
                                fourWeek{j}.POJ_4Week = POJtobeSent;
                                fourWeek{j}.FCOJ_4Week = FCOJtobeSent;
                             elseif (delay < 0.3)
-                               threeWeek = pp.shippingSchedule{5};
+                               threeWeek = obj.shippingSchedule{5};
                                threeWeek{j}.POJ_3Week = threeWeek{j}.POJ_3Week + POJtobeSent;
                                threeWeek{j}.FCOJ_3Week = threeWeek{j}.FCOJ_3Week + FCOJtobeSent;
                             else
-                               twoWeek = pp.shippingSchedule{4};
+                               twoWeek = obj.shippingSchedule{4};
                                twoWeek{j}.POJ_2Week = twoWeek{j}.POJ_2Week + POJtobeSent;
                                twoWeek{j}.FCOJ_2Week = twoWeek{j}.FCOJ_2Week + FCOJtobeSent;
                             end
@@ -234,22 +243,22 @@ classdef ProcessingPlantKarthik
                 end
                 % aging inventory
                 for i=5:-1:2
-                    pp.ora(i) = pp.ora(i-1);
+                    obj.ora(i) = obj.ora(i-1);
                 end
                 % adding newly recieved products to inventory
-                pp.ora(1) = sum_shipped;
-                rotten = pp.ora(5);
-                throwaway = max(sum(pp.ora(1:4))-pp.capacity,0);
-                over = throwaway;
+                obj.ora(1) = sum_shipped;
+                obj.rotten = obj.ora(5);
+                obj.throwaway = max(sum(obj.ora(1:4))-obj.capacity,0);
+                over = obj.throwaway;
                 % tossing out anything over capacity in order of first to rot
                 i = 4;
                 while over > 0
-                     if pp.ora(i) > over
-                         pp.ora(i) = pp.ora(i) - over;
+                     if obj.ora(i) > over
+                         obj.ora(i) = obj.ora(i) - over;
                          over = 0;
                      else
-                         over = over - pp.ora(i);
-                         pp.ora(i) = 0;
+                         over = over - obj.ora(i);
+                         obj.ora(i) = 0;
                      end
                      i = i - 1;
                 end

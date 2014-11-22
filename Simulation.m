@@ -174,7 +174,14 @@ transCostfromGroves_ORA = sum(sum(transCost_fromGroves));
              breakdown = 0;
          end
          breakdown = 0;
-         [POJ_man(i), FCOJ_man(i), tankersHoldC(i), transCfromPlants_tank(i), transCfromPlants_carrier(i), rottenProc(i), toss_outProc(i)] = proc_plants{j}.iterateWeek(sum_shipped, decisions, breakdown, storage_open);
+         proc_plants{j} = proc_plants{j}.iterateWeek(sum_shipped, decisions, breakdown, storage_open);
+         POJ_man(i) = proc_plants{j}.poj;
+         FCOJ_man(i) = proc_plants{j}.fcoj;
+         tankersHoldC(i) = proc_plants{j}.tankersHoldC;
+         transCfromPlants_tank(i) = proc_plants{j}.shipped_out_cost_tank;
+         transCfromPlants_carrier(i) = proc_plants{j}.shipped_out_cost_carrier;
+         rottenProc(i) = proc_plants{j}.rotten;
+         toss_outProc(i) = proc_plants{j}.throwaway;
      end
      for j = 1:length(storage)
          shipped_ORA_FLA = decisions.ship_grove_dec(1,j+length(proc_plants))*0.01*total_ora_shipped(1,i);
@@ -191,7 +198,15 @@ transCostfromGroves_ORA = sum(sum(transCost_fromGroves));
          cities = cities_match_storage(indicies,:);
          name = char(storageNamesInUse(storage_open(j)));
          [ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, big_D, big_P] = drawDemand(decisions,cities,i, demand_city_ORA, demand_city_POJ, demand_city_ROJ, demand_city_FCOJ, decisions.storage_res(name), indicies); % will need to give it a price, and do this for all products
-         [~, sold(:,i), toss_outStor(:,i), rottenStor(:,i), excessDemand, ROJ_man(i), holdCost(i), revReceived(:,i), transport2cities_cost(i)] = storage{j}.iterateWeek(sum_shipped, (monthly_amt_futures_shipped_FCOJ(ceil(i/4)))/4, proc_plants, big_D, big_P, i, ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, cities, i);
+         storage{j}.iterateWeek = storage{j}.iterateWeek(sum_shipped, (monthly_amt_futures_shipped_FCOJ(ceil(i/4)))/4, proc_plants, big_D, big_P, i, ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, cities, i);
+         sold(:,i) = storage{j}.sold;
+         toss_outStor(:,i) = storage{j}.toss_out;
+         rottenStor(:,i) = storage{j}.rotten;
+         excessDemand = storage{j}.excessDemand;
+         ROJ_man(i) = storage{j}.ROJman;
+         holdCost(i) = storage{j}.holdCost;
+         revReceived(:,i) = storage{j}.revReceived;
+         transport2cities_cost(i) = storage{j}.transCost;
      end
  end
  totPOJ_man = sum(POJ_man); 
