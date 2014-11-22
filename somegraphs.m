@@ -3,7 +3,7 @@ function [] = somegraphs(yeardata, oj_obj)
 %will be useful to making decisions with our simulator and policies.
 
 %% OJ game object
-% current_OJ = OJGame();
+% current_OJ = OJGame('MomPop2004Results.xlsm');
 % yr2004 = YearData('MomPop2004Results.xlsm',current_OJ);
 % current_OJ.update(yr2004);
 % yr2005 = YearData('MomPop2005Results.xlsm',current_OJ);

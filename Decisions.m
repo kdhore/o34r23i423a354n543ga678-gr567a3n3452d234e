@@ -63,11 +63,25 @@ classdef Decisions
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 % For processing plants, the decision is the capacity to
                 % buy/sell in each plant: [P01;P02;P03;P04;P05;P06;P07]
-                yr.proc_plant_dec = % enter matrix manually here
+                Decisions.proc_plant_dec = % enter matrix manually here
+                
+                %Add a certain processing plant if:
+                %capacity sold + transportation savings > price of new
+                %plant + price of upgrading capacity + cost of tossing out
+                %current product
+                
+                %Add capacity if:
+                %capacity add cost + transportation add cost < total
+                %revenue gain + opp. cost of product tossed out
+                %(include parameters to set for certain # of years)
+                
+                %Reduce capacity if:
+                %excess capacity not being used, and there is no projected
+                %increase in demand or delivery
                 
                 % For tank car, the decision is #. of tank cars to buy/sell
                 % at each proc. plant: [P01;P02;P03;P04;P05;P06;P07]
-                yr.tank_car_dec = % enter matrix manually here
+                Decisions.tank_car_dec = % enter matrix manually here
                 
                 % For storage, the decision is the capacity to buy/sell
                 % capacity at each of the storage units
@@ -75,6 +89,21 @@ classdef Decisions
                 % Manually define the storage units in use to have some
                 % capacity to buy/sell. For example, for index i:
                 % yr.storage_dec(i) = capacity;
+                
+                %Add a storage unit if:
+                %capacity sold + transportation savings > price of new
+                %plant + price of upgrading capacity + cost of tossing out
+                %current product
+                
+                %Add capacity if:
+                %capacity add cost + transportation add cost < total
+                %revenue gain + opp. cost of product tossed out
+                %(include parameters to set for certain # of years)
+                
+                %Reduce capacity if:
+                %excess capacity not being used, and there is no projected
+                %increase in demand or delivery
+                
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
