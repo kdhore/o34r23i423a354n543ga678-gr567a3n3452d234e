@@ -144,9 +144,9 @@ classdef storageFacility2 < handle
                 sf.inventory{2}(4) = sf.inventory{2}(4) + newInv{sim_index}.POJ_4Week;
                 
                 % update FCOJ inventories
-                sf.inventory{4}(1) = sf.inventory{2}(1) + newInv{sim_index}.FCOJ_1Week + ...
+                sf.inventory{4}(1) = sf.inventory{4}(1) + newInv{sim_index}.FCOJ_1Week + ...
                     futures_per_week_FCOJ;
-                sf.inventory{4}(2) = sf.inventory{2}(2) + newInv{sim_index}.FCOJ_2Week;
+                sf.inventory{4}(2) = sf.inventory{4}(2) + newInv{sim_index}.FCOJ_2Week;
                 sf.inventory{4}(3) = sf.inventory{2}(3) + newInv{sim_index}.FCOJ_3Week;
                 sf.inventory{4}(4) = sf.inventory{2}(4) + newInv{sim_index}.FCOJ_4Week;
             end
@@ -163,10 +163,10 @@ classdef storageFacility2 < handle
 			totalInv = sum(sf.inventory{1}) + sum(sf.inventory{2}) + sum(sf.inventory{3}) + sum(sf.inventory{4});
 			overCap = totalInv - sf.capacity;
 			i = 1;
-			lo = length(sf.inventory{1});
-			lp = length(sf.inventory{2});
-			lr = length(sf.inventory{3});
-			lf = length(sf.inventory{4});
+			lo = length(sf.inventory{1})+1;
+			lp = length(sf.inventory{2})+1;
+			lr = length(sf.inventory{3})+1;
+			lf = length(sf.inventory{4})+1;
 
 			% for loop to go through products by weeks to expiry
 			% various i levels are due to different number of weeks to rot
@@ -174,7 +174,7 @@ classdef storageFacility2 < handle
 			% shouldnt rotten stuff be the first thing we get rid of? if it
 			% is, just get rid of the minus ones.. michelle)
 			while overCap > 0
-				if (i < 5)
+				if (i <= 5)
 					avail = sf.inventory{1}(lo - i) + sf.inventory{2}(lp - i) + sf.inventory{3}(lr - i) + sf.inventory{4}(lf - i);
 					if (avail <= overCap) 
 						sf.toss_out{1}(lo - i) = sf.inventory{1}(lo - i);
@@ -198,7 +198,7 @@ classdef storageFacility2 < handle
 						overCap = 0;
 					end
 
-				elseif (i < 9)
+				elseif (i <= 9)
 					avail = sf.inventory{2}(lp - i) + sf.inventory{3}(lr - i) + sf.inventory{4}(lf - i);
 					if (avail <= overCap)
 						sf.toss_out{2}(lp - i) = sf.inventory{2}(lp - i);
@@ -218,7 +218,7 @@ classdef storageFacility2 < handle
 						overCap = 0;
 					end
 
-				elseif (i < 13)
+				elseif (i <= 13)
 					avail = sf.inventory{3}(lr - i) + sf.inventory{4}(lf - i);
 					if (avail <= overCap)
 						sf.toss_out{3}(lr - i) = sf.inventory{3}(lr - i);
@@ -234,7 +234,7 @@ classdef storageFacility2 < handle
 						overCap = 0;
 					end
 
-				elseif (i < 49)
+				elseif (i <= 49)
 					avail = sf.inventory{4}(lf - i);
 					if (avail <= overCap)
 						sf.toss_out{4}(lf - i) = sf.inventory{4}(lf - i);

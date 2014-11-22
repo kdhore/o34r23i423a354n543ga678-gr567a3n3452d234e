@@ -144,11 +144,11 @@ classdef storageFacility2 < handle
                 sf.inventory{2}(4) = sf.inventory{2}(4) + newInv{sim_index}.POJ_4Week;
                 
                 % update FCOJ inventories
-                sf.inventory{4}(1) = sf.inventory{2}(1) + newInv{sim_index}.FCOJ_1Week + ...
+                sf.inventory{4}(1) = sf.inventory{4}(1) + newInv{sim_index}.FCOJ_1Week + ...
                     futures_per_week_FCOJ;
-                sf.inventory{4}(2) = sf.inventory{2}(2) + newInv{sim_index}.FCOJ_2Week;
-                sf.inventory{4}(3) = sf.inventory{2}(3) + newInv{sim_index}.FCOJ_3Week;
-                sf.inventory{4}(4) = sf.inventory{2}(4) + newInv{sim_index}.FCOJ_4Week;
+                sf.inventory{4}(2) = sf.inventory{4}(2) + newInv{sim_index}.FCOJ_2Week;
+                sf.inventory{4}(3) = sf.inventory{4}(3) + newInv{sim_index}.FCOJ_3Week;
+                sf.inventory{4}(4) = sf.inventory{4}(4) + newInv{sim_index}.FCOJ_4Week;
             end
             
 			sf.inventory{1}(1) = sf.inventory{1}(1) + sum_shipped; 
