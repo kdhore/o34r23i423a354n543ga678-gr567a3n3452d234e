@@ -32,6 +32,10 @@ classdef DecisionsTemp < handle
         pricing_ROJ_dec;
         pricing_ROJ_weekly_dec;
         storage_res;
+        sales_week_ORA_res;
+        sales_week_POJ_res;
+        sales_week_FCOJ_res;
+        sales_week_ROJ_res;
     end
     
     methods
@@ -68,6 +72,10 @@ classdef DecisionsTemp < handle
         dec.pricing_ROJ_dec = yrDataObj.pricing_ROJ_dec;
         dec.pricing_ROJ_weekly_dec = yrDataObj.pricing_ROJ_weekly_dec;
         dec.storage_res = yrDataObj.storage_res;
+        dec.sales_week_ORA_res = yrDataObj.sales_week_ORA_res;
+        dec.sales_week_POJ_res = yrDataObj.sales_week_POJ_res;
+        dec.sales_week_FCOJ_res = yrDataObj.sales_week_FCOJ_res;
+        dec.sales_week_ROJ_res = yrDataObj.sales_week_ROJ_res;
                
         end
     end

@@ -15,6 +15,13 @@ classdef ProcessingPlantKarthik
 		tankerCost = 0;
         shippingSchedule = cell(1,6);
         stor_num;
+        poj = 0;
+        fcoj = 0;
+        tankersHoldC = 0;
+        shipped_out_cost_tank = 0;
+        shipped_out_cost_carrier = 0;
+        rotten = 0;
+        throwaway = 0;
 		% other properties tbd
 		% upper bound on capacity?
 		% tankers?
@@ -22,9 +29,9 @@ classdef ProcessingPlantKarthik
     
     methods
         function pp = ProcessingPlantKarthik(index, capacity, percentPOJ, breakdown, ora, pojC, fcojC, tankers, tankerCost, stor_num)
-            schedule = struct('POJ_1Week', nan, 'POJ_2Week', nan, 'POJ_3Week', nan, 'POJ_4Week', nan, ...
-                              'FCOJ_1Week', nan, 'FCOJ_2Week', nan,'FCOJ_3Week', nan, 'FCOJ_4Week', nan,...
-                              'Tankers', nan, 'Carriers', nan);
+            schedule = struct('POJ_1Week', 0, 'POJ_2Week', 0, 'POJ_3Week', 0, 'POJ_4Week', 0, ...
+                              'FCOJ_1Week', 0, 'FCOJ_2Week', 0,'FCOJ_3Week', 0, 'FCOJ_4Week', 0,...
+                              'Tankers', 0, 'Carriers', 0);
             pp.index = index;
             pp.capacity = capacity;
 			pp.percentPOJ = percentPOJ;
@@ -48,12 +55,12 @@ classdef ProcessingPlantKarthik
         % the breakdown parameter refers to whether it was broken down in
         % the previous week, so it did not produce any POJ or FCOJ for this
         % week
-        function [poj, fcoj, tankersHoldC, shipped_out_cost_tank, shipped_out_cost_carrier, rotten, throwaway] = iterateWeek(pp,sum_shipped, decisions, breakdown, storage_open)
-            shipped_out_cost_tank = 0;
-            shipped_out_cost_carrier = 0;
-            poj = 0;
-            fcoj = 0;
-            tankersHoldC = 0;
+        function pp  = iterateWeek(pp,sum_shipped, decisions, breakdown, storage_open)
+            pp.shipped_out_cost_tank = 0;
+            pp.shipped_out_cost_carrier = 0;
+            pp.poj = 0;
+            pp.fcoj = 0;
+            pp.tankersHoldC = 0;
             %pojC = 0;
             %fcojC = 0;
 			% adding newly recieved products to inventory
@@ -63,9 +70,9 @@ classdef ProcessingPlantKarthik
                     pp.ora(i) = pp.ora(i-1);
                 end
                 pp.ora(1) = sum_shipped;
-                rotten = pp.ora(5);
-                throwaway = max(sum(pp.ora(1:4))-pp.capacity,0);
-                over = throwaway;
+                pp.rotten = pp.ora(5);
+                pp.throwaway = max(sum(pp.ora(1:4))-pp.capacity,0);
+                over = pp.throwaway;
 			% tossing out anything over capacity in order of first to rot
                 i = 4;
                 while over > 0
@@ -99,23 +106,23 @@ classdef ProcessingPlantKarthik
                 for i = 1:1:5
                     pp.shippingSchedule{i} = pp.shippingSchedule{i + 1};
                 end
-                poj = pp.percentPOJ*sum(pp.ora(1:4))/100.0;
+                pp.poj = pp.percentPOJ*sum(pp.ora(1:4))/100.0;
                 %pojC = poj*pp.pojCost;
-				fcoj = pp.percentFCOJ*sum(pp.ora(1:4))/100.0;
+				pp.fcoj = pp.percentFCOJ*sum(pp.ora(1:4))/100.0;
                 %fcojC = fcoj*pp.fcojCost;
 				pp.ora = zeros(5,1);
-                if (poj+fcoj) <= pp.tankersAvailable*30
+                if (pp.poj+pp.fcoj) <= pp.tankersAvailable*30
                     oneWeek = pp.shippingSchedule{3};            
                     for j = 1:pp.stor_num
                         stor = storage_open(j);
                         stor_percentPOJ = decisions.ship_proc_plant_storage_dec(stor, pp.index).POJ;
                         stor_percentFCOJ = decisions.ship_proc_plant_storage_dec(stor, pp.index).FCOJ;
-                        oneWeek{j}.POJ_1Week = stor_percentPOJ*0.01*poj;
-                        oneWeek{j}.FCOJ_1Week = stor_percentFCOJ*0.01*fcoj;
-                        oneWeek{j}.Tankers = ceil((stor_percentPOJ*0.01*poj + stor_percentFCOJ*0.01*fcoj)/30);
-                        shipped_out_cost_tank = shipped_out_cost_tank + 36*oneWeek{j}.Tankers*findPlant2StorageDist(char(plantNamesInUse(pp.index)),char(storageNamesInUse(storage_open(j))));
+                        oneWeek{j}.POJ_1Week = stor_percentPOJ*0.01*pp.poj;
+                        oneWeek{j}.FCOJ_1Week = stor_percentFCOJ*0.01*pp.fcoj;
+                        oneWeek{j}.Tankers = ceil((stor_percentPOJ*0.01*pp.poj + stor_percentFCOJ*0.01*fcoj)/30);
+                        pp.shipped_out_cost_tank = pp.shipped_out_cost_tank + 36*oneWeek{j}.Tankers*findPlant2StorageDist(char(plantNamesInUse(pp.index)),char(storageNamesInUse(storage_open(j))));
                         pp.tankersAvailable = pp.tankersAvailable - oneWeek{j}.Tankers;
-                        tankersHoldC = pp.tankersAvailable*pp.tankerCost;
+                        pp.tankersHoldC = pp.tankersAvailable*pp.tankerCost;
                     end 
                 else
                     overflow = poj+fcoj - pp.tankersAvailable*30;

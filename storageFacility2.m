@@ -76,7 +76,7 @@ classdef storageFacility2 < handle
 		% demand is how much demand is unfulled
 		% reconCost is cost spent reconstituting
 		% holdCost is the cost of holding inventory
-		function [ship_out, sold, toss_out, rotten, demand, ROJman, holdCost, revReceived, transCost] = iterateWeek(sf, sum_shipped, futures_per_week_FCOJ,proc_plants, big_D, big_P, time, ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, cities)
+		function [ship_out, sold, toss_out, rotten, demand, ROJman, holdCost, revReceived, transCost] = iterateWeek(sf, sum_shipped, futures_per_week_FCOJ,proc_plants, big_D, big_P, time, ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, cities, sim_index)
 			% initialize return variables
 			ship_out = cell(4,1);
 			sold = zeros(4,1);
@@ -115,7 +115,7 @@ classdef storageFacility2 < handle
             sf.inventory{3}(1) = ROJman;
 			%reconCost = FCOJRecon * sf.reconC;
 			for i=2:length(sf.inventory{4})
-				sf.inventory{4}(i) = sf.inventory{4}(i)*(1-sf.reconPercent);
+				sf.inventory{4}(i) = sf.inventory{4}(i)*(1-sf.reconPercent(ceil(time/4)));
             end   
             
 			% add in new inventory
@@ -123,17 +123,17 @@ classdef storageFacility2 < handle
                 pp = proc_plants{i};
                 newInv = pp.shippingSchedule{2};
                 % update POJ inventories
-                sf.inventory{2}(1) = sf.inventory{2}(1) + newInv{sf.index}.POJ_1week;
-                sf.inventory{2}(2) = sf.inventory{2}(2) + newInv{sf.index}.POJ_2week;
-                sf.inventory{2}(3) = sf.inventory{2}(3) + newInv{sf.index}.POJ_3week;
-                sf.inventory{2}(4) = sf.inventory{2}(4) + newInv{sf.index}.POJ_4week;
+                sf.inventory{2}(1) = sf.inventory{2}(1) + newInv{sim_index}.POJ_1Week;
+                sf.inventory{2}(2) = sf.inventory{2}(2) + newInv{sim_index}.POJ_2Week;
+                sf.inventory{2}(3) = sf.inventory{2}(3) + newInv{sim_index}.POJ_3Week;
+                sf.inventory{2}(4) = sf.inventory{2}(4) + newInv{sim_index}.POJ_4Week;
                 
                 % update FCOJ inventories
-                sf.inventory{4}(1) = sf.inventory{2}(1) + newInv{sf.index}.FCOJ_1week + ...
+                sf.inventory{4}(1) = sf.inventory{2}(1) + newInv{sim_index}.FCOJ_1Week + ...
                     futures_per_week_FCOJ;
-                sf.inventory{4}(2) = sf.inventory{2}(2) + newInv{sf.index}.FCOJ_2week;
-                sf.inventory{4}(3) = sf.inventory{2}(3) + newInv{sf.index}.FCOJ_3week;
-                sf.inventory{4}(4) = sf.inventory{2}(4) + newInv{sf.index}.FCOJ_4week;
+                sf.inventory{4}(2) = sf.inventory{2}(2) + newInv{sim_index}.FCOJ_2Week;
+                sf.inventory{4}(3) = sf.inventory{2}(3) + newInv{sim_index}.FCOJ_3Week;
+                sf.inventory{4}(4) = sf.inventory{2}(4) + newInv{sim_index}.FCOJ_4Week;
             end
             
 			sf.inventory{1}(1) = sf.inventory{1}(1) + sum_shipped; 
@@ -264,18 +264,19 @@ classdef storageFacility2 < handle
 %             
             
             demand = big_D;
+            transCost = 0;
             for i=1:4
-                j = length(sf.inventory{i})-1;
                 for k=1:length(cities)
+                    j = length(sf.inventory{i})-1;
                     while ((demand(k,i) > 0) && (sum(sf.inventory{i}(1:j))) > 0)
                         if (demand(k,i) > sf.inventory{i}(j))
-                            ship_out{i}(j) = sf.inventory{i}(j);
+                            ship_out{i}(j) = ship_out{i}(j) + sf.inventory{i}(j);
                             transCost = transCost + ship_out{i}(j)*cities{k,3}*0.22;
                             revReceived(i) = revReceived(i) + ship_out{i}(j)*big_P(k,i);
                             demand(k,i) = demand(k,i) - sf.inventory{i}(j);
                             sf.inventory{i}(j) = 0;
                         else
-                            ship_out{i}(j) = demand(k,i);
+                            ship_out{i}(j) = ship_out{i}(j) + demand(k,i);
                             transCost = transCost + ship_out{i}(j)*cities{k,3}*0.22;
                             revReceived(i) = revReceived(i) + ship_out{i}(j)*big_P(k,i);
                             sf.inventory{i}(j) = sf.inventory{i}(j) - demand(k,i);
