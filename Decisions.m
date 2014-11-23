@@ -40,6 +40,47 @@ classdef Decisions
             if nargin > 0
                 
                 % For now this needs to be MANUALLY updated 
+                % Load the year data objects
+                yr2004 = load('yr2004.mat');
+                yr2004temp = genvarname('yr2004');
+                yr2004 = yr2004.(yr2004temp);
+                
+                yr2005 = load('yr2005.mat');
+                yr2005temp = genvarname('yr2005');
+                yr2005 = yr2005.(yr2005temp);                
+                
+                yr2006 = load('yr2006.mat');
+                yr2006temp = genvarname('yr2006');
+                yr2006 = yr2006.(yr2006temp);  
+                
+                yr2007 = load('yr2007.mat');
+                yr2007temp = genvarname('yr2007');
+                yr2007 = yr2007.(yr2007temp);  
+   
+                yr2008 = load('yr2008.mat');
+                yr2008temp = genvarname('yr2008');
+                yr2008 = yr2008.(yr2008temp);  
+                
+                yr2009 = load('yr2009.mat');
+                yr2009temp = genvarname('yr2009');
+                yr2009 = yr2009.(yr2009temp);  
+
+                yr2010 = load('yr2010.mat');
+                yr2010temp = genvarname('yr2010');
+                yr2010 = yr2010.(yr2010temp); 
+                
+                yr2011 = load('yr2011.mat');
+                yr2011temp = genvarname('yr2011');
+                yr2011 = yr2011.(yr2011temp); 
+                
+                yr2012 = load('yr2012.mat');
+                yr2012temp = genvarname('yr2012');
+                yr2012 = yr2012.(yr2012temp); 
+        
+                yr2013 = load('yr2013.mat');
+                yr2013temp = genvarname('yr2013');
+                yr2013 = yr2013.(yr2013temp); 
+                
                 YearDataRecord = [yr2004, yr2005, yr2006, yr2007, yr2008,...
                     yr2009, yr2010, yr2011, yr2012, yr2013];
                 plants_open = find(OJ_object.proc_plant_cap);
@@ -393,7 +434,7 @@ classdef Decisions
                 for month = 1:12
                     for grove = 1:6
                         for i = 1:length(plants_open)
-                            if (Decisions.ship_grove_dec(i,month) ~= 0)
+                            if (Decisions.ship_grove_dec(grove,i) ~= 0)
                                 % Find the first non-zero % of POJ sent
                                 % from storage to proc. plant
                                 index1 = i;
@@ -402,9 +443,9 @@ classdef Decisions
                         Demand.demandGroveORA(grove,month) = ...
                             Demand.demandGroveORA(grove,month) + ...
                             (Decisions.demandProcPlantORA(index1, month)/...
-                            Decisions.ship_grove_dec(index1,month));
+                            Decisions.ship_grove_dec(grove,index1));
                         for j = 1:length(stor_open)
-                            if (Decisions.ship_grove_dec(length(plants_open)+j,month) ~= 0)
+                            if (Decisions.ship_grove_dec(grove, length(plants_open)+j) ~= 0)
                                 % Find the first non-zero % of POJ sent
                                 % from storage to proc. plant
                                 index2 = j;
@@ -413,7 +454,7 @@ classdef Decisions
                         Demand.demandGroveORA(grove,month) = ...
                             Demand.demandGroveORA(grove,month) + ...
                             (Decisions.demandStorageORA(index2, month)/...
-                            Decisions.ship_grove_dec(length(plants_open)+index2,month));
+                            Decisions.ship_grove_dec(grove, length(plants_open)+index2));
                     end
                 end
                 
