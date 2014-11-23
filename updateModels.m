@@ -30,7 +30,7 @@ function [] = updateModels(yearMax)
 
 	for i=1:length(years)
 		fname = strcat(fn1, num2str(years(i)),fn2);
-		vn = genvarname(strcat(fname,'_MomPop'));
+		vn = genvarname(fname);
 
 		data = load(fname);
 		%data = xlsread(fname, shtname, range);
