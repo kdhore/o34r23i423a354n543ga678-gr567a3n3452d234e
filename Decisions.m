@@ -681,7 +681,7 @@ classdef Decisions
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 % For processing plants, the decision is the capacity to
                 % buy/sell in each plant: [P01;P02;...;P10]
-                Decisions.proc_plant_dec = zeros(10,1);% enter matrix manually here
+                Decisions.proc_plant_dec = zeros(length(plants_open),1);% enter matrix manually here
                 
                 %currently nothing changed in capacity
                 
@@ -698,10 +698,24 @@ classdef Decisions
                 %Reduce capacity if:
                 %excess capacity not being used, and there is no projected
                 %increase in demand or delivery
+                rho1 = 1.1; %parameter > 1 for buffer of processing plant
+                for i = 1:length(plants_open)
+                    Decisions.proc_plant_dec(i,plants_open(i,1)) = ...
+                        rho1*(max(Decisions.demandProcPlantORA(i,1)) + ...
+                        max(Decisions.demandProcPlantPOJ(i,1)) + ... 
+                        max(Decisions.demandProcPlantFCOJ(i,1))) - ...
+                        OJ_object.proc_plant_cap(plants_open(i,1),1);
+                    %can be positive or negative number
+                end
+                
+                
                 
                 % For tank car, the decision is #. of tank cars to buy/sell
-                % at each proc. plant: [P01;P02;P03;P04;P05;P06;P07]
+                % at each proc. plant: [P01;P02;...;P10]
                 Decisions.tank_car_dec = zeros(10,1); % enter matrix manually here
+                
+                
+                
                 
                 % For storage, the decision is the capacity to buy/sell
                 % capacity at each of the storage units
@@ -715,14 +729,22 @@ classdef Decisions
                 %plant + price of upgrading capacity + cost of tossing out
                 %current product
                 
-                %Add capacity if:
-                %capacity add cost + transportation add cost < total
-                %revenue gain + opp. cost of product tossed out
-                %(include parameters to set for certain # of years)
+                %For capacity, always want some buffer between the
+                %projected demand and above because we don't want
+                %additional (unforseen) factors to throw out a lot of our
+                %product
                 
-                %Reduce capacity if:
-                %excess capacity not being used, and there is no projected
-                %increase in demand or delivery
+                rho2 = 1.1; %parameter > 1 for buffer of storage unit
+                for i = 1:length(stor_open)
+                    Decisions.storage_dec(i,stor_open(i,1)) = ...
+                        rho2*(max(Decisions.demandStorageORA(i,:) + ...
+                        max(Decisions.demandStoragePOJ(i,:)) + ... 
+                        max(Decisions.demandStorageROJ(i,:)) + ...
+                        max(Decisions.demandStorageFCOJ(i,:))) - ...
+                        OJ_object.storage_cap(stor_open(i,1),1);
+                    %can be positive or negative number
+                end
+                
                 
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
