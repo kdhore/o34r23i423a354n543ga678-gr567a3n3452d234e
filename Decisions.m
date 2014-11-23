@@ -135,6 +135,114 @@ classdef Decisions
                     end
                 end
                 
+               
+                
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                % Reading in shipping_manufacturing tab
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                
+                % Enter the futures shipping to storage decisions
+                Decisions.futures_ship_dec = zeros(length(stor_open),1);
+                % enter the percent to ship to each storage
+                CumDemandoverStorageFCOJ = 0;                
+                
+                for i = 1:length(stor_open)
+                    CumDemandoverStorageFCOJ = CumDemandoverStorageFCOJ + ...
+                        sum(Decisions.demandStorageFCOJ(i, :));
+                end
+
+                for j = 1:length(stor_open)
+                    Decisions.futures_ship_dec(j,1)...
+                        =sum(Decisions.demandStorageFCOJ(j, :))/...
+                        CumDemandoverStorageFCOJ;
+                end
+
+                                
+                % Enter the shipping POJ and FCOJ to storage
+                % decisions
+                ship_break = struct('POJ', nan, 'FCOJ', nan);
+                Decisions.ship_proc_plant_storage_dec = ship_break;
+                for (i=1:71)
+                    for(j =1:10)
+                        Decisions.ship_proc_plant_storage_dec(i,j) = ship_break;
+                    end
+                end
+                
+                AverageProcPlantPOJPercent = zeros(71,10);
+                AverageProcPlantFCOJPercent = zeros(71,10);
+                
+                % Calculate average of these percentages over the past
+                % years
+                for i = 71
+                    for j = 10
+                        for k = 1:length(YearDataRecord)
+                            AverageProcPlantPOJPercent(i,j) ...
+                                = AverageProcPlantPOJPercent(i,j)...
+                                +YearDataRecord(k).ship_proc_plant_storage_dec(i,j).POJ;
+                            AverageProcPlantFCOJPercent(i,j) ...
+                                = AverageProcPlantFCOJPercent(i,j)...
+                                +YearDataRecord(k).ship_proc_plant_storage_dec(i,j).FCOJ;
+                            
+                        end
+                    end
+                end
+                
+                for i = 71
+                    for j = 10
+                        AverageProcPlantPOJPercent(i,j) = ...
+                            AverageProcPlantPOJPercent(i,j)/...
+                            length(YearDataRecord);
+                        AverageProcPlantFCOJPercent(i,j) = ...
+                            AverageProcPlantFCOJPercent(i,j)/...
+                            length(YearDataRecord);
+                    end
+                end
+                
+                plant2storage = load('plant2storage_dist.mat');
+                p2s = genvarname('processing2storage_dist');
+                plant2storage = plant2storage.(p2s);
+                % rows are storage, columns are plants
+                plant2storage = cell2mat(plant2storage);
+                
+                
+                epsilon1 = 1;
+                epsilon2 = 1/10000;
+                epsilon3 = 1;
+                epsilon4 = 1/10000;
+                        
+                CumDemandoverStoragePOJ = 0;                
+                for i = 1:length(stor_open)
+                    CumDemandoverStoragePOJ = CumDemandoverStoragePOJ + ...
+                        sum(Decisions.demandStoragePOJ(i, :));
+                end
+                
+                %%%% NEED TO MAKE SURE THE PERCENT OVER ALL STORAGE UNITS
+                %%%% IS 1 in a more efficient way
+                for j = 1:length(plants_open)
+                    for i = 1:length(stor_open)-1
+                        Decisions.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).POJ = ...
+                            AverageProcPlantPOJPercent(stor_open(i),plants_open(j)) + ...
+                            epsilon1*(sum(Decisions.demandStoragePOJ(i,:))/...
+                            CumDemandoverStoragePOJ -  ...
+                            AverageProcPlantPOJPercent(stor_open(i),plants_open(j)))...
+                            + epsilon2*(plant2storage(stor_open(i),plants_open(j)));
+                        
+                        Decisions.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).FCOJ = ...
+                            AverageProcPlantFCOJPercent(stor_open(i),plants_open(j)) + ...
+                            epsilon3*(sum(Decisions.demandStorageFCOJ(i,:))/...
+                            CumDemandoverStorageFCOJ -  ...
+                            AverageProcPlantFCOJPercent(stor_open(i),plants_open(j)))...
+                            + epsilon4*(plant2storage(stor_open(i),plants_open(j)));
+                    
+                    end
+                    % at this point i = length(stor_open)
+                    Decisions.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).POJ = ...
+                        1 - sum(Decisions.ship_proc_plant_storage_dec(:,plants_open(j)).POJ);
+                    Decisions.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).FCOJ = ...
+                        1 - sum(Decisions.ship_proc_plant_storage_dec(:,plants_open(j)).FCOJ);
+                 end
+                
+                
                 Decisions.demandProcPlantORA = zeros(length(plants_open),12);
                 Decisions.demandProcPlantPOJ = zeros(length(plants_open),12);
                 Decisions.demandProcPlantFCOJ = zeros(length(plants_open),12);
@@ -168,37 +276,6 @@ classdef Decisions
                     end
                 end
                 
-                
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                % Reading in shipping_manufacturing tab
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                
-                % Enter the futures shipping to storage decisions
-                Decisions.futures_ship_dec = zeros(length(stor_open),1);
-                % enter the percent to ship to each storage
-                CumDemandoverStorageFCOJ = 0;                
-                
-                for i = 1:length(stor_open)
-                    CumDemandoverStorageFCOJ = CumDemandoverStorageFCOJ + ...
-                        sum(Decisions.demandStorageFCOJ(i, :));
-                end
-
-                for j = 1:length(stor_open)
-                    Decisions.futures_ship_dec(j,1)...
-                        =sum(Decisions.demandStorageFCOJ(j, :))/...
-                        CumDemandoverStorageFCOJ;
-                end
-
-                                
-                % Enter the shipping POJ and FCOJ to storage
-                % decisions
-                ship_break = struct('POJ', nan, 'FCOJ', nan);
-                Decisions.ship_proc_plant_storage_dec = ship_break;
-                for (i=1:length(stor_open))
-                    for(j =1:length(plants_open))
-                        Decisions.ship_proc_plant_storage_dec(i,j) = ship_break;
-                    end
-                end
                           
                 % Do this for a 71 x 10 matrix as well
                 
@@ -304,12 +381,19 @@ classdef Decisions
                     end
                 end
                 
+                Decisions.demandProcPlantPOJ = zeros(length(plants_open),12);
+                Decisions.demandProcPlantFCOJ = zeros(length(plants_open),12);
+                
                 % Processing plants manufacturing decisions
                 Decisions.manufac_proc_plant_dec =...
                     struct('POJ', nan, 'FCOJ', nan);
                 for i = 1:length(plants_open)
-                    Decisions.manufac_proc_plant_dec(1,i).POJ = % ORA into POJ
-                    Decisions.manufac_proc_plant_dec(1,i).FCOJ = % ORA into FCOJ
+                    Decisions.manufac_proc_plant_dec(1,i).POJ = ...
+                         sum(Decisions.demandProcPlantPOJ(i,:))/...
+                         sum(Decisions.demandProcPlantORA(i,:));
+                     Decisions.manufac_proc_plant_dec(1,i).FCOJ = ...
+                         sum(Decisions.demandProcPlantFCOJ(i,:))/...
+                         sum(Decisions.demandProcPlantORA(i,:));
                 end
                 
                 % Set the % of FCOJ to reconstitute to ROJ at each
