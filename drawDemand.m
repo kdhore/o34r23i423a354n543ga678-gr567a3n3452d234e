@@ -1,4 +1,4 @@
-function [ ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, big_D, big_P ] = drawDemand(decisions,cities,week,demand_city_ORA, demand_city_POJ, demand_city_ROJ, demand_city_FCOJ,temp,indicies )
+function [ ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, big_D, big_P ] = drawDemand(decisions,cities,week,demand_city_ORA, demand_city_POJ, demand_city_ROJ, demand_city_FCOJ)
    
 % Will return the demand for each city
     ORA_demand = 0;
@@ -37,12 +37,12 @@ function [ ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, big_D, big_P ] = dra
        FCOJ_demand = FCOJ_demand + fcoj;
        ROJ_demand = ROJ_demand + roj;
     end
-   ORA_demand = temp.ORA_Sales(2,week);
-    POJ_demand = temp.POJ_Sales(2,week);
-    FCOJ_demand = temp.FCOJ_Sales(2,week);
-    ROJ_demand = temp.ROJ_Sales(2,week);
-    big_D(:,1) = decisions.sales_week_ORA_res(indicies,week);
-    big_D(:,2) = decisions.sales_week_POJ_res(indicies,week);
-    big_D(:,3) = decisions.sales_week_ROJ_res(indicies,week);
-    big_D(:,4) = decisions.sales_week_FCOJ_res(indicies,week);
+%    ORA_demand = temp.ORA_Sales(2,week);
+%     POJ_demand = temp.POJ_Sales(2,week);
+%     FCOJ_demand = temp.FCOJ_Sales(2,week);
+%     ROJ_demand = temp.ROJ_Sales(2,week);
+%     big_D(:,1) = decisions.sales_week_ORA_res(indicies,week);
+%     big_D(:,2) = decisions.sales_week_POJ_res(indicies,week);
+%     big_D(:,3) = decisions.sales_week_ROJ_res(indicies,week);
+%     big_D(:,4) = decisions.sales_week_FCOJ_res(indicies,week);
 end
