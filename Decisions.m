@@ -42,6 +42,8 @@ classdef Decisions
                 % For now this needs to be MANUALLY updated 
                 YearDataRecord = [yr2004, yr2005, yr2006, yr2007, yr2008,...
                     yr2009, yr2010, yr2011, yr2012, yr2013];
+                plants_open = find(OJ_object.proc_plant_cap);
+                stor_open = find(OJ_object.storage_cap);
                 
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 % Reading in pricing tab
@@ -106,72 +108,6 @@ classdef Decisions
                 
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                % Reading in shipping_manufacturing tab
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                % Manually set the percent of ORA to ship from groves to
-                % either processing or storage plants. Each row is one of
-                % the grove locations (FLA, CAL, TEX, ARZ,
-                %  BRA, SPA) and the columns represent each processing plan
-                %  and each storage unit that is currently open
-                % Find the storage and processing plants currently open
-                % from the OJ object.
-                plants_open = find(OJ_object.proc_plant_cap);
-                stor_open = find(OJ_object.storage_cap);
-                Decisions.ship_grove_dec = zeros(6, length(plants_open) +...
-                    length(stor_open));
-                % Set these percentages manually %
-                
-                % Processing plants manufacturing decisions
-                Decisions.manufac_proc_plant_dec =...
-                    struct('POJ', nan, 'FCOJ', nan);
-                for i = 1:length(plants_open)
-                    Decisions.manufac_proc_plant_dec(1,i).POJ = % ORA into POJ
-                    Decisions.manufac_proc_plant_dec(1,i).FCOJ = % ORA into FCOJ
-                end
-                
-                % Manually set the % of FCOJ to reconstitute to ROJ at each
-                % storage unit each month where each row is an open storage
-                % unit and each column is a month from Sep-Aug
-                Decisions.reconst_storage_dec = zeros(length(stor_open), 12);
-                % Set the percentages for each of these cells %
-                
-                
-                % Manually enter the futures shipping to storage decisions
-                Decisions.futures_ship_dec(% for each storage unit in stor_open) =
-                % enter the percent to ship to each storage
-                
-                % Manually enter the shipping POJ and FCOJ to storage
-                % decisions
-                ship_break = struct('POJ', nan, 'FCOJ', nan);
-                Decisions.ship_proc_plant_storage_dec = ship_break;
-                for (i=1:length(stor_open))
-                    for(j =1:length(plants_open))
-                        Decisions.ship_proc_plant_storage_dec(i,j) = ship_break;
-                    end
-                end
-                
-                % Do this for a 71 x 10 matrix as well
-                
-                % For stor_fac = each storage unit in stor_open
-                % For proc_plant = each processing plant in plants_open
-                % yr.ship_proc_plant_storage_dec(% for each stor_fac,% for each proc_plant).POJ = % enter the percent to ship to each storage
-                % yr.ship_proc_plant_storage_dec(% for each stor_fac,% for each proc_plant).FCOJ = % enter the percent to ship to each storage
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                
-                
-                
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                % Reading in raw_materials tab
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                %  Manually set the spot market prices equal to matrix
-                %  where each row is grove location (FLA, CAL, TEX, ARZ,
-                %  BRA, SPA respectively) and each column is a month of the
-                %  year starting in September
-                Decisions.purchase_spotmkt_dec = zeros(6,12);
-                % assign the buying quantity (tons per week in a month)
-                % either manually or by looping through locations/months
-                
                 Decisions.demandStorageORA = zeros(length(stor_open),12);
                 Decisions.demandStoragePOJ = zeros(length(stor_open),12);
                 Decisions.demandStorageROJ = zeros(length(stor_open),12);
@@ -181,7 +117,7 @@ classdef Decisions
                     for  i = 1:7
                         for j = 1:length(stor_open)
                             if(strcmp(matchRegiontoStorage(i,OJ_Object),...
-                                    stor_open(j)) == 1)
+                                    storageNamesInUse(stor_open(j))) == 1)
                                 Decisions.demandStorageORA(j, month) = ...
                                     Decisions.demandStorageORA(j, month) + ...
                                     getDemand(1,i,Decisions.pricing_ORA_dec(i,month));
@@ -232,6 +168,186 @@ classdef Decisions
                     end
                 end
                 
+                
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                % Reading in shipping_manufacturing tab
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                
+                % Enter the futures shipping to storage decisions
+                Decisions.futures_ship_dec = zeros(length(stor_open),1);
+                % enter the percent to ship to each storage
+                CumDemandoverStorageFCOJ = 0;                
+                
+                for i = 1:length(stor_open)
+                    CumDemandoverStorageFCOJ = CumDemandoverStorageFCOJ + ...
+                        sum(Decisions.demandStorageFCOJ(i, :));
+                end
+
+                for j = 1:length(stor_open)
+                    Decisions.futures_ship_dec(j,1)...
+                        =sum(Decisions.demandStorageFCOJ(j, :))/...
+                        CumDemandoverStorageFCOJ;
+                end
+
+                                
+                % Enter the shipping POJ and FCOJ to storage
+                % decisions
+                ship_break = struct('POJ', nan, 'FCOJ', nan);
+                Decisions.ship_proc_plant_storage_dec = ship_break;
+                for (i=1:length(stor_open))
+                    for(j =1:length(plants_open))
+                        Decisions.ship_proc_plant_storage_dec(i,j) = ship_break;
+                    end
+                end
+                          
+                % Do this for a 71 x 10 matrix as well
+                
+                % For stor_fac = each storage unit in stor_open
+                % For proc_plant = each processing plant in plants_open
+                % yr.ship_proc_plant_storage_dec(% for each stor_fac,% for each proc_plant).POJ = % enter the percent to ship to each storage
+                % yr.ship_proc_plant_storage_dec(% for each stor_fac,% for each proc_plant).FCOJ = % enter the percent to ship to each storage
+                              
+                % Set the percent of ORA to ship from groves to
+                % either processing or storage plants. Each row is one of
+                % the grove locations (FLA, CAL, TEX, ARZ,
+                %  BRA, SPA) and the columns represent each processing plan
+                %  and each storage unit that is currently open
+                % Find the storage and processing plants currently open
+                % from the OJ object.
+                
+                grove2processing_storage = load('grove2processing_storage.mat');
+                g2ps = genvarname('grove2processing_storage_dist');
+                grove2processing_storage = grove2processing_storage.(g2ps);
+                grove2processing_storage = cell2mat(grove2processing_storage);
+                grove2processing_storage = [grove2processing_storage, ...
+                    grove2processing_storage(:,1),...
+                    grove2processing_storage(:,1)];
+                
+                Dist_Grove_Storage = zeros(length(stor_open),6);
+                Dist_Grove_Proc_Plant = zeros(length(plants_open),6);
+                
+                for i = 1:6
+                    for j = 1:length(stor_open)
+                       Dist_Grove_Storage(j, i) =...
+                           grove2processing_storage(10+stor_open(j), i);
+                    end
+                end
+                
+                for i = 1:6
+                    for j = 1:length(plants_open)
+                       Dist_Grove_Proc_Plant(j, i) =...
+                           grove2processing_storage(plants_open(j), i);
+                    end
+                end
+                
+                theta5 = 1;
+                theta6 = -1;
+                theta7 = 1;
+                theta8 = -1;
+                
+                Decisions.ship_grove_dec = zeros(6, length(plants_open) +...
+                    length(stor_open));
+
+                % Set the decisions for the storage units
+                
+                CumDemandoverStorageORA = 0;
+                CumDemandoverProcPlantORA = 0;
+                TotalCurrentFutures = 0;
+                
+                for i = 1:5
+                    TotalCurrentFutures = TotalCurrentFutures + ...
+                        OJ_Object.ora_current_futures(1,2*i);
+                end
+                
+                for i = 1:length(stor_open)
+                    CumDemandoverStorageORA = CumDemandoverStorageORA + ...
+                        sum(Decisions.demandStorageORA(i, :));
+                end
+                
+                for i = 1:6
+                    for j = 1:length(stor_open)
+                        Decisions.ship_grove_dec(i, lengths(plants_open)+j)...
+                            =(sum(Decisions.demandStorageORA(j, :)) - ...
+                            Decisions.futures_ship_dec(j,1)*TotalCurrentFutures)/...
+                            CumDemandoverStorageORA;
+                    end
+                end
+                
+                                
+                for i = 1:6
+                    for j = 1:length(stor_open)
+                       Decisions.ship_grove_dec(i,lengths(plants_open)+j)= ...
+                           theta5*(Decisions.ship_grove_dec(i,lengths(plants_open)+j))...
+                           +theta6*(Dist_Grove_Storage(j, i));
+                    end
+                end
+                
+                for i = 1:length(plants_open)
+                    CumDemandoverProcPlantORA = CumDemandoverProcPlantORA + ...
+                        sum(Decisions.demandProcPlantORA(i, :));
+                end
+                        
+                for i = 1:6
+                    for j = 1:length(plants_open)
+                        Decisions.ship_grove_dec(i, j)...
+                            =(sum(Decisions.demandProcPlantORA(j, :)))/...
+                            CumDemandoverProcPlantORA;
+                    end
+                end
+                
+                                
+                for i = 1:6
+                    for j = 1:length(plants_open)
+                       Decisions.ship_grove_dec(i,j)= ...
+                           theta7*(Decisions.ship_grove_dec(i,j))...
+                           +theta8*(Dist_Grove_Proc_Plant(j, i));
+                    end
+                end
+                
+                % Processing plants manufacturing decisions
+                Decisions.manufac_proc_plant_dec =...
+                    struct('POJ', nan, 'FCOJ', nan);
+                for i = 1:length(plants_open)
+                    Decisions.manufac_proc_plant_dec(1,i).POJ = % ORA into POJ
+                    Decisions.manufac_proc_plant_dec(1,i).FCOJ = % ORA into FCOJ
+                end
+                
+                % Set the % of FCOJ to reconstitute to ROJ at each
+                % storage unit each month where each row is an open storage
+                % unit and each column is a month from Sep-Aug
+                Decisions.demandStorageTotalFCOJ = zeros(length(stor_open),12);
+                
+                for i = 1:12
+                    for j = 1:length(stor_open)
+                        Decisions.demandStorageTotalFCOJ(j,i) = ...
+                            Decisions.demandStorageFCOJ(j,i) + ...
+                            Decisions.demandStorageROJ(j,i);
+                    end
+                end
+                
+                Decisions.reconst_storage_dec = zeros(length(stor_open), 12);
+                for i = 1:12
+                    for j = 1:length(stor_open)
+                        Decisions.reconst_storage_dec(j, i) = ...
+                            Decisions.demandStorageROJ(j,i)/...
+                            Decisions.demandStorageTotalFCOJ(j,i);
+                    end
+                end
+                
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                
+                
+                
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                % Reading in raw_materials tab
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                %  Manually set the spot market prices equal to matrix
+                %  where each row is grove location (FLA, CAL, TEX, ARZ,
+                %  BRA, SPA respectively) and each column is a month of the
+                %  year starting in September
+                Decisions.purchase_spotmkt_dec = zeros(6,12);
+                % assign the buying quantity (tons per week in a month)
+                % either manually or by looping through locations/months
                 
                 Decisions.demandGroveORA = zeros(6,12);
                 index1 = 0;
@@ -440,8 +556,7 @@ classdef Decisions
                     end
                 end
                 
-                % Set the value of year you want to buy futures for
-                
+
                 % Set the percent of futures of ORA or FCOJ
                 % to arrive in month Sep-Aug
                 Decisions.arr_future_dec_ORA = zeros(1, 12);
@@ -471,10 +586,7 @@ classdef Decisions
                        Decisions.monthlyDemandFCOJ(1, i)/...
                        sum(Decisions.monthlyDemandFCOJ(1, :));
                 end
-                % Set each month you want delivery of futures to some
-                % percent
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                
+ 
                 
                 
                 
