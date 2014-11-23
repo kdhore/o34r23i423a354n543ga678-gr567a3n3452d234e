@@ -634,6 +634,8 @@ classdef Decisions
                 % For processing plants, the decision is the capacity to
                 % buy/sell in each plant: [P01;P02;...;P10]
                 Decisions.proc_plant_dec = zeros(10,1);% enter matrix manually here
+
+                %currently nothing changed in capacity
                 
                 %Add a certain processing plant if:
                 %capacity sold + transportation savings > price of new
