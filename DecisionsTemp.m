@@ -6,6 +6,8 @@ classdef DecisionsTemp < handle
         storage_dec;
         purchase_spotmkt_dec;
         quant_mult_dec;
+        future_mark_dec_ORA;
+        future_mark_dec_FCOJ;
         future_mark_dec_ORA_current1;
         future_mark_dec_ORA_current2;
         future_mark_dec_ORA_current3;
@@ -46,6 +48,8 @@ classdef DecisionsTemp < handle
         dec.storage_dec = yrDataObj.storage_dec;
         dec.purchase_spotmkt_dec = yrDataObj.purchase_spotmkt_dec;
         dec.quant_mult_dec = yrDataObj.quant_mult_dec;
+        dec.future_mark_dec_ORA = yrDataObj.future_mark_dec_ORA;
+        dec.future_mark_dec_FCOJ = yrDataObj.future_mark_dec_FCOJ;
         dec.future_mark_dec_ORA_current1 = yrDataObj.future_mark_dec_ORA_current1;
         dec.future_mark_dec_ORA_current2 = yrDataObj.future_mark_dec_ORA_current2;
         dec.future_mark_dec_ORA_current3 = yrDataObj.future_mark_dec_ORA_current3;
