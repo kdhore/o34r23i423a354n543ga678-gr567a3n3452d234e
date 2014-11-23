@@ -320,9 +320,9 @@ classdef Decisions
                 end
                 
                 theta5 = 1;
-                theta6 = -1;
+                theta6 = -1/10000;
                 theta7 = 1;
-                theta8 = -1;
+                theta8 = -1/10000;
                 
                 Decisions.ship_grove_dec = zeros(6, length(plants_open) +...
                     length(stor_open));
@@ -382,9 +382,6 @@ classdef Decisions
                             +theta8*(Dist_Grove_Proc_Plant(j, i));
                     end
                 end
-                
-                Decisions.demandProcPlantPOJ = zeros(length(plants_open),12);
-                Decisions.demandProcPlantFCOJ = zeros(length(plants_open),12);
                 
                 % Processing plants manufacturing decisions
                 Decisions.manufac_proc_plant_dec =...
@@ -699,11 +696,9 @@ classdef Decisions
                 
                 rho1 = 1.1; %parameter > 1 for buffer of processing plant
                 for i = 1:length(plants_open)
-                    Decisions.proc_plant_dec(plants_open(i,1),1) = ...
-                        rho1*(max(Decisions.demandProcPlantORA(i,1)) + ...
-                        max(Decisions.demandProcPlantPOJ(i,1)) + ... 
-                        max(Decisions.demandProcPlantFCOJ(i,1))) - ...
-                        OJ_object.proc_plant_cap(plants_open(i,1),1);
+                    Decisions.proc_plant_dec(plants_open(i),1) = ...
+                        rho1*max(Decisions.demandProcPlantORA(i,1)) - ...
+                        OJ_object.proc_plant_cap(plants_open(i),1);
                     %can be positive or negative number
                 end
                 
@@ -719,11 +714,9 @@ classdef Decisions
                 %rho2
                 rho3 = 0.75; %percentage of max to use
                 for i = 1:length(plants_open)
-                    Decisions.tank_car_dec(plants_open(i,1),1) = ...
-                        rho2*(rho3*max(Decisions.demandProcPlantPOJ(i,1)) + ...
-                        rho3*max(Decisions.demandProcPlantPOJ(i,1)) + ...
-                        rho3*max(Decisions.demandProcPlantPOJ(i,1))) - ...
-                        OJ_object.tank_cars_num(plants_open(i,1),1);
+                    Decisions.tank_car_dec(plants_open(i),1) = ...
+                        rho2*rho3*max(Decisions.demandProcPlantORA(i)) - ...
+                        OJ_object.tank_cars_num(plants_open(i),1);
                 end
                 
                 
@@ -745,14 +738,14 @@ classdef Decisions
                 %additional (unforseen) factors to throw out a lot of our
                 %product
                 
-                rho4 = 1.1; %parameter > 1 for buffer of storage unit
+                rho4 = 1.1; %parameter > 1 for buffer space of storage unit
                 for i = 1:length(stor_open)
-                    Decisions.storage_dec(i,stor_open(i,1)) = ...
+                    Decisions.storage_dec(i,stor_open(i)) = ...
                         rho4*(max(Decisions.demandStorageORA(i,:) + ...
                         max(Decisions.demandStoragePOJ(i,:)) + ... 
                         max(Decisions.demandStorageROJ(i,:)) + ...
                         max(Decisions.demandStorageFCOJ(i,:))) - ...
-                        OJ_object.storage_cap(stor_open(i,1),1));
+                        OJ_object.storage_cap(stor_open(i),1));
                     %can be positive or negative number
                 end
                 
