@@ -420,7 +420,7 @@ classdef Decisions
                     OJ_Object.fcoj_futures_current4(1,2);
                 
                 % Current decision year is first chance to buy for year 5
-                FCOJFuturesMaturing5 = 0
+                FCOJFuturesMaturing5 = 0;
                 
                 FCOJFuturesMaturing = [FCOJFuturesMaturing1, FCOJFuturesMaturing2,...
                     FCOJFuturesMaturing3, FCOJFuturesMaturing4, FCOJFuturesMaturing5];
@@ -442,10 +442,35 @@ classdef Decisions
                 
                 % Set the value of year you want to buy futures for
                 
-                % Manually set the percent of futures of ORA or FCOJ
+                % Set the percent of futures of ORA or FCOJ
                 % to arrive in month Sep-Aug
                 Decisions.arr_future_dec_ORA = zeros(1, 12);
+                Decisions.monthlyDemandORA = zeros(1,12);
+                 
+                for i = 1:12
+                    Decisions.monthlyDemandORA(1, i) = ...
+                       sum(Decisions.demandStorageORA(:,i));
+                end
+                
+                for i = 1:12
+                     Decisions.arr_future_dec_ORA(1, i) = ...
+                       Decisions.monthlyDemandORA(1, i)/...
+                       sum(Decisions.monthlyDemandORA(1, :));
+                end
+                
                 Decisions.arr_future_dec_FCOJ = zeros(1, 12);
+                Decisions.monthlyDemandFCOJ = zeros(1,12);
+
+                for i = 1:12
+                    Decisions.monthlyDemandFCOJ(1, i) = ...
+                       sum(Decisions.demandStorageFCOJ(:,i));
+                end
+                
+                for i = 1:12
+                     Decisions.arr_future_dec_FCOJ(1, i) = ...
+                       Decisions.monthlyDemandFCOJ(1, i)/...
+                       sum(Decisions.monthlyDemandFCOJ(1, :));
+                end
                 % Set each month you want delivery of futures to some
                 % percent
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
