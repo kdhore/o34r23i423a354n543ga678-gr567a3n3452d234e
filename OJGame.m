@@ -29,6 +29,7 @@ classdef OJGame
         
         % Number of tank cars? and Where they are?
         tank_cars_num = zeros(10,1);
+        %tank_status;
         
         % Two arrays for future deliveries (one for ORA and one for FCOJ)
         %   - how much is arriving in the next four years
@@ -59,7 +60,9 @@ classdef OJGame
             tank_cars = cell2mat(cellNaNReplace(tank_cars,0));
             for i = 1:10
                 oj.tank_cars_num(i) = tank_cars(i);
+                %oj.tank_status(:,i) = [tank_cars(i);0;0];
             end
+            
             [~,~, storage_capacity] = xlsread(filename,'facilities','D36:D106');
             storage_capacity = cell2mat(cellNaNReplace(storage_capacity,0));
             for i = 1:71
@@ -146,6 +149,7 @@ classdef OJGame
             obj.proc_plant_cap = obj.proc_plant_cap + YearData.proc_plant_dec;
             obj.tank_cars_num = obj.tank_cars_num + YearData.tank_car_dec;
             obj.storage_cap = obj.storage_cap + YearData.storage_dec;
+            %obj.tank_status = YearData.tank_status;
             
         end
         

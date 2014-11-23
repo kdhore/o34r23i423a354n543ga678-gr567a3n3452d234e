@@ -1,4 +1,4 @@
-classdef storageFacility2 < handle
+classdef storageFacility2v2 < handle
 
 	properties
 		capacity;
@@ -15,6 +15,7 @@ classdef storageFacility2 < handle
         ship_out;
         sold;
         toss_out;
+        cum_toss_out;
         rotten;
         excessDemand; 
         ROJman; 
@@ -36,7 +37,7 @@ classdef storageFacility2 < handle
         
         % Note: If this class should calculate transportation cost from
         % storage to demand, need the cities that this facility services
-		function sf = storageFacility2(cap,inventory,rc,hc,rp,index,proc_num)
+		function sf = storageFacility2v2(cap,inventory,rc,hc,rp,index,proc_num)
 			sf.inventory{1} = [inventory.ORA];
             sf.inventory{2} = [inventory.POJ];
             sf.inventory{3} = [inventory.ROJ];
@@ -50,6 +51,7 @@ classdef storageFacility2 < handle
             sf.ship_out = cell(4,1);
             sf.sold = zeros(4,1);
             sf.toss_out = cell(4,1);
+            sf.cum_toss_out = zeros(4,1);
             sf.rotten = zeros(4,1);
             sf.excessDemand = 0; 
             sf.ROJman = 0; 
@@ -112,6 +114,11 @@ classdef storageFacility2 < handle
 
 			avails = zeros(4,1);
             sf.revReceived = zeros(4,1);
+            
+            % get how much is rotten this week
+            for i=1:length(sf.inventory)
+                sf.rotten(i) = sf.inventory{i}(length(sf.inventory{i}));
+            end
             
 			% add in new inventory
             for i = 1:sf.proc_num
@@ -235,12 +242,15 @@ classdef storageFacility2 < handle
 					a = 'debugging needed'
 				end
 				i = i + 1;
-            end     
+            end
+            for i = 1:4
+                 sf.cum_toss_out(i) = sum(sf.toss_out{i});
+            end
              
-            sf.ROJman = sf.roj_temp;
+            sf.ROJman = sum(sf.roj_temp);
              % store in temp variable what we make from this week FCOJ
              for i = 1:length(sf.roj_temp)
-                 sf.roj_temp(i) = sf.inventory{4}(i)* sf.reconPercent(ceil(time/4));
+                 sf.roj_temp(i) = sf.inventory{4}(i)* sf.reconPercent(ceil(time/4))/100;
              end
             
             % satisfy demand from FCOJ - ROJ
@@ -301,11 +311,10 @@ classdef storageFacility2 < handle
 				for j=m:-1:2
 					sf.inventory{i}(j) = sf.inventory{i}(j-1);
 				end
-				sf.inventory{i}(1) = 0;
-				sf.rotten(i) = sf.inventory{i}(m);
+				sf.inventory{i}(1) = 0;	
+                %sf.rotten(i) = sf.inventory{i}(length(sf.inventory{i}));
             end
-            
-            
+
 		end
 	end
 end

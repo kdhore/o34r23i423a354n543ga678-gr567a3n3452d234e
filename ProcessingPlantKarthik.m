@@ -28,7 +28,7 @@ classdef ProcessingPlantKarthik
 	end
     
     methods
-        function pp = ProcessingPlantKarthik(index, capacity, percentPOJ, breakdown, ora, pojC, fcojC, tankers, tankerCost, stor_num)
+        function pp = ProcessingPlantKarthik(index, capacity, percentPOJ, breakdown, ora, pojC, fcojC, tanker_num, tankerCost, stor_num)
             schedule = struct('POJ_1Week', 0, 'POJ_2Week', 0, 'POJ_3Week', 0, 'POJ_4Week', 0, ...
                               'FCOJ_1Week', 0, 'FCOJ_2Week', 0,'FCOJ_3Week', 0, 'FCOJ_4Week', 0,...
                               'Tankers', 0, 'Carriers', 0);
@@ -38,7 +38,7 @@ classdef ProcessingPlantKarthik
 			pp.percentFCOJ = 100 - percentPOJ;
 			pp.ora = ora;
 			pp.breakdown = breakdown;
-			pp.tankersAvailable = tankers;
+			pp.tankersAvailable = tanker_num; % was just tanker_num before. now inputting tanker status with available, going out, and coming home
 			pp.tankerCost = tankerCost;
 			pp.pojCost = pojC;
 			pp.fcojCost = fcojC;
@@ -51,6 +51,7 @@ classdef ProcessingPlantKarthik
             pp.shipped_out_cost_carrier = 0;
             pp.rotten = 0;
             pp.throwaway = 0;
+            %pp.shippingSchedule = shippingSchedule;
             for i = 1:stor_num
                 storage_schedule{i} = schedule;
             end

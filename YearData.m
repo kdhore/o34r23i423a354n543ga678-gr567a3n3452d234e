@@ -18,9 +18,12 @@ classdef YearData
         year;
         proc_plant_dec;
         tank_car_dec;
+        %tank_status;
         storage_dec;
         purchase_spotmkt_dec;
         quant_mult_dec;
+        future_mark_dec_ORA;
+        future_mark_dec_FCOJ;
         future_mark_dec_ORA_current;
         future_mark_dec_ORA_current1;
         future_mark_dec_ORA_current2;
@@ -118,11 +121,24 @@ classdef YearData
                 [~,~, yr.storage_dec] = xlsread(filename,'facilities','C36:C106');
                 yr.storage_dec = cell2mat(cellNaNReplace(yr.storage_dec,0));
                 
+                %plants_open = find(OJ_object.proc_plant_cap);
+                %yr.tank_status = zeros(3,length(plants_open));
+                %for i = 1:length(plants_open)
+                %    if (i == 10)
+                %        [~,~,yr.tank_status(:,i)] = xlsread(filename,strcat('P',num2string(i)),'AY27:AY29');
+                %    else  
+                %        [~,~,yr.tank_status(:,i)] = xlsread(filename,strcat('P0',num2string(i)),'AY27:AY29');  
+                %    end
+                %end
                 % Reading in raw_materials tab
                 [~, ~, yr.purchase_spotmkt_dec] = xlsread(filename,'raw_materials','C6:N11');
                 yr.purchase_spotmkt_dec = cell2mat(cellNaNReplace(yr.purchase_spotmkt_dec,0));  
                 yr.quant_mult_dec = xlsread(filename,'raw_materials','C17:H22');
                 
+                [~, ~, yr.future_mark_dec_ORA] = xlsread(filename,'raw_materials','N31:O35');
+                yr.future_mark_dec_ORA = cell2mat(cellNaNReplace(yr.future_mark_dec_ORA,0));
+                [~, ~, yr.future_mark_dec_FCOJ] = xlsread(filename,'raw_materials','N37:O41');
+                yr.future_mark_dec_FCOJ = cell2mat(cellNaNReplace(yr.future_mark_dec_FCOJ,0));
                 [~, ~, yr.future_mark_dec_ORA_current] = xlsread(filename,'raw_materials','D30:M30');
                 yr.future_mark_dec_ORA_current = cell2mat(cellNaNReplace(yr.future_mark_dec_ORA_current,0));
                 [~, ~, yr.future_mark_dec_ORA_current1] = xlsread(filename,'raw_materials','F31:O31');

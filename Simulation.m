@@ -11,6 +11,7 @@ grove2processing_storage = [grove2processing_storage, grove2processing_storage(:
 plant2storage = load('plant2storage_dist.mat');
 p2s = genvarname('processing2storage_dist');
 plant2storage = plant2storage.(p2s);
+plant2storage = cell2mat(plant2storage);
 demand_city_ORA = load('demand_city_ORA.mat');
 dc_ora = genvarname('ORA_means_by_city');
 demand_city_ORA = demand_city_ORA.(dc_ora);
@@ -31,14 +32,14 @@ plants_open = find(OJgameobj.proc_plant_cap);
 proc_plants = cell(length(plants_open),1);
 for i = 1:length(plants_open)
     inventory = [OJgameobj.proc_plant_inv(plants_open(i)).ORA];
-    proc_plants{i} = ProcessingPlantKarthik(plants_open(i),OJgameobj.proc_plant_cap(plants_open(i)),    decisions.manufac_proc_plant_dec(1,plants_open(i)), 0, inventory,  2000, 1000, OJgameobj.tank_cars_num(plants_open(i)), 10, length(find(OJgameobj.storage_cap)));
+    proc_plants{i} = ProcessingPlantKarthik(plants_open(i),OJgameobj.proc_plant_cap(plants_open(i)),decisions.manufac_proc_plant_dec(1,plants_open(i)), 0, inventory,  2000, 1000, OJgameobj.tank_cars_num(plants_open(i)), 10, length(find(OJgameobj.storage_cap)));
 end
 
 % Storage facilities
 storage_open = find(OJgameobj.storage_cap);
 storage = cell(length(storage_open),1);
 for i = 1:length(storage_open)
-    storage{i} = storageFacility2(OJgameobj.storage_cap(storage_open(i)),OJgameobj.storage_inv(storage_open(i)),650,60,decisions.reconst_storage_dec(storage_open(i),:),storage_open(i),length(plants_open));
+    storage{i} = storageFacility2v2(OJgameobj.storage_cap(storage_open(i)),OJgameobj.storage_inv(storage_open(i)),650,60,decisions.reconst_storage_dec(storage_open(i),:),storage_open(i),length(plants_open));
 end
 
 cities_match_storage = matchCitiestoStorage(storage_open, storage2market.(s2m));
@@ -49,6 +50,8 @@ cities_match_storage = matchCitiestoStorage(storage_open, storage2market.(s2m));
     fx = foreignEx(); % Need to write function
     adj_BRASPA_USPrice = grove_spot(5:6,:).*fx;
     adj_USP = [grove_spot(1:4,:); adj_BRASPA_USPrice];
+    %updateModels(2014)
+    %adj_USP = genPrices();
     act_quant_mult = zeros(6,12);
     for h = 1:6
         mult_1 = decisions.quant_mult_dec(h,1);
@@ -60,12 +63,12 @@ cities_match_storage = matchCitiestoStorage(storage_open, storage2market.(s2m));
         for j = 1:12
             if adj_USP(h,j) <= price_1
                 act_quant_mult(h,j) = mult_1;
-            end
-            if adj_USP(h,j) <= price_2;
+            elseif adj_USP(h,j) <= price_2;
                 act_quant_mult(h,j) = mult_2;
-            end
-            if adj_USP(h,j) <= price_3;
+            elseif adj_USP(h,j) <= price_3;
                 act_quant_mult(h,j) = mult_3;
+            else
+                act_quant_mult(h,j) = 0;
             end
         end
     end
@@ -97,10 +100,10 @@ cities_match_storage = matchCitiestoStorage(storage_open, storage2market.(s2m));
  for i = 1:5
      ora_futures = ora_futures + OJgameobj.ora_futures_current(2*(i-1)+2);
      fcoj_futures = fcoj_futures + OJgameobj.fcoj_futures_current(2*(i-1)+2);
-     futures_cost_ORA = futures_cost_ORA + OJgameobj.ora_futures_current(2*(i-1)+1)*OJgameobj.ora_futures_current(2*(i-1)+2);
-     futures_cost_FCOJ = futures_cost_FCOJ + OJgameobj.fcoj_futures_current(2*(i-1)+1)*OJgameobj.ora_futures_current(2*(i-1)+2);
+     futures_cost_ORA = futures_cost_ORA + 2000*OJgameobj.ora_futures_current(2*(i-1)+1)*OJgameobj.ora_futures_current(2*(i-1)+2);
+     futures_cost_FCOJ = futures_cost_FCOJ + 2000*OJgameobj.fcoj_futures_current(2*(i-1)+1)*OJgameobj.fcoj_futures_current(2*(i-1)+2);
  end
- 
+
  % Number of ORA/FCOJ futures arriving each month at the florida grove
  futures_arr_ORA = ora_futures.*(decisions.arr_future_dec_ORA*0.01);
  futures_arr_FCOJ = fcoj_futures.*(decisions.arr_future_dec_FCOJ*0.01);
@@ -146,12 +149,24 @@ transCostfromGroves_ORA = sum(sum(transCost_fromGroves));
  POJ_man = zeros(length(proc_plants),48); 
  FCOJ_man = zeros(length(proc_plants),48); 
  ROJ_man = zeros(length(storage_open),48); 
- sold = cell(length(storage_open),48);
- toss_outStor = cell(length(storage_open),48);
+ soldORA = zeros(length(storage_open),48);
+ soldPOJ = zeros(length(storage_open),48);
+ soldROJ = zeros(length(storage_open),48);
+ soldFCOJ = zeros(length(storage_open),48);
+ toss_outStorORA = zeros(length(storage_open),48);
+ toss_outStorPOJ = zeros(length(storage_open),48);
+ toss_outStorROJ = zeros(length(storage_open),48);
+ toss_outStorFCOJ = zeros(length(storage_open),48);
  toss_outProc = zeros(length(proc_plants),48); 
- rottenStor = cell(length(storage_open),48);
+ rottenStorORA = zeros(length(storage_open),48);
+ rottenStorPOJ = zeros(length(storage_open),48);
+ rottenStorROJ = zeros(length(storage_open),48);
+ rottenStorFCOJ = zeros(length(storage_open),48);
  rottenProc = zeros(length(proc_plants),48);
- revReceived = cell(length(storage_open),48);
+ revReceivedORA = zeros(length(storage_open),48);
+ revReceivedPOJ = zeros(length(storage_open),48);
+ revReceivedROJ = zeros(length(storage_open),48);
+ revReceivedFCOJ = zeros(length(storage_open),48);
  transCfromPlants_tank = zeros(length(proc_plants),48); 
  transCfromPlants_carrier = zeros(length(proc_plants),48); 
  holdCost = zeros(length(storage_open),48); 
@@ -173,43 +188,29 @@ transCostfromGroves_ORA = sum(sum(transCost_fromGroves));
          else
              breakdown = 0;
          end
-         %breakdown = 0;
-%          if i == 14 && j ==2
-%              breakdown = 1;
-%          end
-%          if i == 17 && j ==2
-%              breakdown = 1;
-%          end
-%          if i == 48 && j ==2
-%              breakdown = 1;
-%          end
-%          if i == 43 && j == 1
-%              breakdown = 1;
-%          end
-%          if i ==8 && j == 3 
-%              breakdown = 1;
-%          end
-%          if i ==39 && j == 3 
-%              breakdown = 1;
-%          end
-%          if i ==24 && j == 3 
-%              breakdown = 1;
-%          end
-%          if i == 17 && j == 2
-%              sum_shipped = 849.1962;
-%          end
-%          if i == 19 && j == 2
-%              sum_shipped = 851.0874;
-%          end
-%          if i == 27 && j == 2
-%              sum_shipped = 1219.53;
-%          end
-%          if i == 29 && j == 2
-%              sum_shipped = 860.365;
-%          end
-%          if i == 18 && j == 2
-%              sum_shipped = 850.143;
-%          end
+         breakdown = 0;
+         if i == 43 && j == 1
+              breakdown = 1;
+          end
+          if i == 14 && j == 2
+              breakdown = 1;
+          end
+          if i == 17 && j == 2
+              breakdown = 1;
+          end
+          if i == 48 && j == 2
+              breakdown = 1;
+          end
+
+          if i == 8 && j == 3
+              breakdown = 1;
+          end
+          if i == 24 && j == 3
+              breakdown = 1;
+          end
+          if i == 39 && j == 3
+              breakdown = 1;
+          end
          proc_plants{j} = proc_plants{j}.iterateWeek(sum_shipped, decisions, breakdown, storage_open);
          POJ_man(j,i) = proc_plants{j}.poj;
          FCOJ_man(j,i) = proc_plants{j}.fcoj;
@@ -232,69 +233,66 @@ transCostfromGroves_ORA = sum(sum(transCost_fromGroves));
          monthly_amt_futures_shipped_FCOJ = futures_arr_FCOJ*fraction_shipped_futures;
          indicies = strcmp(char(storageNamesInUse(storage_open(j))),cities_match_storage(:,2));
          cities = cities_match_storage(indicies,:);
-         name = char(storageNamesInUse(storage_open(j)));
-         [ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, big_D, big_P] = drawDemand(decisions,cities,i, demand_city_ORA, demand_city_POJ, demand_city_ROJ, demand_city_FCOJ, decisions.storage_res(name), indicies); % will need to give it a price, and do this for all products
+         %name = char(storageNamesInUse(storage_open(j)));
+         %[ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, big_D, big_P] = drawDemand(decisions,cities,i, demand_city_ORA, demand_city_POJ, demand_city_ROJ, demand_city_FCOJ, decisions.storage_res(name), indicies); % will need to give it a price, and do this for all products
+         [ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, big_D, big_P] = drawDemand(decisions,cities,i, demand_city_ORA, demand_city_POJ, demand_city_ROJ, demand_city_FCOJ);
          storage{j} = storage{j}.iterateWeek(sum_shipped, (monthly_amt_futures_shipped_FCOJ(ceil(i/4)))/4, proc_plants, big_D, big_P, i, ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, cities, j);
-         sold{j,i} = storage{j}.sold;
-         toss_outStor{j,i} = storage{j}.toss_out;
-         rottenStor{j,i} = storage{j}.rotten;
+         soldORA(j,i) = storage{j}.sold(1);
+         soldPOJ(j,i) = storage{j}.sold(2);
+         soldROJ(j,i) = storage{j}.sold(3);
+         soldFCOJ(j,i) = storage{j}.sold(4);
+         toss_outStorORA(j,i) = storage{j}.cum_toss_out(1);
+         toss_outStorPOJ(j,i) = storage{j}.cum_toss_out(2);
+         toss_outStorROJ(j,i) = storage{j}.cum_toss_out(3);
+         toss_outStorFCOJ(j,i) = storage{j}.cum_toss_out(4);
+         rottenStorORA(j,i) = storage{j}.rotten(1);
+         rottenStorPOJ(j,i) = storage{j}.rotten(2);
+         rottenStorROJ(j,i) = storage{j}.rotten(3);
+         rottenStorFCOJ(j,i) = storage{j}.rotten(4);
          excessDemand = storage{j}.excessDemand;
          ROJ_man(j,i) = storage{j}.ROJman;
          holdCost(j,i) = storage{j}.holdCost;
-         revReceived{j,i} = storage{j}.revReceived;
+         revReceivedORA(j,i) = storage{j}.revReceived(1);
+         revReceivedPOJ(j,i) = storage{j}.revReceived(2);
+         revReceivedROJ(j,i) = storage{j}.revReceived(3);
+         revReceivedFCOJ(j,i) = storage{j}.revReceived(4);
          transport2cities_cost(j,i) = storage{j}.transCost;
      end
  end
  totPOJ_man = sum(sum(POJ_man)); 
  totFCOJ_man = sum(sum(FCOJ_man)); 
  totROJ_man = sum(sum(ROJ_man)); 
- totSold = sum(sold,2);
- totToss_out = sum(sum(toss_outStor))+sum(toss_outProc); 
- totRotten = sum(rottenProc)+sum(sum(rottenStor));
- totRevReceived = sum(revReceived,2);
- totTransCfromPlants_tank = sum(transCfromPlants_tank); 
- totTransCfromPlants_carrier = sum(transCfromPlants_carrier); 
- totHoldCost = sum(holdCost); 
- totTankHoldCost = sum(totTankersHoldC);
- totTransport2cities_cost = sum(transport2cities_cost);
- pojManCost = sum(POJ_man)*2000;
- fcojManCost = sum(FCOJ_man)*1000;
- reconCost = sum(ROJ_man)*650;
-        
-    % Transporation costs of shipping for FCOJ futures to storage facilities (input the distance excel file)
-    % Transportation costs of shipping for ORA and ORA futures to processing
-    % plants and storage
+ totSoldORA = sum(sum(soldORA));
+ totSoldPOJ = sum(sum(soldPOJ));
+ totSoldROJ = sum(sum(soldROJ));
+ totSoldFCOJ = sum(sum(soldFCOJ));
+ totToss_out = sum(sum(toss_outStorORA))+sum(sum(toss_outStorPOJ))+sum(sum(toss_outStorROJ))+sum(sum(toss_outStorFCOJ))+sum(sum(toss_outProc)); 
+ totRottenORA = sum(sum(rottenProc))+sum(sum(rottenStorORA));
+ totRottenPOJ = sum(sum(rottenStorPOJ));
+ totRottenROJ = sum(sum(rottenStorROJ));
+ totRottenFCOJ = sum(sum(rottenStorFCOJ));
+ totRotten = totRottenORA+totRottenPOJ+totRottenROJ+totRottenFCOJ;
+ totRevReceivedORA = sum(sum(revReceivedORA));
+ totRevReceivedPOJ = sum(sum(revReceivedPOJ));
+ totRevReceivedROJ = sum(sum(revReceivedROJ));
+ totRevReceivedFCOJ = sum(sum(revReceivedFCOJ));
+ totTransCfromPlants_tank = sum(sum(transCfromPlants_tank)); 
+ totTransCfromPlants_carrier = sum(sum(transCfromPlants_carrier)); 
+ totHoldCost = sum(sum(holdCost)); 
+ totTankHoldCost = sum(sum(tankersHoldC));
+ totTransport2cities_cost = sum(sum(transport2cities_cost));
+ pojManCost = totPOJ_man*2000;
+ fcojManCost = totFCOJ_man*1000;
+ reconCost = totROJ_man*650;
 
-    % Transporation costs of shipping from processing plants to storage
-    % facilities
-
-    % Processing plants costs of making FCOJ and POJ
-    
-    % Reconstitution of FCOJ and update storage plant inventory and cost of
-    % that
-    
-    % Draw demand for that particular week for each region (based on the
-    % inventory that's there in the storage facilities of each product)
-    % (you also need to figure out which storage facilities are servicing
-    % which regions)
-    
-    % Calculate transportation costs from storage to market for each
-    % product (you need to figure out which storages are servicing which
-    % areas)
-    
-    % Calculate sales of all the products for each region
-    
-    % store information somewhere
-    
-    % Manage the processing plants and storage plants inventory
-ORA_futures_purch = decisions.future_mark_dec_ORA;
-FCOJ_futures_purch = decisions.future_mark_dec_FCOJ;
+ORA_futures_purch = decisions.future_mark_dec_ORA(:,2);
+FCOJ_futures_purch = decisions.future_mark_dec_FCOJ(:,2);
 plant_cap_upgrade = max(sum(decisions.proc_plant_dec),0);
 plant_cap_downgrade = min(sum(decisions.proc_plant_dec),0);
 storage_cap_upgrade = max(sum(decisions.storage_dec),0);
 storage_cap_downgrade = min(sum(decisions.storage_dec),0);
 newtank = max(sum(decisions.tank_car_dec),0);
-tanksold = min(sum(decisions.tank_car_dec),0);
+tanksold = -min(sum(decisions.tank_car_dec),0);
 
 newplants = 0;
 plantsold = 0;
@@ -317,25 +315,29 @@ for i = 1:length(decisions.storage_dec)
 end
 
 proc_plants = find(OJgameobj.proc_plant_cap);
-proc_plants_main = 8000000*length(proc_plants)+2500*OJgameobj.proc_plant_cap(proc_plants);
+proc_plants_main = 8000000*length(proc_plants)+sum(2500*OJgameobj.proc_plant_cap(proc_plants));
 costs_new_plants = newplants*12000000-plantsold*70/100*12000000;
 proc_plant_cap_costs = 8000*plant_cap_upgrade+0.7*8000*plant_cap_downgrade; 
 storages = find(OJgameobj.storage_cap);
-storage_main = 7500000*length(storages)+650*OJgameobj.storage_cap(storages); 
+storage_main = 7500000*length(storages)+sum(650*OJgameobj.storage_cap(storages)); 
 costs_new_storage = newstorage*9000000-storagesold*80/100*9000000; 
 storage_cap_costs = 6000*storage_cap_upgrade+0.8*6000*storage_cap_downgrade; 
 tankCar_purchase_costs = newtank*100000-tanksold*60/100*100000;
     
-sales = totSold;
+sales = [totSoldORA;totSoldPOJ;totSoldROJ;totSoldFCOJ];
 materialsAcqLos = [ora_futures; fcoj_futures; totPOJ_man; totFCOJ_man; totROJ_man; totToss_out; totRotten];
-futures = [ORA_futures_purch; FCOJ_futures_purch];
+futures = [sum(ORA_futures_purch); sum(FCOJ_futures_purch)];
 facilities = [plant_cap_upgrade; storage_cap_upgrade; plant_cap_downgrade; storage_cap_downgrade; newplants; newstorage; newtank; plantsold; storagesold; tanksold]; %decisions
-salesRev = totRevReceived;
+salesRev = [totRevReceivedORA;totRevReceivedPOJ;totRevReceivedROJ;totRevReceivedFCOJ];
 materialsCost = [ORA_purch_cost; futures_cost_ORA; futures_cost_FCOJ; transCostfromGroves_ORA; transCostfromGroves_FCOJ];
 manCost = [pojManCost; fcojManCost; reconCost];
 transCost = [totTransCfromPlants_tank; totTransCfromPlants_carrier; totHoldCost; totTransport2cities_cost];
 maintainenceCost = [proc_plants_main; costs_new_plants; proc_plant_cap_costs; storage_main; costs_new_storage; storage_cap_costs; totTankHoldCost; tankCar_purchase_costs]; %decisions
-results = cell(9,1);
+
+totalRevenue = sum(salesRev);
+totalCosts = sum(materialsCost) + sum(manCost) + sum(transCost) + sum(maintainenceCost);
+
+results = cell(10,1);
 results{1} = sales;
 results{2} = materialsAcqLos;
 results{3} = futures;
@@ -345,5 +347,7 @@ results{6} = materialsCost;
 results{7} = manCost;
 results{8} = transCost;
 results{9} = maintainenceCost;
+results{10} = totalRevenue - totalCosts;
+
 end
 
