@@ -26,44 +26,45 @@ dc_fcoj = genvarname('FCOJ_means_by_city');
 demand_city_FCOJ = demand_city_FCOJ.(dc_fcoj);
 
 % % for 2015 run
-% firstShippingSchedule = cell(1,6);
-% secondShippingSchedule = cell(1,6);
-% thirdShippingSchedule = cell(1,6);
-% schedule = struct('POJ_1Week', 0, 'POJ_2Week', 0, 'POJ_3Week', 0, 'POJ_4Week', 0, ...
-%                               'FCOJ_1Week', 0, 'FCOJ_2Week', 0,'FCOJ_3Week', 0, 'FCOJ_4Week', 0,'Tankers', 0, 'Carriers', 0);
-% stor_num = 3;
-% storage_schedule = cell(1, stor_num);                          
-% for i = 1:stor_num
-%      storage_schedule{i} = schedule;
-% end
-% for i = 1:6
-%     firstShippingSchedule{i} = storage_schedule;
-% end
-% for i = 1:6
-%     secondShippingSchedule{i} = storage_schedule;
-% end
-% for i = 1:6
-%     thirdShippingSchedule{i} = storage_schedule;
-% end
-% firstShippingSchedule{5}{1}.POJ_3Week = 153.08547;
-% firstShippingSchedule{5}{1}.FCOJ_3Week = 191.91453;
-% firstShippingSchedule{2}{1}.Tankers = 11;
-% secondShippingSchedule{3}{1}.POJ_1Week = 221.863;
-% secondShippingSchedule{3}{1}.FCOJ_1Week = 278.137;
-% secondShippingSchedule{3}{1}.Tankers = 17;
-% secondShippingSchedule{2}{1}.Tankers = 5;
-% thirdShippingSchedule{3}{1}.POJ_1Week = 66.81346335;
-% thirdShippingSchedule{3}{1}.FCOJ_1Week = 83.18653665;
-% thirdShippingSchedule{3}{1}.Tankers = 5;
-% thirdShippingSchedule{4}{1}.POJ_2Week = 431.2320904;
-% thirdShippingSchedule{4}{1}.FCOJ_2Week = 536.908316;
-% thirdShippingSchedule{3}{2}.POJ_1Week = 946.6295265;
-% thirdShippingSchedule{3}{2}.FCOJ_1Week = 493.3704735;
-% thirdShippingSchedule{3}{2}.Tankers = 48;
-% thirdShippingSchedule{5}{2}.POJ_3Week = 630.5147272;
-% thirdShippingSchedule{5}{2}.FCOJ_3Week = 328.6157264;
-% thirdShippingSchedule{3}{2}.POJ_2Week = 1577.144254;
-% thirdShippingSchedule{3}{2}.FCOJ_2Week = 821.9862;
+firstShippingSchedule = cell(1,6);
+secondShippingSchedule = cell(1,6);
+thirdShippingSchedule = cell(1,6);
+schedule = struct('POJ_1Week', 0, 'POJ_2Week', 0, 'POJ_3Week', 0, 'POJ_4Week', 0, ...
+                              'FCOJ_1Week', 0, 'FCOJ_2Week', 0,'FCOJ_3Week', 0, 'FCOJ_4Week', 0,'Tankers', 0, 'Carriers', 0);
+stor_num = 71;
+storage_schedule = cell(1, stor_num);   
+stor_open = find(OJgameobj.storage_cap);
+for i = 1:stor_num
+     storage_schedule{i} = schedule;
+end
+for i = 1:6
+    firstShippingSchedule{i} = storage_schedule;
+end
+for i = 1:6
+    secondShippingSchedule{i} = storage_schedule;
+end
+for i = 1:6
+    thirdShippingSchedule{i} = storage_schedule;
+end
+firstShippingSchedule{5}{stor_open(1)}.POJ_3Week = 153.08547;
+firstShippingSchedule{5}{stor_open(1)}.FCOJ_3Week = 191.91453;
+firstShippingSchedule{2}{stor_open(1)}.Tankers = 11;
+secondShippingSchedule{3}{stor_open(1)}.POJ_1Week = 221.863;
+secondShippingSchedule{3}{stor_open(1)}.FCOJ_1Week = 278.137;
+secondShippingSchedule{3}{stor_open(1)}.Tankers = 17;
+secondShippingSchedule{2}{stor_open(1)}.Tankers = 5;
+thirdShippingSchedule{3}{stor_open(1)}.POJ_1Week = 66.81346335;
+thirdShippingSchedule{3}{stor_open(1)}.FCOJ_1Week = 83.18653665;
+thirdShippingSchedule{3}{stor_open(1)}.Tankers = 5;
+thirdShippingSchedule{4}{stor_open(1)}.POJ_2Week = 431.2320904;
+thirdShippingSchedule{4}{stor_open(1)}.FCOJ_2Week = 536.908316;
+thirdShippingSchedule{3}{stor_open(2)}.POJ_1Week = 946.6295265;
+thirdShippingSchedule{3}{stor_open(2)}.FCOJ_1Week = 493.3704735;
+thirdShippingSchedule{3}{stor_open(2)}.Tankers = 48;
+thirdShippingSchedule{5}{stor_open(2)}.POJ_3Week = 630.5147272;
+thirdShippingSchedule{5}{stor_open(2)}.FCOJ_3Week = 328.6157264;
+thirdShippingSchedule{3}{stor_open(2)}.POJ_2Week = 1577.144254;
+thirdShippingSchedule{3}{stor_open(2)}.FCOJ_2Week = 821.9862;
 %            
 % plants_open = find(OJgameobj.proc_plant_cap);
 % proc_plants = cell(length(plants_open),1);
@@ -91,6 +92,15 @@ for i = 1:10
     end
 end
 
+proc_plants{plants_open(1)}.shippingSchedule = firstShippingSchedule;
+proc_plants{plants_open(1)}.tankersAvailable = 19;
+ 
+proc_plants{plants_open(2)}.shippingSchedule = secondShippingSchedule; 
+proc_plants{plants_open(2)}.tankersAvailable = 17;
+
+proc_plants{plants_open(3)}.shippingSchedule = thirdShippingSchedule;
+proc_plants{plants_open(3)}.tankersAvailable = 70;
+
 % Storage facilities
 storage_open = find(OJgameobj.storage_cap);
 storage = cell(length(storage_open),1);
@@ -103,12 +113,12 @@ cities_match_storage = matchCitiestoStorage(storage_open, storage2market.(s2m));
        
 % Draw grove prices matrix, fx grove => US$ prices, and use actual
 % quantity purchased and the purchasing cost
-    %grove_spot = grovePrices(); %Need to write function
-    %fx = foreignEx(); % Need to write function
-    %adj_BRASPA_USPrice = grove_spot(5:6,:).*fx;
-    %adj_USP = [grove_spot(1:4,:); adj_BRASPA_USPrice];
-    updateModels();
-    adj_USP = genPrices();
+    grove_spot = grovePrices(); %Need to write function
+    fx = foreignEx(); % Need to write function
+    adj_BRASPA_USPrice = grove_spot(5:6,:).*fx;
+    adj_USP = [grove_spot(1:4,:); adj_BRASPA_USPrice];
+    %updateModels();
+    %adj_USP = genPrices();
     act_quant_mult = zeros(6,12);
     for h = 1:6
         mult_1 = decisions.quant_mult_dec(h,1);

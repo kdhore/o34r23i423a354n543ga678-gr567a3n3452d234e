@@ -148,7 +148,7 @@ classdef ProcessingPlantKarthikNew
                     % Allocate as much as possible to tankers
                     %oneWeek = obj.shippingSchedule{3};
                     temp_tankers = obj.tankersAvailable;
-                    while temp_tankers > 0       
+                    while temp_tankers > 0
                         stor = storage_open(j);
                         stor_percentPOJ = decisions.ship_proc_plant_storage_dec(stor, obj.index).POJ;
                         stor_percentFCOJ = decisions.ship_proc_plant_storage_dec(stor, obj.index).FCOJ;

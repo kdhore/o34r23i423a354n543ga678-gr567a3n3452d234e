@@ -189,8 +189,9 @@ classdef YearData
                     yr.manufac_proc_plant_dec(:,plant) = reshape_manufac(:,i);
                 end
 
-
-                range = strcat('C36:','N',num2str(26+num_stor+9));
+                first_row = strcat('C', num2str(26+num_stor+ 8), ':');
+                %range = strcat('C36:','N',num2str(26+num_stor+9));
+                range = strcat(first_row,'N',num2str(26+num_stor+8+num_stor-1));
                 [~, ~, raw_recon] = xlsread(filename,'shipping_manufacturing',range);
                 raw_recon = cell2mat(cellNaNReplace(raw_recon,0));
 

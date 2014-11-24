@@ -31,18 +31,18 @@ secondShippingSchedule = cell(1,6);
 thirdShippingSchedule = cell(1,6);
 schedule = struct('POJ_1Week', 0, 'POJ_2Week', 0, 'POJ_3Week', 0, 'POJ_4Week', 0, ...
                               'FCOJ_1Week', 0, 'FCOJ_2Week', 0,'FCOJ_3Week', 0, 'FCOJ_4Week', 0,'Tankers', 0, 'Carriers', 0);
-stor_num = 3;
+stor_num = 71;
 storage_schedule = cell(1, stor_num);                          
 for i = 1:stor_num
      storage_schedule{i} = schedule;
 end
-for i = 1:6
+for i = 1:10
     firstShippingSchedule{i} = storage_schedule;
 end
-for i = 1:6
+for i = 1:10
     secondShippingSchedule{i} = storage_schedule;
 end
-for i = 1:6
+for i = 1:10
     thirdShippingSchedule{i} = storage_schedule;
 end
 firstShippingSchedule{5}{1}.POJ_3Week = 153.08547;
@@ -68,13 +68,13 @@ thirdShippingSchedule{3}{2}.FCOJ_2Week = 821.9862;
 plants_open = find(OJgameobj.proc_plant_cap);
 proc_plants = cell(length(plants_open),1);
 inventory1 = [OJgameobj.proc_plant_inv(plants_open(1)).ORA];
-proc_plants{1} = ProcessingPlantKarthik(plants_open(1),OJgameobj.proc_plant_cap(plants_open(1)),decisions.manufac_proc_plant_dec(1,plants_open(1)), 0, inventory1,  2000, 1000, 0, 10, length(find(OJgameobj.storage_cap)),firstShippingSchedule);
+proc_plants{plants_open(1)} = ProcessingPlantKarthikNew(plants_open(1),OJgameobj.proc_plant_cap(plants_open(1)),decisions.manufac_proc_plant_dec(1,plants_open(1)), 0, inventory1,  2000, 1000, 0, 10, length(find(OJgameobj.storage_cap)),firstShippingSchedule);
 
 inventory2 = [OJgameobj.proc_plant_inv(plants_open(2)).ORA];
-proc_plants{2} = ProcessingPlantKarthik(plants_open(2),OJgameobj.proc_plant_cap(plants_open(2)),decisions.manufac_proc_plant_dec(1,plants_open(2)), 0, inventory2,  2000, 1000, 17, 10, length(find(OJgameobj.storage_cap)),secondShippingSchedule);
+proc_plants{plants_open(2)} = ProcessingPlantKarthikNew(plants_open(2),OJgameobj.proc_plant_cap(plants_open(2)),decisions.manufac_proc_plant_dec(1,plants_open(2)), 0, inventory2,  2000, 1000, 17, 10, length(find(OJgameobj.storage_cap)),secondShippingSchedule);
 
 inventory3 = [OJgameobj.proc_plant_inv(plants_open(3)).ORA];
-proc_plants{3} = ProcessingPlantKarthik(plants_open(3),OJgameobj.proc_plant_cap(plants_open(3)),decisions.manufac_proc_plant_dec(1,plants_open(3)), 0, inventory3,  2000, 1000, 53, 10, length(find(OJgameobj.storage_cap)),thirdShippingSchedule);
+proc_plants{plants_open(3)} = ProcessingPlantKarthikNew(plants_open(3),OJgameobj.proc_plant_cap(plants_open(3)),decisions.manufac_proc_plant_dec(1,plants_open(3)), 0, inventory3,  2000, 1000, 53, 10, length(find(OJgameobj.storage_cap)),thirdShippingSchedule);
 
 %Processing plants
 % plants_open = find(OJgameobj.proc_plant_cap);
