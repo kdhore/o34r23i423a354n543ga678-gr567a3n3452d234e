@@ -26,63 +26,63 @@ dc_fcoj = genvarname('FCOJ_means_by_city');
 demand_city_FCOJ = demand_city_FCOJ.(dc_fcoj);
 
 % % for 2015 run
-% firstShippingSchedule = cell(1,6);
-% secondShippingSchedule = cell(1,6);
-% thirdShippingSchedule = cell(1,6);
-% schedule = struct('POJ_1Week', 0, 'POJ_2Week', 0, 'POJ_3Week', 0, 'POJ_4Week', 0, ...
-%                               'FCOJ_1Week', 0, 'FCOJ_2Week', 0,'FCOJ_3Week', 0, 'FCOJ_4Week', 0,'Tankers', 0, 'Carriers', 0);
-% stor_num = 3;
-% storage_schedule = cell(1, stor_num);                          
-% for i = 1:stor_num
-%      storage_schedule{i} = schedule;
-% end
-% for i = 1:6
-%     firstShippingSchedule{i} = storage_schedule;
-% end
-% for i = 1:6
-%     secondShippingSchedule{i} = storage_schedule;
-% end
-% for i = 1:6
-%     thirdShippingSchedule{i} = storage_schedule;
-% end
-% firstShippingSchedule{5}{1}.POJ_3Week = 153.08547;
-% firstShippingSchedule{5}{1}.FCOJ_3Week = 191.91453;
-% firstShippingSchedule{2}{1}.Tankers = 11;
-% secondShippingSchedule{3}{1}.POJ_1Week = 221.863;
-% secondShippingSchedule{3}{1}.FCOJ_1Week = 278.137;
-% secondShippingSchedule{3}{1}.Tankers = 17;
-% secondShippingSchedule{2}{1}.Tankers = 5;
-% thirdShippingSchedule{3}{1}.POJ_1Week = 66.81346335;
-% thirdShippingSchedule{3}{1}.FCOJ_1Week = 83.18653665;
-% thirdShippingSchedule{3}{1}.Tankers = 5;
-% thirdShippingSchedule{4}{1}.POJ_2Week = 431.2320904;
-% thirdShippingSchedule{4}{1}.FCOJ_2Week = 536.908316;
-% thirdShippingSchedule{3}{2}.POJ_1Week = 946.6295265;
-% thirdShippingSchedule{3}{2}.FCOJ_1Week = 493.3704735;
-% thirdShippingSchedule{3}{2}.Tankers = 48;
-% thirdShippingSchedule{5}{2}.POJ_3Week = 630.5147272;
-% thirdShippingSchedule{5}{2}.FCOJ_3Week = 328.6157264;
-% thirdShippingSchedule{3}{2}.POJ_2Week = 1577.144254;
-% thirdShippingSchedule{3}{2}.FCOJ_2Week = 821.9862;
-%            
-% plants_open = find(OJgameobj.proc_plant_cap);
-% proc_plants = cell(length(plants_open),1);
-% inventory1 = [OJgameobj.proc_plant_inv(plants_open(1)).ORA];
-% proc_plants{1} = ProcessingPlantKarthik(plants_open(1),OJgameobj.proc_plant_cap(plants_open(1)),decisions.manufac_proc_plant_dec(1,plants_open(1)), 0, inventory1,  2000, 1000, 0, 10, length(find(OJgameobj.storage_cap)),firstShippingSchedule);
-% 
-% inventory2 = [OJgameobj.proc_plant_inv(plants_open(2)).ORA];
-% proc_plants{2} = ProcessingPlantKarthik(plants_open(2),OJgameobj.proc_plant_cap(plants_open(2)),decisions.manufac_proc_plant_dec(1,plants_open(2)), 0, inventory2,  2000, 1000, 17, 10, length(find(OJgameobj.storage_cap)),secondShippingSchedule);
-% 
-% inventory3 = [OJgameobj.proc_plant_inv(plants_open(3)).ORA];
-% proc_plants{3} = ProcessingPlantKarthik(plants_open(3),OJgameobj.proc_plant_cap(plants_open(3)),decisions.manufac_proc_plant_dec(1,plants_open(3)), 0, inventory3,  2000, 1000, 53, 10, length(find(OJgameobj.storage_cap)),thirdShippingSchedule);
-
-%Processing plants
+firstShippingSchedule = cell(1,6);
+secondShippingSchedule = cell(1,6);
+thirdShippingSchedule = cell(1,6);
+schedule = struct('POJ_1Week', 0, 'POJ_2Week', 0, 'POJ_3Week', 0, 'POJ_4Week', 0, ...
+                              'FCOJ_1Week', 0, 'FCOJ_2Week', 0,'FCOJ_3Week', 0, 'FCOJ_4Week', 0,'Tankers', 0, 'Carriers', 0);
+stor_num = 3;
+storage_schedule = cell(1, stor_num);                          
+for i = 1:stor_num
+     storage_schedule{i} = schedule;
+end
+for i = 1:6
+    firstShippingSchedule{i} = storage_schedule;
+end
+for i = 1:6
+    secondShippingSchedule{i} = storage_schedule;
+end
+for i = 1:6
+    thirdShippingSchedule{i} = storage_schedule;
+end
+firstShippingSchedule{5}{1}.POJ_3Week = 153.08547;
+firstShippingSchedule{5}{1}.FCOJ_3Week = 191.91453;
+firstShippingSchedule{2}{1}.Tankers = 11;
+secondShippingSchedule{3}{1}.POJ_1Week = 221.863;
+secondShippingSchedule{3}{1}.FCOJ_1Week = 278.137;
+secondShippingSchedule{3}{1}.Tankers = 17;
+secondShippingSchedule{2}{1}.Tankers = 5;
+thirdShippingSchedule{3}{1}.POJ_1Week = 66.81346335;
+thirdShippingSchedule{3}{1}.FCOJ_1Week = 83.18653665;
+thirdShippingSchedule{3}{1}.Tankers = 5;
+thirdShippingSchedule{4}{1}.POJ_2Week = 431.2320904;
+thirdShippingSchedule{4}{1}.FCOJ_2Week = 536.908316;
+thirdShippingSchedule{3}{2}.POJ_1Week = 946.6295265;
+thirdShippingSchedule{3}{2}.FCOJ_1Week = 493.3704735;
+thirdShippingSchedule{3}{2}.Tankers = 48;
+thirdShippingSchedule{5}{2}.POJ_3Week = 630.5147272;
+thirdShippingSchedule{5}{2}.FCOJ_3Week = 328.6157264;
+thirdShippingSchedule{3}{2}.POJ_2Week = 1577.144254;
+thirdShippingSchedule{3}{2}.FCOJ_2Week = 821.9862;
+           
 plants_open = find(OJgameobj.proc_plant_cap);
 proc_plants = cell(length(plants_open),1);
-for i = 1:length(plants_open)
-    inventory = [OJgameobj.proc_plant_inv(plants_open(i)).ORA];
-    proc_plants{i} = ProcessingPlantKarthik(plants_open(i),OJgameobj.proc_plant_cap(plants_open(i)),decisions.manufac_proc_plant_dec(1,plants_open(i)), 0, inventory,  2000, 1000, OJgameobj.tank_cars_num(plants_open(i)), 10, length(find(OJgameobj.storage_cap)));
-end
+inventory1 = [OJgameobj.proc_plant_inv(plants_open(1)).ORA];
+proc_plants{1} = ProcessingPlantKarthik(plants_open(1),OJgameobj.proc_plant_cap(plants_open(1)),decisions.manufac_proc_plant_dec(1,plants_open(1)), 0, inventory1,  2000, 1000, 0, 10, length(find(OJgameobj.storage_cap)),firstShippingSchedule);
+
+inventory2 = [OJgameobj.proc_plant_inv(plants_open(2)).ORA];
+proc_plants{2} = ProcessingPlantKarthik(plants_open(2),OJgameobj.proc_plant_cap(plants_open(2)),decisions.manufac_proc_plant_dec(1,plants_open(2)), 0, inventory2,  2000, 1000, 17, 10, length(find(OJgameobj.storage_cap)),secondShippingSchedule);
+
+inventory3 = [OJgameobj.proc_plant_inv(plants_open(3)).ORA];
+proc_plants{3} = ProcessingPlantKarthik(plants_open(3),OJgameobj.proc_plant_cap(plants_open(3)),decisions.manufac_proc_plant_dec(1,plants_open(3)), 0, inventory3,  2000, 1000, 53, 10, length(find(OJgameobj.storage_cap)),thirdShippingSchedule);
+
+%Processing plants
+% plants_open = find(OJgameobj.proc_plant_cap);
+% proc_plants = cell(length(plants_open),1);
+% for i = 1:length(plants_open)
+%     inventory = [OJgameobj.proc_plant_inv(plants_open(i)).ORA];
+%     proc_plants{i} = ProcessingPlantKarthik(plants_open(i),OJgameobj.proc_plant_cap(plants_open(i)),decisions.manufac_proc_plant_dec(1,plants_open(i)), 0, inventory,  2000, 1000, OJgameobj.tank_cars_num(plants_open(i)), 10, length(find(OJgameobj.storage_cap)));
+% end
 
 % Storage facilities
 storage_open = find(OJgameobj.storage_cap);
@@ -96,12 +96,12 @@ cities_match_storage = matchCitiestoStorage(storage_open, storage2market.(s2m));
        
 % Draw grove prices matrix, fx grove => US$ prices, and use actual
 % quantity purchased and the purchasing cost
-    grove_spot = grovePrices(); %Need to write function
-    fx = foreignEx(); % Need to write function
-    adj_BRASPA_USPrice = grove_spot(5:6,:).*fx;
-    adj_USP = [grove_spot(1:4,:); adj_BRASPA_USPrice];
-    %updateModels();
-    %adj_USP = genPrices();
+    %grove_spot = grovePrices(); %Need to write function
+    %fx = foreignEx(); % Need to write function
+    %adj_BRASPA_USPrice = grove_spot(5:6,:).*fx;
+    %adj_USP = [grove_spot(1:4,:); adj_BRASPA_USPrice];
+    updateModels();
+    adj_USP = genPrices();
     act_quant_mult = zeros(6,12);
     for h = 1:6
         mult_1 = decisions.quant_mult_dec(h,1);
@@ -238,36 +238,7 @@ transCostfromGroves_ORA = sum(sum(transCost_fromGroves));
          else
              breakdown = 0;
          end
-         breakdown = 0;
-                  % for testing 2014:
-          if i == 2 && j ==1
-              breakdown = 1;
-          end
-          if i == 7 && j ==2
-              breakdown = 1;
-          end
-          if i == 16 && j ==2
-              breakdown = 1;
-          end
-          if i == 29 && j == 2
-              breakdown = 1;
-          end
-          if i ==8 && j == 3 
-              breakdown = 1;
-          end
-          if i ==35 && j == 3 
-              breakdown = 1;
-          end
-          if i == 41 && j == 3 
-              breakdown = 1;
-          end
-          if i == 42 && j == 3
-              breakdown = 1;
-          end
-          if i == 43 && j == 3
-              breakdown = 1;
-          end
-
+        
          proc_plants{j} = proc_plants{j}.iterateWeek(sum_shipped, decisions, breakdown, storage_open);
          POJ_man(j,i) = proc_plants{j}.poj;
          FCOJ_man(j,i) = proc_plants{j}.fcoj;
@@ -290,9 +261,9 @@ transCostfromGroves_ORA = sum(sum(transCost_fromGroves));
          monthly_amt_futures_shipped_FCOJ = futures_arr_FCOJ*fraction_shipped_futures;
          indicies = strcmp(char(storageNamesInUse(storage_open(j))),cities_match_storage(:,2));
          cities = cities_match_storage(indicies,:);
-         name = char(storageNamesInUse(storage_open(j)));
-         [ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, big_D, big_P] = drawDemand(decisions,cities,i, demand_city_ORA, demand_city_POJ, demand_city_ROJ, demand_city_FCOJ, decisions.storage_res(name), indicies); % will need to give it a price, and do this for all products
-         %[ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, big_D, big_P] = drawDemand(decisions,cities,i, demand_city_ORA, demand_city_POJ, demand_city_ROJ, demand_city_FCOJ);
+         %name = char(storageNamesInUse(storage_open(j)));
+         %[ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, big_D, big_P] = drawDemand(decisions,cities,i, demand_city_ORA, demand_city_POJ, demand_city_ROJ, demand_city_FCOJ, decisions.storage_res(name), indicies); % will need to give it a price, and do this for all products
+         [ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, big_D, big_P] = drawDemand(decisions,cities,i, demand_city_ORA, demand_city_POJ, demand_city_ROJ, demand_city_FCOJ);
          storage{j} = storage{j}.iterateWeek(sum_shipped, (monthly_amt_futures_shipped_FCOJ(ceil(i/4)))/4, proc_plants, big_D, big_P, i, ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, cities, j);
          soldORA(j,i) = storage{j}.sold(1);
          soldPOJ(j,i) = storage{j}.sold(2);
@@ -344,18 +315,22 @@ transCostfromGroves_ORA = sum(sum(transCost_fromGroves));
 
 ORA_futures_purch = decisions.future_mark_dec_ORA(:,2);
 FCOJ_futures_purch = decisions.future_mark_dec_FCOJ(:,2);
+plant_cap_upgrade = 0;
+plant_cap_downgrade = 0;
+storage_cap_upgrade = 0;
+storage_cap_downgrade = 0;
 for i = 1:10
     if decisions.proc_plant_dec(i) > 0
         plant_cap_upgrade = plant_cap_upgrade + decisions.proc_plant_dec(i);
     elseif decisions.proc_plant_dec(i) < 0
-        plant_cap_downgrade = plant_cap_downgrade - decisions.proc_plant_dec(i);
+        plant_cap_downgrade = plant_cap_downgrade + decisions.proc_plant_dec(i);
     end
 end
 for i = 1:71
     if decisions.storage_dec(i) > 0
         storage_cap_upgrade = storage_cap_upgrade + decisions.storage_dec(i);
-    elseif decisions.proc_plant_dec(i) < 0
-        storage_cap_downgrade = storage_cap_downgrade - decisions.storage_dec(i);
+    elseif decisions.storage_dec(i) < 0
+        storage_cap_downgrade = storage_cap_downgrade + decisions.storage_dec(i);
     end
 end
 newtank = max(sum(decisions.tank_car_dec),0);

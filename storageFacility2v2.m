@@ -288,7 +288,7 @@ classdef storageFacility2v2 < handle
                             demand(k,i) = demand(k,i) - (sf.inventory{i}(j)-sf.roj_temp(j));
                             sf.transCost = sf.transCost + (sf.inventory{i}(j)-sf.roj_temp(j))*cities{k,3}*0.22;
                             sf.revReceived(i) = sf.revReceived(i) + (sf.inventory{i}(j)-sf.roj_temp(j))*big_P(k,i)*2000;
-                            sf.inventory{i}(j) = 0;
+                            sf.inventory{i}(j) = sf.roj_temp(j);
                         else
                             sf.ship_out{i}(j) = sf.ship_out{i}(j) + demand(k,i);
                             sf.transCost = sf.transCost + demand(k,i)*cities{k,3}*1.2;

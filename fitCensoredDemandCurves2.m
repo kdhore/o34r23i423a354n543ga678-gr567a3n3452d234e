@@ -1,4 +1,4 @@
-function [] = fitCensoredDemandCurves(yearMax)
+function [] = fitCensoredDemandCurves2(yearMax)
 	region = {'NE'; 'MA'; 'SE';'MW';'DS';'NW';'SW'};
 
 	yrs = 2004:2013;
