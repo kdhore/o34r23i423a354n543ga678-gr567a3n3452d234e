@@ -1,4 +1,4 @@
-classdef ProcessingPlantKarthik
+classdef ProcessingPlantKarthikNew
     %Processing Plant class
     
     properties
@@ -28,10 +28,10 @@ classdef ProcessingPlantKarthik
 	end
     
     methods
-        function pp = ProcessingPlantKarthik(index, capacity, percentPOJ, breakdown, ora, pojC, fcojC, tanker_num, tankerCost, stor_num, shippingSchedule)
-%             schedule = struct('POJ_1Week', 0, 'POJ_2Week', 0, 'POJ_3Week', 0, 'POJ_4Week', 0, ...
-%                                'FCOJ_1Week', 0, 'FCOJ_2Week', 0,'FCOJ_3Week', 0, 'FCOJ_4Week', 0,...
-%                                'Tankers', 0, 'Carriers', 0);
+        function pp = ProcessingPlantKarthikNew(index, capacity, percentPOJ, breakdown, ora, pojC, fcojC, tanker_num, tankerCost, stor_num, shippingSchedule)
+         schedule = struct('POJ_1Week', 0, 'POJ_2Week', 0, 'POJ_3Week', 0, 'POJ_4Week', 0, ...
+                               'FCOJ_1Week', 0, 'FCOJ_2Week', 0,'FCOJ_3Week', 0, 'FCOJ_4Week', 0,...
+                               'Tankers', 0, 'Carriers', 0);
             pp.index = index;
             pp.capacity = capacity;
 			pp.percentPOJ = percentPOJ;
@@ -42,7 +42,6 @@ classdef ProcessingPlantKarthik
 			pp.tankerCost = tankerCost;
 			pp.pojCost = pojC;
 			pp.fcojCost = fcojC;
-            %storage_schedule = cell(1, stor_num);
             pp.stor_num = stor_num;
             pp.poj = 0;
             pp.fcoj = 0;
@@ -51,14 +50,20 @@ classdef ProcessingPlantKarthik
             pp.shipped_out_cost_carrier = 0;
             pp.rotten = 0;
             pp.throwaway = 0;
-            pp.shippingSchedule = shippingSchedule;
             
-%             for i = 1:stor_num
-%                 storage_schedule{i} = schedule;
-%             end
-%             for i = 1:6
-%                 pp.shippingSchedule{i} = storage_schedule;
-%             end
+            if nargin < 11
+                storage_schedule = cell(1, 71);
+                for i = 1:71
+                 storage_schedule{i} = schedule;
+                end
+                for i = 1:6
+                    pp.shippingSchedule{i} = storage_schedule;
+                end
+            else
+                pp.shippingSchedule = shippingSchedule;
+            end
+%             
+              
         end
         
         % the breakdown parameter refers to whether it was broken down in
@@ -104,7 +109,8 @@ classdef ProcessingPlantKarthik
                 % Update number of available tankers
                 cameHome = obj.shippingSchedule{1};
                 for i = 1:obj.stor_num
-                    obj.tankersAvailable = obj.tankersAvailable + cameHome{i}.Tankers - obj.shippingSchedule{2}{i}.Tankers;
+                    stor_ind = storage_open(i);
+                    obj.tankersAvailable = obj.tankersAvailable + cameHome{stor_ind}.Tankers - obj.shippingSchedule{2}{stor_ind}.Tankers;
                 end
                 obj.tankersHoldC = obj.tankersAvailable*obj.tankerCost;
             % If it isn't broken down...
@@ -115,8 +121,9 @@ classdef ProcessingPlantKarthik
                 end
                 % Update number of available tankers
                 cameHome = obj.shippingSchedule{1};
-                for i = 1:obj.stor_num    
-                    obj.tankersAvailable = obj.tankersAvailable + cameHome{i}.Tankers - obj.shippingSchedule{2}{i}.Tankers;
+                for i = 1:obj.stor_num
+                    stor_ind = storage_open(i);
+                    obj.tankersAvailable = obj.tankersAvailable + cameHome{stor_ind}.Tankers - obj.shippingSchedule{2}{stor_ind}.Tankers;
                 end
                 obj.tankersHoldC = obj.tankersAvailable*obj.tankerCost;
                 obj.poj = obj.percentPOJ*sum(obj.ora(1:4))/100.0;
@@ -130,10 +137,10 @@ classdef ProcessingPlantKarthik
                         stor = storage_open(j);
                         stor_percentPOJ = decisions.ship_proc_plant_storage_dec(stor, obj.index).POJ;
                         stor_percentFCOJ = decisions.ship_proc_plant_storage_dec(stor, obj.index).FCOJ;
-                        obj.shippingSchedule{3}{j}.POJ_1Week = stor_percentPOJ*0.01*obj.poj;
-                        obj.shippingSchedule{3}{j}.FCOJ_1Week = stor_percentFCOJ*0.01*obj.fcoj;
-                        obj.shippingSchedule{3}{j}.Tankers = ceil((stor_percentPOJ*0.01*obj.poj + stor_percentFCOJ*0.01*obj.fcoj)/30);
-                        obj.shipped_out_cost_tank = obj.shipped_out_cost_tank + 36*obj.shippingSchedule{3}{j}.Tankers*findPlant2StorageDist(char(plantNamesInUse(obj.index)),char(storageNamesInUse(storage_open(j))));
+                        obj.shippingSchedule{3}{stor}.POJ_1Week = stor_percentPOJ*0.01*obj.poj;
+                        obj.shippingSchedule{3}{stor}.FCOJ_1Week = stor_percentFCOJ*0.01*obj.fcoj;
+                        obj.shippingSchedule{3}{stor}.Tankers = ceil((stor_percentPOJ*0.01*obj.poj + stor_percentFCOJ*0.01*obj.fcoj)/30);
+                        obj.shipped_out_cost_tank = obj.shipped_out_cost_tank + 36*obj.shippingSchedule{3}{stor}.Tankers*findPlant2StorageDist(char(plantNamesInUse(obj.index)),char(storageNamesInUse(storage_open(j))));
                         
                     end 
                 else
@@ -146,11 +153,11 @@ classdef ProcessingPlantKarthik
                         stor_percentPOJ = decisions.ship_proc_plant_storage_dec(stor, obj.index).POJ;
                         stor_percentFCOJ = decisions.ship_proc_plant_storage_dec(stor, obj.index).FCOJ;
                         if (stor_percentPOJ*0.01*obj.poj + stor_percentFCOJ*0.01*obj.fcoj) < temp_tankers*30
-                           obj.shippingSchedule{3}{j}.POJ_1Week = stor_percentPOJ*0.01*obj.poj;
-                            obj.shippingSchedule{3}{j}.FCOJ_1Week = stor_percentFCOJ*0.01*obj.fcoj;
-                            obj.shippingSchedule{3}{j}.Tankers = ceil((stor_percentPOJ*0.01*obj.poj + stor_percentFCOJ*0.01*obj.fcoj)/30);
-                            obj.shipped_out_cost_tank = obj.shipped_out_cost_tank + 36*obj.shippingSchedule{3}{j}.Tankers*findPlant2StorageDist(char(plantNamesInUse(obj.index)),char(storageNamesInUse(storage_open(j))));
-                            temp_tankers = temp_tankers - obj.shippingSchedule{3}{j}.Tankers;
+                           obj.shippingSchedule{3}{stor}.POJ_1Week = stor_percentPOJ*0.01*obj.poj;
+                            obj.shippingSchedule{3}{stor}.FCOJ_1Week = stor_percentFCOJ*0.01*obj.fcoj;
+                            obj.shippingSchedule{3}{stor}.Tankers = ceil((stor_percentPOJ*0.01*obj.poj + stor_percentFCOJ*0.01*obj.fcoj)/30);
+                            obj.shipped_out_cost_tank = obj.shipped_out_cost_tank + 36*obj.shippingSchedule{3}{stor}.Tankers*findPlant2StorageDist(char(plantNamesInUse(obj.index)),char(storageNamesInUse(storage_open(j))));
+                            temp_tankers = temp_tankers - obj.shippingSchedule{3}{stor}.Tankers;
                             sent = sent + stor_percentPOJ*0.01*obj.poj + stor_percentFCOJ*0.01*obj.fcoj;
                             j = j + 1;
                         else
@@ -158,10 +165,10 @@ classdef ProcessingPlantKarthik
                             obj.shipped_out_cost_tank = obj.shipped_out_cost_tank + 36*temp_tankers*findPlant2StorageDist(char(plantNamesInUse(obj.index)),char(storageNamesInUse(storage_open(j))));
                             POJsentviaTanker = (stor_percentPOJ*0.01*obj.poj)/((stor_percentPOJ*0.01*obj.poj) + (stor_percentFCOJ*0.01*obj.fcoj))*tankerAmount;
                             FCOJsentviaTanker = (stor_percentFCOJ*0.01*obj.fcoj)/((stor_percentPOJ*0.01*obj.poj) + (stor_percentFCOJ*0.01*obj.fcoj))*tankerAmount;
-                            obj.shippingSchedule{3}{j}.POJ_1Week = POJsentviaTanker;
-                            obj.shippingSchedule{3}{j}.FCOJ_1Week = FCOJsentviaTanker;
-                            obj.shippingSchedule{3}{j}.Tankers = ceil((POJsentviaTanker + FCOJsentviaTanker)/30);
-                            temp_tankers = temp_tankers - obj.shippingSchedule{3}{j}.Tankers;
+                            obj.shippingSchedule{3}{stor}.POJ_1Week = POJsentviaTanker;
+                            obj.shippingSchedule{3}{stor}.FCOJ_1Week = FCOJsentviaTanker;
+                            obj.shippingSchedule{3}{stor}.Tankers = ceil((POJsentviaTanker + FCOJsentviaTanker)/30);
+                            temp_tankers = temp_tankers - obj.shippingSchedule{3}{stor}.Tankers;
                             POJlefttobeSent = stor_percentPOJ*0.01*obj.poj - POJsentviaTanker;
                             FCOJlefttobeSent = stor_percentFCOJ*0.01*obj.fcoj - FCOJsentviaTanker;
                             distance = findPlant2StorageDist(char(plantNamesInUse(obj.index)),char(storageNamesInUse(storage_open(j))));
@@ -170,31 +177,31 @@ classdef ProcessingPlantKarthik
                                 delay = rand;
                                 if (delay < 0.09)
                                     %threeWeek = obj.shippingSchedule{5};
-                                    obj.shippingSchedule{5}{j}.POJ_3Week = obj.shippingSchedule{5}{j}.POJ_3Week + POJlefttobeSent;
-                                    obj.shippingSchedule{5}{j}.FCOJ_3Week = obj.shippingSchedule{5}{j}.FCOJ_3Week + FCOJlefttobeSent;
+                                    obj.shippingSchedule{5}{stor}.POJ_3Week = obj.shippingSchedule{5}{stor}.POJ_3Week + POJlefttobeSent;
+                                    obj.shippingSchedule{5}{stor}.FCOJ_3Week = obj.shippingSchedule{5}{stor}.FCOJ_3Week + FCOJlefttobeSent;
                                 elseif (delay < 0.3)
                                     %twoWeek = obj.shippingSchedule{4};
-                                    obj.shippingSchedule{4}{j}.POJ_2Week = obj.shippingSchedule{4}{j}.POJ_2Week + POJlefttobeSent;
-                                    obj.shippingSchedule{4}{j}.FCOJ_2Week = obj.shippingSchedule{4}{j}.FCOJ_2Week + FCOJlefttobeSent;
+                                    obj.shippingSchedule{4}{stor}.POJ_2Week = obj.shippingSchedule{4}{stor}.POJ_2Week + POJlefttobeSent;
+                                    obj.shippingSchedule{4}{stor}.FCOJ_2Week = obj.shippingSchedule{4}{stor}.FCOJ_2Week + FCOJlefttobeSent;
                                 else 
-                                     obj.shippingSchedule{3}{j}.POJ_1Week =  obj.shippingSchedule{3}{j}.POJ_1Week + POJlefttobeSent;
-                                     obj.shippingSchedule{3}{j}.FCOJ_1Week =  obj.shippingSchedule{3}{j}.FCOJ_1Week + FCOJlefttobeSent;
+                                     obj.shippingSchedule{3}{stor}.POJ_1Week =  obj.shippingSchedule{3}{stor}.POJ_1Week + POJlefttobeSent;
+                                     obj.shippingSchedule{3}{stor}.FCOJ_1Week =  obj.shippingSchedule{3}{stor}.FCOJ_1Week + FCOJlefttobeSent;
                                 end
                                 j = j + 1;
                             else
                                 delay = rand;
                                 if (delay < 0.09)
                                     %fourWeek = obj.shippingSchedule{6};
-                                    obj.shippingSchedule{6}{j}.POJ_4Week = POJlefttobeSent;
-                                    obj.shippingSchedule{6}{j}.FCOJ_4Week = FCOJlefttobeSent;
+                                    obj.shippingSchedule{6}{stor}.POJ_4Week = POJlefttobeSent;
+                                    obj.shippingSchedule{6}{stor}.FCOJ_4Week = FCOJlefttobeSent;
                                 elseif (delay < 0.3)
                                     %threeWeek = obj.shippingSchedule{5};
-                                    obj.shippingSchedule{5}{j}.POJ_3Week = obj.shippingSchedule{5}{j}.POJ_3Week + POJlefttobeSent;
-                                    obj.shippingSchedule{5}{j}.FCOJ_3Week = obj.shippingSchedule{5}{j}.FCOJ_3Week + FCOJlefttobeSent;
+                                    obj.shippingSchedule{5}{stor}.POJ_3Week = obj.shippingSchedule{5}{stor}.POJ_3Week + POJlefttobeSent;
+                                    obj.shippingSchedule{5}{stor}.FCOJ_3Week = obj.shippingSchedule{5}{stor}.FCOJ_3Week + FCOJlefttobeSent;
                                 else
                                     %twoWeek = obj.shippingSchedule{4};
-                                    obj.shippingSchedule{4}{j}.POJ_2Week = obj.shippingSchedule{4}{j}.POJ_2Week + POJlefttobeSent;
-                                    obj.shippingSchedule{4}{j}.FCOJ_2Week = obj.shippingSchedule{4}{j}.FCOJ_2Week + FCOJlefttobeSent;
+                                    obj.shippingSchedule{4}{stor}.POJ_2Week = obj.shippingSchedule{4}{stor}.POJ_2Week + POJlefttobeSent;
+                                    obj.shippingSchedule{4}{stor}.FCOJ_2Week = obj.shippingSchedule{4}{stor}.FCOJ_2Week + FCOJlefttobeSent;
                                 end
                                 j = j + 1;
                             end
@@ -214,31 +221,31 @@ classdef ProcessingPlantKarthik
                            delay = rand;
                            if (delay < 0.09)
                                %threeWeek = obj.shippingSchedule{5};
-                               obj.shippingSchedule{5}{j}.POJ_3Week = obj.shippingSchedule{5}{j}.POJ_3Week + POJtobeSent;
-                               obj.shippingSchedule{5}{j}.FCOJ_3Week = obj.shippingSchedule{5}{j}.FCOJ_3Week + FCOJtobeSent;
+                               obj.shippingSchedule{5}{stor}.POJ_3Week = obj.shippingSchedule{5}{stor}.POJ_3Week + POJtobeSent;
+                               obj.shippingSchedule{5}{stor}.FCOJ_3Week = obj.shippingSchedule{5}{stor}.FCOJ_3Week + FCOJtobeSent;
                            elseif (delay < 0.3)
                                %twoWeek = obj.shippingSchedule{4};
-                               obj.shippingSchedule{4}{j}.POJ_2Week = obj.shippingSchedule{4}{j}.POJ_2Week + POJtobeSent;
-                               obj.shippingSchedule{4}{j}.FCOJ_2Week = obj.shippingSchedule{4}{j}.FCOJ_2Week + FCOJtobeSent;
+                               obj.shippingSchedule{4}{stor}.POJ_2Week = obj.shippingSchedule{4}{stor}.POJ_2Week + POJtobeSent;
+                               obj.shippingSchedule{4}{stor}.FCOJ_2Week = obj.shippingSchedule{4}{stor}.FCOJ_2Week + FCOJtobeSent;
                             else 
-                               obj.shippingSchedule{3}{j}.POJ_1Week = obj.shippingSchedule{3}{j}.POJ_1Week + POJtobeSent;
-                               obj.shippingSchedule{3}{j}.FCOJ_1Week = obj.shippingSchedule{3}{j}.FCOJ_1Week + FCOJtobeSent;
+                               obj.shippingSchedule{3}{stor}.POJ_1Week = obj.shippingSchedule{3}{stor}.POJ_1Week + POJtobeSent;
+                               obj.shippingSchedule{3}{stor}.FCOJ_1Week = obj.shippingSchedule{3}{stor}.FCOJ_1Week + FCOJtobeSent;
                             end
                             j = j + 1;
                          else
                             delay = rand;
                             if (delay < 0.09)
                                %fourWeek = obj.shippingSchedule{6};
-                               obj.shippingSchedule{6}{j}.POJ_4Week = POJtobeSent;
-                               obj.shippingSchedule{6}{j}.FCOJ_4Week = FCOJtobeSent;
+                               obj.shippingSchedule{6}{stor}.POJ_4Week = POJtobeSent;
+                               obj.shippingSchedule{6}{stor}.FCOJ_4Week = FCOJtobeSent;
                             elseif (delay < 0.3)
                                %threeWeek = obj.shippingSchedule{5};
-                               obj.shippingSchedule{5}{j}.POJ_3Week = obj.shippingSchedule{5}{j}.POJ_3Week + POJtobeSent;
-                               obj.shippingSchedule{5}{j}.FCOJ_3Week = obj.shippingSchedule{5}{j}.FCOJ_3Week + FCOJtobeSent;
+                               obj.shippingSchedule{5}{stor}.POJ_3Week = obj.shippingSchedule{5}{stor}.POJ_3Week + POJtobeSent;
+                               obj.shippingSchedule{5}{stor}.FCOJ_3Week = obj.shippingSchedule{5}{stor}.FCOJ_3Week + FCOJtobeSent;
                             else
                                %twoWeek = obj.shippingSchedule{4};
-                               obj.shippingSchedule{4}{j}.POJ_2Week = obj.shippingSchedule{4}{j}.POJ_2Week + POJtobeSent;
-                               obj.shippingSchedule{4}{j}.FCOJ_2Week = obj.shippingSchedule{4}{j}.FCOJ_2Week + FCOJtobeSent;
+                               obj.shippingSchedule{4}{stor}.POJ_2Week = obj.shippingSchedule{4}{stor}.POJ_2Week + POJtobeSent;
+                               obj.shippingSchedule{4}{stor}.FCOJ_2Week = obj.shippingSchedule{4}{stor}.FCOJ_2Week + FCOJtobeSent;
                             end
                             j = j + 1;
                          end

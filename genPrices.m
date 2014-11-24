@@ -3,7 +3,7 @@ function [pricesOut,ratesOut] = genPrices()
 	load('probs.mat');
 	rPrev = load('inits.mat');
 	rPrev = rPrev.inits;
-	num_models = length(estmdls)
+	num_models = length(estmdls);
 
 	tests = cell(6,1);
 
@@ -15,11 +15,11 @@ function [pricesOut,ratesOut] = genPrices()
 			vals = rand(12,1);
 			ra = rand;
 			for k=1:12
-				if (vals(k) < probMonth(i,k) & ra < probSpike(i))
+				if (vals(k) < probMonth(i,k) && ra < probSpike(i))
 					if (i ~= 5)
 						tests{i}(j+k) = 1.5*m;
 					else
-						tests{i}(j+k) = 1.1*m
+						tests{i}(j+k) = 1.1*m;
 					end
 				end
 				ra = rand;
