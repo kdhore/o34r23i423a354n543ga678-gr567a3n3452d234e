@@ -25,7 +25,7 @@ demand_city_FCOJ = load('demand_city_FCOJ.mat');
 dc_fcoj = genvarname('FCOJ_means_by_city');
 demand_city_FCOJ = demand_city_FCOJ.(dc_fcoj);
 
-% for 2015 run
+% % for 2015 run
 firstShippingSchedule = cell(1,6);
 secondShippingSchedule = cell(1,6);
 thirdShippingSchedule = cell(1,6);
@@ -76,7 +76,7 @@ proc_plants{2} = ProcessingPlantKarthik(plants_open(2),OJgameobj.proc_plant_cap(
 inventory3 = [OJgameobj.proc_plant_inv(plants_open(3)).ORA];
 proc_plants{3} = ProcessingPlantKarthik(plants_open(3),OJgameobj.proc_plant_cap(plants_open(3)),decisions.manufac_proc_plant_dec(1,plants_open(3)), 0, inventory3,  2000, 1000, 53, 10, length(find(OJgameobj.storage_cap)),thirdShippingSchedule);
 
-%Processing plants
+% %Processing plants
 % plants_open = find(OJgameobj.proc_plant_cap);
 % proc_plants = cell(length(plants_open),1);
 % for i = 1:length(plants_open)
@@ -96,12 +96,12 @@ cities_match_storage = matchCitiestoStorage(storage_open, storage2market.(s2m));
        
 % Draw grove prices matrix, fx grove => US$ prices, and use actual
 % quantity purchased and the purchasing cost
-    grove_spot = grovePrices(); %Need to write function
-    fx = foreignEx(); % Need to write function
-    adj_BRASPA_USPrice = grove_spot(5:6,:).*fx;
-    adj_USP = [grove_spot(1:4,:); adj_BRASPA_USPrice];
-    %updateModels()
-    %adj_USP = genPrices();
+    %grove_spot = grovePrices(); %Need to write function
+    %fx = foreignEx(); % Need to write function
+    %adj_BRASPA_USPrice = grove_spot(5:6,:).*fx;
+    %adj_USP = [grove_spot(1:4,:); adj_BRASPA_USPrice];
+    updateModels()
+    adj_USP = genPrices();
     act_quant_mult = zeros(6,12);
     for h = 1:6
         mult_1 = decisions.quant_mult_dec(h,1);

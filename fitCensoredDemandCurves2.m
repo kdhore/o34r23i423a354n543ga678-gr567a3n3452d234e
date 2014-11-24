@@ -17,7 +17,7 @@ function [] = fitCensoredDemandCurves(yearMax)
 	c
 
  	for i=length(yrs)+2+1:length(yrs)+2+length(yrs2)
- 		c{i} = load(strcat('yr',num2str(yrs2*(i-length(yrs)-1))));
+ 		c{i} = load(strcat('yr',num2str(yrs2+i-length(yrs)-3)));
  	end
 
 	compiled_prices_ORA = [];
@@ -64,10 +64,9 @@ function [] = fitCensoredDemandCurves(yearMax)
 		FCOJ_res = [];
 
 		% get associated storage units, then process accordingly
-
-		for j=1:length(c)
-			OJ_object = OJGame(strcat('MomPop',num2str(yrs(j)),'Results.xlsm'));
-
+        OJ_object = OJGame('MomPop2004Results.xlsm');
+		for j=1:11
+			
 			sfac_name = matchRegiontoStorage(region(i),OJ_object);
 
 			vn = genvarname(strcat('yr',num2str(yrs(j))));
@@ -88,7 +87,10 @@ function [] = fitCensoredDemandCurves(yearMax)
 			compiled_avails_POJ = [compiled_avails_ORA c{j}.(vn).storage_res(sfac_name{1}).POJ_Sales(2,:)];
 			compiled_avails_ROJ = [compiled_avails_ORA c{j}.(vn).storage_res(sfac_name{1}).ROJ_Sales(2,:)];
 			compiled_avails_FCOJ = [compiled_avails_ORA c{j}.(vn).storage_res(sfac_name{1}).FCOJ_Sales(2,:)];
-		end
+            OJ_object = OJ_object.update(strcat('MomPop',num2str(yrs(j)),'Results.xlsm'));
+
+        end
+        
 
 		for j=1:length(ORA_res)
 			if (ORA_res(j) == compiled_avails_ORA(j))

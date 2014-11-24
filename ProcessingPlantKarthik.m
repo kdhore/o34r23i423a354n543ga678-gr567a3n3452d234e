@@ -30,8 +30,8 @@ classdef ProcessingPlantKarthik
     methods
         function pp = ProcessingPlantKarthik(index, capacity, percentPOJ, breakdown, ora, pojC, fcojC, tanker_num, tankerCost, stor_num, shippingSchedule)
 %             schedule = struct('POJ_1Week', 0, 'POJ_2Week', 0, 'POJ_3Week', 0, 'POJ_4Week', 0, ...
-%                               'FCOJ_1Week', 0, 'FCOJ_2Week', 0,'FCOJ_3Week', 0, 'FCOJ_4Week', 0,...
-%                               'Tankers', 0, 'Carriers', 0);
+%                                'FCOJ_1Week', 0, 'FCOJ_2Week', 0,'FCOJ_3Week', 0, 'FCOJ_4Week', 0,...
+%                                'Tankers', 0, 'Carriers', 0);
             pp.index = index;
             pp.capacity = capacity;
 			pp.percentPOJ = percentPOJ;
@@ -42,7 +42,7 @@ classdef ProcessingPlantKarthik
 			pp.tankerCost = tankerCost;
 			pp.pojCost = pojC;
 			pp.fcojCost = fcojC;
-            storage_schedule = cell(1, stor_num);
+            %storage_schedule = cell(1, stor_num);
             pp.stor_num = stor_num;
             pp.poj = 0;
             pp.fcoj = 0;

@@ -22,5 +22,5 @@ function [demand] = getDemand(product_index,region_index,price)
     else
         display('gave wrong product index');
     end
-    demand = (sum(coeff_matrix.*[1,price,price.^2]))/4;
+    demand = (sum(coeff_matrix.*[price.^2,price,1]))/4;
 end

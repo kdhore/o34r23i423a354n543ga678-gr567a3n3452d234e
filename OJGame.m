@@ -73,7 +73,7 @@ classdef OJGame
             for (i=2:10)
                 oj.proc_plant_inv(i) = test_1;
             end
-            test = struct('ORA', nan, 'POJ', nan, 'ROJ', nan, 'FCOJ', nan);
+            test = struct('ORA', zeros(5,1), 'POJ', zeros(9,1), 'ROJ', zeros(13,1), 'FCOJ', zeros(49,1));
             oj.storage_inv = test;
             for (i=2:71)
                 oj.storage_inv(i) = test;
@@ -153,13 +153,34 @@ classdef OJGame
             
         end
         
-        function obj = updatefromSim(obj,decision, proc_plants, storage)
+        function obj = updatefromSim(obj,decisions, proc_plants, storage)
             obj.year_start = obj.year_start + 1;
             plants_open = find(obj.proc_plant_cap);
             for i=1:length(plants_open)
                 obj.proc_plant_inv(plants_open(i)).ORA = proc_plants{i}.ora;
             end
-            
+            obj.proc_plant_cap = obj.proc_plant_cap + decisions.proc_plant_dec; 
+            storage_open = find(obj.storage_cap);
+            for i=1:length(storage_open)
+                index = storage_open(i);
+                obj.storage_inv(index).ORA = storage{i}{1};
+                obj.storage_inv(index).POJ = storage{i}{2};
+                obj.storage_inv(index).ROJ = storage{i}{3};
+                obj.storage_inv(index).FCOJ = storage{i}{4};
+            end
+            obj.storage_open = obj.storage_open + decisions.storage_dec;
+            obj.futures_years = obj.futures_years + 1;
+            obj.ora_futures_current = [obj.ora_futures_current1, decisions.future_mark_dec_ORA(1,:)];
+            obj.ora_futures_current1 = [obj.ora_futures_current2, decisions.future_mark_dec_ORA(2,:)];
+            obj.ora_futures_current2 = [obj.ora_futures_current3, decisions.future_mark_dec_ORA(3,:)];
+            obj.ora_futures_current3 = [obj.ora_futures_current4, decisions.future_mark_dec_ORA(4,:)];
+            obj.ora_futures_current4 = decisions.future_mark_dec_ORA(5,:);
+            obj.fcoj_futures_current = [obj.fcoj_futures_current1, decisions.future_mark_dec_FCOJ(1,:)];
+            obj.fcoj_futures_current1 = [obj.fcoj_futures_current2, decisions.future_mark_dec_FCOJ(2,:)];
+            obj.fcoj_futures_current2 = [obj.fcoj_futures_current3, decisions.future_mark_dec_FCOJ(3,:)];
+            obj.fcoj_futures_current3 = [obj.fcoj_futures_current4, decisions.future_mark_dec_FCOJ(4,:)];
+            obj.fcoj_futures_current4 = decisions.future_mark_dec_FCOJ(5,:);
+            obj.tank_cars_num = obj.tank_cars_num + decisions.tank_car_dec;
         end
         
     end

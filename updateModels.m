@@ -46,8 +46,8 @@ function [] = updateModels(yearMax)
 	end
 
 	mat = load('yr2014a');
-	data = mat.yr2014a.price_orange_spot_res;
-	ratedat = mat.yr2014a.fx_exch_res;
+	data = mat.yr2014a_orianga.price_orange_spot_res;
+	ratedat = mat.yr2014a_orianga.fx_exch_res;
 
 	for j=1:6
 		Prices{j} = [Prices{j} data(j,:)];
@@ -58,8 +58,8 @@ function [] = updateModels(yearMax)
 	end
 
 	mat = load('yr2014b');
-	data = mat.yr2014b.price_orange_spot_res;
-	ratedat = mat.yr2014b.fx_exch_res;
+	data = mat.yr2014b_orianga.price_orange_spot_res;
+	ratedat = mat.yr2014b_orianga.fx_exch_res;
 
 	for j=1:6
 		Prices{j} = [Prices{j} data(j,:)];
