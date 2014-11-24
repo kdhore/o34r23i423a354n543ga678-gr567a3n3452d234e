@@ -31,12 +31,21 @@ classdef Decisions
         pricing_FCOJ_weekly_dec;
         pricing_ROJ_dec;
         pricing_ROJ_weekly_dec;
+        
+        demandStorageORA;
+        demandStoragePOJ;
+        demandStorageROJ;
+        demandStorageFCOJ;
+        
+        demandProcPlantORA;
+        demandProcPlantPOJ;
+        demandProcPlantFCOJ;
     end
     
     methods
         % Constructor where you update each of the properties of the
         % decision in the Decision file inputted
-        function Decisions = Decision(filename,OJ_object)
+        function Decisions = Decisions(filename,OJ_object)
             if nargin > 0
                 
                 % For now this needs to be MANUALLY updated
@@ -93,9 +102,18 @@ classdef Decisions
                 % each row is a region (NE, MA, SE, MW, DS, NW, SW) and the
                 % columns are months Sep-Aug
                 Decisions.pricing_ORA_dec = zeros(7,12);
-                Decisions.pricing_POJ_dec = zeros(7, 12);
-                Decisions.pricing_ROJ_dec = zeros(7, 12);
-                Decisions.pricing_FCOJ_dec = zeros(7, 12);
+                Decisions.pricing_POJ_dec = zeros(7,12);
+                Decisions.pricing_ROJ_dec = zeros(7,12);
+                Decisions.pricing_FCOJ_dec = zeros(7,12);
+                
+                for i = 1:7
+                    for j = 1:12
+                        Decisions.pricing_ORA_dec(i,j) = 3;
+                        Decisions.pricing_POJ_dec(i,j) = 3;
+                        Decisions.pricing_ROJ_dec(i,j) = 3;
+                        Decisions.pricing_FCOJ_dec(i,j) = 3;
+                    end
+                end
                 
                 % Set the prices of each product either manually or by
                 % looping through the regions and the months
@@ -108,10 +126,24 @@ classdef Decisions
                 Decisions.demandStorageROJ = zeros(length(stor_open),12);
                 Decisions.demandStorageFCOJ = zeros(length(stor_open),12);
                 
+                storage2market_dist = load('storage2market_dist.mat');
+                storage2market_dist_temp = genvarname('storage2market_dist');
+                storage2market_dist = cell2mat(storage2market_dist.(storage2market_dist_temp));
+                
+                cellDist = cell(7);
+                cellDist{1} = 'NE';
+                cellDist{2} = 'MA';
+                cellDist{3} = 'SE';
+                cellDist{4} = 'MW';
+                cellDist{5} = 'DS';
+                cellDist{6} = 'NW';
+                cellDist{7} = 'SW';
+                
+                
                 for month = 1:12
                     for  i = 1:7
                         for j = 1:length(stor_open)
-                            if(strcmp(matchRegiontoStorage(i,OJ_Object),...
+                            if(strcmp(matchRegiontoStorage(cellDist(i),OJ_object,storage2market_dist),...
                                     storageNamesInUse(stor_open(j))) == 1)
                                 Decisions.demandStorageORA(j, month) = ...
                                     Decisions.demandStorageORA(j, month) + ...
@@ -231,10 +263,16 @@ classdef Decisions
                         
                     end
                     % at this point i = length(stor_open)
+                    sumPOJ = 0;
+                    sumFCOJ = 0;
+                    for k = 1:length(stor_open)
+                        sumPOJ = sumPOJ + Decisions.ship_proc_plant_storage_dec(k,plants_open(j)).POJ;
+                        sumFCOJ = sumFCOJ + Decisions.ship_proc_plant_storage_dec(k,plants_open(j)).FCOJ;
+                    end
                     Decisions.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).POJ = ...
-                        1 - sum(Decisions.ship_proc_plant_storage_dec(:,plants_open(j)).POJ);
+                        1 - sumPOJ;
                     Decisions.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).FCOJ = ...
-                        1 - sum(Decisions.ship_proc_plant_storage_dec(:,plants_open(j)).FCOJ);
+                        1 - sumFCOJ;
                 end
                 
                 
@@ -246,7 +284,7 @@ classdef Decisions
                 fcojCurrentTotalFutures = 0;
                 for i = 1:5
                     fcojCurrentTotalFutures = fcojCurrentTotalFutures +...
-                        OJ_Object.fcoj_futures_current(1,i*2);
+                        OJ_object.fcoj_futures_current(1,i*2);
                 end
                 
                 for month = 1:12
@@ -335,7 +373,7 @@ classdef Decisions
                 
                 for i = 1:5
                     TotalCurrentFutures = TotalCurrentFutures + ...
-                        OJ_Object.ora_current_futures(1,2*i);
+                        OJ_object.ora_current_futures(1,2*i);
                 end
                 
                 for i = 1:length(stor_open)
@@ -532,27 +570,27 @@ classdef Decisions
                 FuturesMaturing1 = 0;
                 for i = 1:4
                     FuturesMaturing1 = FuturesMaturing1 + ...
-                        OJ_Object.ora_futures_current1(1,2*i);
+                        OJ_object.ora_futures_current1(1,2*i);
                 end
                 
                 %Total Futures maturing in decision year + 2
                 FuturesMaturing2 = 0;
                 for i = 1:3
                     FuturesMaturing2 = FuturesMaturing2 + ...
-                        OJ_Object.ora_futures_current2(1,2*i);
+                        OJ_object.ora_futures_current2(1,2*i);
                 end
                 
                 %Total Futures maturing in decision year + 3
                 FuturesMaturing3 = 0;
                 for i = 1:2
                     FuturesMaturing3 = FuturesMaturing3 + ...
-                        OJ_Object.ora_futures_current3(1,2*i);
+                        OJ_object.ora_futures_current3(1,2*i);
                 end
                 
                 %Total Futures maturing in decision year + 4
                 FuturesMaturing4 = 0;
                 FuturesMaturing4 = FuturesMaturing4 + ...
-                    OJ_Object.ora_futures_current4(1,2);
+                    OJ_object.ora_futures_current4(1,2);
                 
                 % Current decision year is first chance to buy for year 5
                 FuturesMaturing5 = 0;
@@ -596,27 +634,27 @@ classdef Decisions
                 FCOJFuturesMaturing1 = 0;
                 for i = 1:4
                     FCOJFuturesMaturing1 = FCOJFuturesMaturing1 + ...
-                        OJ_Object.fcoj_futures_current1(1,2*i);
+                        OJ_object.fcoj_futures_current1(1,2*i);
                 end
                 
                 %Total Futures maturing in decision year + 2
                 FCOJFuturesMaturing2 = 0;
                 for i = 1:3
                     FCOJFuturesMaturing2 = FCOJFuturesMaturing2 + ...
-                        OJ_Object.fcoj_futures_current2(1,2*i);
+                        OJ_object.fcoj_futures_current2(1,2*i);
                 end
                 
                 %Total Futures maturing in decision year + 3
                 FCOJFuturesMaturing3 = 0;
                 for i = 1:2
                     FCOJFuturesMaturing3 = FCOJFuturesMaturing3 + ...
-                        OJ_Object.fcoj_futures_current3(1,2*i);
+                        OJ_object.fcoj_futures_current3(1,2*i);
                 end
                 
                 %Total Futures maturing in decision year + 4
                 FCOJFuturesMaturing4 = 0;
                 FCOJFuturesMaturing4 = FCOJFuturesMaturing4 + ...
-                    OJ_Object.fcoj_futures_current4(1,2);
+                    OJ_object.fcoj_futures_current4(1,2);
                 
                 % Current decision year is first chance to buy for year 5
                 FCOJFuturesMaturing5 = 0;
@@ -715,7 +753,7 @@ classdef Decisions
                 rho3 = 0.75; %percentage of max to use
                 for i = 1:length(plants_open)
                     Decisions.tank_car_dec(plants_open(i),1) = ...
-                        rho2*rho3*max(Decisions.demandProcPlantORA(i)) - ...
+                        rho2*rho3*max(Decisions.demandProcPlantORA(i,:)) - ...
                         OJ_object.tank_cars_num(plants_open(i),1);
                 end
                 
