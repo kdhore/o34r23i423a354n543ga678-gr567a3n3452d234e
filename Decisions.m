@@ -470,9 +470,9 @@ classdef Decisions
                 end
                 
                 theta5 = 1;
-                theta6 = -1/10000;
+                theta6 = 1;
                 theta7 = 1;
-                theta8 = -1/10000;
+                theta8 = 1;
                 
                 Decision.ship_grove_dec = zeros(6, length(plants_open) +...
                     length(stor_open));
@@ -507,7 +507,7 @@ classdef Decisions
                     for j = 1:length(stor_open)
                         Decision.ship_grove_dec(i,length(plants_open)+j)= ...
                             theta5*(Decision.ship_grove_dec(i,length(plants_open)+j))...
-                            +theta6*(Dist_Grove_Storage(j, i));
+                            +theta6*(1/Dist_Grove_Storage(j, i));
                     end
                 end
                 
@@ -529,7 +529,7 @@ classdef Decisions
                     for j = 1:length(plants_open)
                         Decision.ship_grove_dec(i,j)= ...
                             theta7*(Decision.ship_grove_dec(i,j))...
-                            +theta8*(Dist_Grove_Proc_Plant(j, i));
+                            +theta8*(1/Dist_Grove_Proc_Plant(j, i));
                     end
                 end
                 
@@ -902,10 +902,33 @@ classdef Decisions
                 
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                % Correct formatting for percent decisions               %
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                % Convert all percents to 100 times decimal              
+                
+                Decision.arr_future_dec_ORA = ...
+                    100.*Decision.arr_future_dec_ORA;
+                Decision.arr_future_dec_FCOJ = ...
+                        100.*Decision.arr_future_dec_FCOJ;
+                Decision.ship_grove_dec = 100.*Decision.ship_grove_dec;
+                Decision.manufac_proc_plant_dec = ...
+                    100.*Decision.manufac_proc_plant_dec;
+                Decision.futures_ship_dec = 100.*Decision.futures_ship_dec;
+                Decision.reconst_storage_dec = ...
+                    100.*Decision.reconst_storage_dec;
+                          
+                for (i=1:71)
+                    for(j =1:10)
+                        Decision.ship_proc_plant_storage_dec(i,j).POJ = ...
+                            100*Decision.ship_proc_plant_storage_dec(i,j).POJ;
+                         Decision.ship_proc_plant_storage_dec(i,j).FCOJ = ...
+                            100*Decision.ship_proc_plant_storage_dec(i,j).FCOJ;
+                    end
+                end
                 
                 
-                
-                
+            
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 % Code to be written to write these updates decisions in %
                 % to Excel decision file                                 %
