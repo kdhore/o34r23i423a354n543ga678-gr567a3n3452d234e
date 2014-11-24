@@ -261,7 +261,7 @@ classdef Decisions
                 %%%% NEED TO MAKE SURE THE PERCENT OVER ALL STORAGE UNITS
                 %%%% IS 1 in a more efficient way
                 for j = 1:length(plants_open)
-                    for i = 1:length(stor_open)-1
+                    for i = 1:length(stor_open)
                         Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).POJ = ...
                             AverageProcPlantPOJPercent(stor_open(i),plants_open(j)) + ...
                             epsilon1*(sum(Decision.demandStoragePOJ(i,:))/...
@@ -277,20 +277,39 @@ classdef Decisions
                             + epsilon4*(plant2storage(stor_open(i),plants_open(j)));
                         
                     end
-                    
-                    % at this point i = length(stor_open)-1
-                    sumPOJ = 0;
-                    sumFCOJ = 0;
-                    for k = 1:length(stor_open)-1
-                        sumPOJ = sumPOJ + Decision.ship_proc_plant_storage_dec(stor_open(k),plants_open(j)).POJ;
-                        sumFCOJ = sumFCOJ + Decision.ship_proc_plant_storage_dec(stor_open(k),plants_open(j)).FCOJ;
-                    end
-                    
-                    Decision.ship_proc_plant_storage_dec(stor_open(i+1),plants_open(j)).POJ = ...
-                        1 - sumPOJ;
-                    Decision.ship_proc_plant_storage_dec(stor_open(i+1),plants_open(j)).FCOJ = ...
-                        1 - sumFCOJ;
                 end
+                for j = 1:length(plants_open)
+                    tempsumPOJ = 0;
+                    tempsumFCOJ = 0;
+                    for x = 1:length(stor_open)
+                        tempsumPOJ = tempsumPOJ + ...
+                            Decision.ship_proc_plant_storage_dec(stor_open(x),plants_open(j)).POJ;
+                        tempsumFCOJ = tempsumFCOJ + ...
+                            Decision.ship_proc_plant_storage_dec(stor_open(x),plants_open(j)).FCOJ;
+                    end
+                    for i = 1:length(stor_open)
+                        
+                        Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).POJ = ...
+                            Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).POJ...
+                            /tempsumPOJ;
+                        Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).FCOJ = ...
+                            Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).FCOJ...
+                            /tempsumFCOJ;
+                    end
+                end
+%                     % at this point i = length(stor_open)-1
+%                     sumPOJ = 0;
+%                     sumFCOJ = 0;
+%                     for k = 1:length(stor_open)-1
+%                         sumPOJ = sumPOJ + Decision.ship_proc_plant_storage_dec(stor_open(k),plants_open(j)).POJ;
+%                         sumFCOJ = sumFCOJ + Decision.ship_proc_plant_storage_dec(stor_open(k),plants_open(j)).FCOJ;
+%                     end
+%                     
+%                     Decision.ship_proc_plant_storage_dec(stor_open(i+1),plants_open(j)).POJ = ...
+%                         1 - sumPOJ;
+%                     Decision.ship_proc_plant_storage_dec(stor_open(i+1),plants_open(j)).FCOJ = ...
+%                         1 - sumFCOJ;
+                
                 
                 
                 Decision.demandProcPlantORA = zeros(length(plants_open),12);
@@ -488,6 +507,15 @@ classdef Decisions
                     end
                 end
                 
+                for i = 1:6
+                    tempSum = sum(Decision.ship_grove_dec(i,:));
+                    for j = 1:(length(plants_open) + length(stor_open))
+                        
+                        Decision.ship_grove_dec(i,j) = ...
+                            Decision.ship_grove_dec(i,j)/tempSum;
+                    end
+                end
+                
                 % Processing plants manufacturing decisions
                 
                 
@@ -612,8 +640,8 @@ classdef Decisions
                 %  Set the amount (in tons) of ORA futures to
                 %  purchase in each year from the year after the current to
                 %  5 years after the current
-                theta1 = 0;
-                theta2 = 0;
+                theta1 = 1;
+                theta2 = 1;
                 
                 cumDemand = 0;
                 for i = 1:7 %iterate over all regions
@@ -676,8 +704,8 @@ classdef Decisions
                 %  purchase in each year from the year after the current to
                 %  5 years after the current
                 
-                theta3 = 0;
-                theta4 = 0;
+                theta3 = 1;
+                theta4 = 1;
                 
                 cumDemandFCOJ = 0;
                 for i = 1:7 %iterate over all regions
@@ -836,7 +864,7 @@ classdef Decisions
                 
                 rho4 = 1.01; %parameter > 1 for buffer space of storage unit
                 for i = 1:length(stor_open)
-                    Decision.storage_dec(i,stor_open(i)) = ...
+                    Decision.storage_dec(stor_open(i),1) = ...
                         rho4*(mean(Decision.demandStorageORA(i,:))/4 + ...
                         mean(Decision.demandStoragePOJ(i,:))/4 + ...
                         mean(Decision.demandStorageROJ(i,:))/4 + ...
