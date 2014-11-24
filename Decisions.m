@@ -63,6 +63,21 @@ classdef Decisions
                 Decision.pricing_ROJ_dec = pricesROJ;
                 Decision.pricing_FCOJ_dec = pricesFCOJ;
                 
+                Decision.pricing_ORA_weekly_dec = zeros(7,48);
+                Decision.pricing_POJ_weekly_dec = zeros(7,48);
+                Decision.pricing_ROJ_weekly_dec = zeros(7,48);
+                Decision.pricing_FCOJ_weekly_dec = zeros(7,48);
+                
+                
+                for i = 1:7
+                    for j = 1:12
+                        Decision.pricing_ORA_weekly_dec(i,(4*j-3):(4*j)) = Decision.pricing_ORA_dec(i,j);
+                        Decision.pricing_POJ_weekly_dec(i,(4*j-3):(4*j)) = Decision.pricing_POJ_dec(i,j);
+                        Decision.pricing_ROJ_weekly_dec(i,(4*j-3):(4*j)) = Decision.pricing_ROJ_dec(i,j);
+                        Decision.pricing_FCOJ_weekly_dec(i,(4*j-3):(4*j)) = Decision.pricing_FCOJ_dec(i,j);
+                    end
+                end
+                
                 
                 % For now this needs to be MANUALLY updated
                 % Load the year data objects
@@ -166,13 +181,13 @@ classdef Decisions
                                     getDemand(1,i,Decision.pricing_ORA_dec(i,month));
                                 Decision.demandStoragePOJ(j, month) = ...
                                     Decision.demandStoragePOJ(j, month) + ...
-                                    getDemand(1,i,Decision.pricing_POJ_dec(i,month));
+                                    getDemand(2,i,Decision.pricing_POJ_dec(i,month));
                                 Decision.demandStorageROJ(j, month) = ...
                                     Decision.demandStorageROJ(j, month) + ...
-                                    getDemand(1,i,Decision.pricing_ROJ_dec(i,month));
+                                    getDemand(3,i,Decision.pricing_ROJ_dec(i,month));
                                 Decision.demandStorageFCOJ(j, month) = ...
                                     Decision.demandStorageFCOJ(j, month) + ...
-                                    getDemand(1,i,Decision.pricing_FCOJ_dec(i,month));
+                                    getDemand(4,i,Decision.pricing_FCOJ_dec(i,month));
                             end
                         end
                     end
@@ -185,7 +200,6 @@ classdef Decisions
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
                 % Enter the futures shipping to storage decisions
-                Decision.futures_ship_dec = zeros(length(stor_open),1);
                 % enter the percent to ship to each storage
                 CumDemandoverStorageFCOJ = 0;
                 
@@ -195,7 +209,7 @@ classdef Decisions
                 end
                 
                 for j = 1:length(stor_open)
-                    Decision.futures_ship_dec(j,1)...
+                    Decision.futures_ship_dec(stor_open(j),1)...
                         =sum(Decision.demandStorageFCOJ(j, :))/...
                         CumDemandoverStorageFCOJ;
                 end
@@ -342,7 +356,7 @@ classdef Decisions
                                 Decision.demandProcPlantFCOJ(i, month) = ...
                                     (Decision.demandStorageFCOJ(index, month)+...
                                     Decision.demandStorageROJ(index, month)-...
-                                    fcojCurrentTotalFutures*Decision.futures_ship_dec(index,1))/...
+                                    fcojCurrentTotalFutures*Decision.futures_ship_dec(stor_open(index),1))/...
                                     Decision.ship_proc_plant_storage_dec(stor_open(index),plants_open(i)).FCOJ;
                             else
                                 Decision.demandProcPlantFCOJ(i, month) = 0;
@@ -352,20 +366,32 @@ classdef Decisions
                     
                 end
                 
-                Decision.manufac_proc_plant_dec =...
-                    struct('POJ', nan, 'FCOJ', nan);
+%                 Decision.manufac_proc_plant_dec =...
+%                     struct('POJ', nan, 'FCOJ', nan);
+                denom = zeros(1,length(plants_open));
                 for i = 1:length(plants_open)
-                    denom = (sum(Decision.demandProcPlantPOJ(i,:))+...
+                    denom(1,i) = (sum(Decision.demandProcPlantPOJ(i,:))+...
                         sum(Decision.demandProcPlantFCOJ(i,:)));
-                    
-                    Decision.manufac_proc_plant_dec(1,i).POJ = ...
-                        sum(Decision.demandProcPlantPOJ(i,:))/denom;
-                    
-                    Decision.manufac_proc_plant_dec(1,i).FCOJ = ...
-                        1 - Decision.manufac_proc_plant_dec(1,i).POJ;
+                          
                 end
                 
+                for i = 1:10
+                    % First row is POJ
+                    Decision.manufac_proc_plant_dec(1,i) = 0;
+                    % Second row is FCOJ
+                    Decision.manufac_proc_plant_dec(2,i) = 0;
+                    
+                end
                 
+                for i = 1:length(plants_open)
+                    % Decisions for POJ
+                    Decision.manufac_proc_plant_dec(1,plants_open(i)) = ...
+                        sum(Decision.demandProcPlantPOJ(i,:))/denom(1,i);
+                    % Decisions for FCOJ
+                    Decision.manufac_proc_plant_dec(2,plants_open(i)) = ...
+                        1 - Decision.manufac_proc_plant_dec(1,plants_open(i));
+                    
+                end
                 
                 for month = 1:12
                     for i = 1:length(plants_open)
@@ -383,17 +409,17 @@ classdef Decisions
                         %                                 Decisions.demandStorageROJ(index, month)-...
                         %                                 fcojCurrentTotalFutures*Decisions.futures_ship_dec(index,1))/...
                         %                                 Decisions.ship_proc_plant_storage_dec(index,i).FCOJ;
-                        if (Decision.manufac_proc_plant_dec(1,i).POJ ~= 0)
+                        if (Decision.manufac_proc_plant_dec(1,i) ~= 0)
                             Decision.demandProcPlantORA(i, month) = ...
                                 Decision.demandProcPlantPOJ(i, month)/...
-                                Decision.manufac_proc_plant_dec(1,i).POJ;
+                                Decision.manufac_proc_plant_dec(1,i);
                             
                             
                             
-                        elseif (Decision.manufac_proc_plant_dec(1,i).FCOJ ~= 0)
+                        elseif (Decision.manufac_proc_plant_dec(2,i) ~= 0)
                             Decision.demandProcPlantORA(i, month) = ...
                                 Decision.demandProcPlantFCOJ(i, month)/...
-                                Decision.manufac_proc_plant_dec(1,i).FCOJ;
+                                Decision.manufac_proc_plant_dec(2,i);
                             
                         end
                         
@@ -471,7 +497,7 @@ classdef Decisions
                     for j = 1:length(stor_open)
                         Decision.ship_grove_dec(i, length(plants_open)+j)...
                             =(sum(Decision.demandStorageORA(j, :)) - ...
-                            Decision.futures_ship_dec(j,1)*TotalCurrentFutures)/...
+                            Decision.futures_ship_dec(stor_open(j),1)*TotalCurrentFutures)/...
                             CumDemandoverStorageORA;
                     end
                 end
@@ -532,10 +558,10 @@ classdef Decisions
                     end
                 end
                 
-                Decision.reconst_storage_dec = zeros(length(stor_open), 12);
+                Decision.reconst_storage_dec = zeros(71, 12);
                 for i = 1:12
                     for j = 1:length(stor_open)
-                        Decision.reconst_storage_dec(j, i) = ...
+                        Decision.reconst_storage_dec(stor_open(j), i) = ...
                             Decision.demandStorageROJ(j,i)/...
                             Decision.demandStorageTotalFCOJ(j,i);
                     end
