@@ -180,7 +180,7 @@ cities_match_storage = matchCitiestoStorage(storage_open, storage2market.(s2m));
  for i = 1:length(storage)
     % Fraction of total FCOJ arriving at florida grove that are being shipped to storage facitlity (storage_open(i)) 
     fraction_shipped = decisions.futures_ship_dec(storage_open(i));
-    monthly_amt_shipped = futures_arr_FCOJ*fraction_shipped;
+    monthly_amt_shipped = futures_arr_FCOJ*fraction_shipped*.01;
     cost_per_ton = 0.22*grove2processing_storage(10 + storage_open(i),1);
     %cost_per_ton = findGrove2PlantOrStorageDist('FLA', char(storageNamesInUse(storage_open(i))))*0.22; % I hope this function has been called correctly (MICHELLE) FUCK YOU KARTHIK
     cost_shipping_FCOJ_futures(:,i) = monthly_amt_shipped'.*cost_per_ton; 
@@ -274,7 +274,7 @@ transCostfromGroves_ORA = sum(sum(transCost_fromGroves));
          sum_shipped = shipped_ORA_FLA + shipped_ORA_CAL + shipped_ORA_TEX + shipped_ORA_ARZ + ...
                        shipped_ORA_BRA + shipped_ORA_SPA;
          fraction_shipped_futures = decisions.futures_ship_dec(storage_open(j));
-         monthly_amt_futures_shipped_FCOJ = futures_arr_FCOJ*fraction_shipped_futures;
+         monthly_amt_futures_shipped_FCOJ = futures_arr_FCOJ*fraction_shipped_futures*.01;
          indicies = strcmp(char(storageNamesInUse(storage_open(j))),cities_match_storage(:,2));
          cities = cities_match_storage(indicies,:);
          %name = char(storageNamesInUse(storage_open(j)));

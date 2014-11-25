@@ -113,10 +113,10 @@ classdef Decisions
             if nargin > 0
                 
                 %prices inputted 7(regions) by 12(months)
-                Decision.pricing_ORA_dec = yr2014.pricing_ORA_dec;
-                Decision.pricing_POJ_dec = yr2014.pricing_POJ_dec;
-                Decision.pricing_ROJ_dec = yr2014.pricing_ROJ_dec;
-                Decision.pricing_FCOJ_dec = yr2014.pricing_FCOJ_dec;
+                Decision.pricing_ORA_dec = yr2014.pricing_ORA_dec - 0.5;
+                Decision.pricing_POJ_dec = yr2014.pricing_POJ_dec - 0.5;
+                Decision.pricing_ROJ_dec = yr2014.pricing_ROJ_dec - 0.5;
+                Decision.pricing_FCOJ_dec = yr2014.pricing_FCOJ_dec - 0.5;
                 
                 Decision.pricing_ORA_weekly_dec = zeros(7,48);
                 Decision.pricing_POJ_weekly_dec = zeros(7,48);
@@ -620,11 +620,12 @@ classdef Decisions
                     end
                 end
                 
+                xi1 = 0.5;
                 % Finally, set the value of the decisions
                 for i = 1:6
                     for j = 1:12
                         Decision.purchase_spotmkt_dec(i,j) = ...
-                            Decision.demandGroveORA(i,j);
+                            xi1*Decision.demandGroveORA(i,j);
                     end
                 end
                 
