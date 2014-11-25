@@ -55,29 +55,8 @@ classdef Decisions
         % decision in the Decision file inputted
         function Decision = Decisions(filename,OJ_object,pricesORA,...
                 pricesPOJ, pricesROJ, pricesFCOJ)
-            if nargin > 0
-                
-                %prices inputted 7(regions) by 12(months)
-                Decision.pricing_ORA_dec = pricesORA;
-                Decision.pricing_POJ_dec = pricesPOJ;
-                Decision.pricing_ROJ_dec = pricesROJ;
-                Decision.pricing_FCOJ_dec = pricesFCOJ;
-                
-                Decision.pricing_ORA_weekly_dec = zeros(7,48);
-                Decision.pricing_POJ_weekly_dec = zeros(7,48);
-                Decision.pricing_ROJ_weekly_dec = zeros(7,48);
-                Decision.pricing_FCOJ_weekly_dec = zeros(7,48);
-                
-                
-                for i = 1:7
-                    for j = 1:12
-                        Decision.pricing_ORA_weekly_dec(i,(4*j-3):(4*j)) = Decision.pricing_ORA_dec(i,j);
-                        Decision.pricing_POJ_weekly_dec(i,(4*j-3):(4*j)) = Decision.pricing_POJ_dec(i,j);
-                        Decision.pricing_ROJ_weekly_dec(i,(4*j-3):(4*j)) = Decision.pricing_ROJ_dec(i,j);
-                        Decision.pricing_FCOJ_weekly_dec(i,(4*j-3):(4*j)) = Decision.pricing_FCOJ_dec(i,j);
-                    end
-                end
-                
+            
+             
                 
                 % For now this needs to be MANUALLY updated
                 % Load the year data objects
@@ -121,10 +100,39 @@ classdef Decisions
                 yr2013temp = genvarname('yr2013');
                 yr2013 = yr2013.(yr2013temp);
                 
+                yr2014 = load('yr2014.mat');
+                yr2014temp = genvarname('yr2014_orianga');
+                yr2014 = yr2014.(yr2014temp);
+                
                 YearDataRecord = [yr2004, yr2005, yr2006, yr2007, yr2008,...
-                    yr2009, yr2010, yr2011, yr2012, yr2013];
+                    yr2009, yr2010, yr2011, yr2012, yr2013, yr2014];
                 plants_open = find(OJ_object.proc_plant_cap);
                 stor_open = find(OJ_object.storage_cap);
+            
+            
+            if nargin > 0
+                
+                %prices inputted 7(regions) by 12(months)
+                Decision.pricing_ORA_dec = yr2014.pricing_ORA_dec;
+                Decision.pricing_POJ_dec = yr2014.pricing_POJ_dec;
+                Decision.pricing_ROJ_dec = yr2014.pricing_ROJ_dec;
+                Decision.pricing_FCOJ_dec = yr2014.pricing_FCOJ_dec;
+                
+                Decision.pricing_ORA_weekly_dec = zeros(7,48);
+                Decision.pricing_POJ_weekly_dec = zeros(7,48);
+                Decision.pricing_ROJ_weekly_dec = zeros(7,48);
+                Decision.pricing_FCOJ_weekly_dec = zeros(7,48);
+                
+                
+                for i = 1:7
+                    for j = 1:12
+                        Decision.pricing_ORA_weekly_dec(i,(4*j-3):(4*j)) = Decision.pricing_ORA_dec(i,j);
+                        Decision.pricing_POJ_weekly_dec(i,(4*j-3):(4*j)) = Decision.pricing_POJ_dec(i,j);
+                        Decision.pricing_ROJ_weekly_dec(i,(4*j-3):(4*j)) = Decision.pricing_ROJ_dec(i,j);
+                        Decision.pricing_FCOJ_weekly_dec(i,(4*j-3):(4*j)) = Decision.pricing_FCOJ_dec(i,j);
+                    end
+                end
+               
                 
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 % Reading in pricing tab
@@ -519,7 +527,7 @@ classdef Decisions
                 for i = 1:6
                     for j = 1:length(plants_open)
                         Decision.ship_grove_dec(i, j)...
-                            =(sum(Decision.demandProcPlantORA(j, :)))/...
+                            =min((sum(Decision.demandProcPlantORA(j, :))),OJ_object.proc_plant_cap(plants_open(j),1))/...
                             CumDemandoverProcPlantORA;
                     end
                 end
@@ -844,13 +852,13 @@ classdef Decisions
                 %increase in demand or delivery
                 Decision.proc_plant_dec = zeros(10,1);% enter matrix manually here
                 
-                rho1 = 1.01; %parameter > 1 for buffer of processing plant
-                for i = 1:length(plants_open)
-                    Decision.proc_plant_dec(plants_open(i),1) = ...
-                        rho1*mean(Decision.demandProcPlantORA(i,:))/4 - ...
-                        OJ_object.proc_plant_cap(plants_open(i),1);
-                    %can be positive or negative number
-                end
+%                 rho1 = 1.01; %parameter > 1 for buffer of processing plant
+%                 for i = 1:length(plants_open)
+%                     Decision.proc_plant_dec(plants_open(i),1) = ...
+%                         rho1*mean(Decision.demandProcPlantORA(i,:))/4 - ...
+%                         OJ_object.proc_plant_cap(plants_open(i),1);
+%                     %can be positive or negative number
+%                 end
                 
                 
                 
@@ -858,17 +866,17 @@ classdef Decisions
                 % at each proc. plant: [P01;P02;...;P10]
                 Decision.tank_car_dec = zeros(10,1); % enter matrix manually here
                 
-                rho2 = 0.5;
-                %number of tank cars as a percentage for transport between
-                %processing plant and storage unit is parameterized by
-                %rho2
-                rho3 = 0.75; %percentage of max to use
-                for i = 1:length(plants_open)
-                    Decision.tank_car_dec(plants_open(i),1) = ...
-                        rho2*rho3*mean(Decision.demandProcPlantORA(i,:))/4 - ...
-                        OJ_object.tank_cars_num(plants_open(i),1);
-                end
-                
+%                 rho2 = 0.5;
+%                 %number of tank cars as a percentage for transport between
+%                 %processing plant and storage unit is parameterized by
+%                 %rho2
+%                 rho3 = 0.75; %percentage of max to use
+%                 for i = 1:length(plants_open)
+%                     Decision.tank_car_dec(plants_open(i),1) = ...
+%                         rho2*rho3*mean(Decision.demandProcPlantORA(i,:))/4 - ...
+%                         OJ_object.tank_cars_num(plants_open(i),1);
+%                 end
+%                 
                 
                 
                 % For storage, the decision is the capacity to buy/sell
@@ -877,6 +885,8 @@ classdef Decisions
                 % Manually define the storage units in use to have some
                 % capacity to buy/sell. For example, for index i:
                 % yr.storage_dec(i) = capacity;
+                Decision.storage_dec(4,1) = -31000;
+                Decision.storage_dec(stor_open(3),1) = -20000;
                 
                 %Add a storage unit if:
                 %capacity sold + transportation savings > price of new
@@ -888,17 +898,17 @@ classdef Decisions
                 %additional (unforseen) factors to throw out a lot of our
                 %product
                 
-                rho4 = 1.01; %parameter > 1 for buffer space of storage unit
-                for i = 1:length(stor_open)
-                    Decision.storage_dec(stor_open(i),1) = ...
-                        rho4*(mean(Decision.demandStorageORA(i,:))/4 + ...
-                        mean(Decision.demandStoragePOJ(i,:))/4 + ...
-                        mean(Decision.demandStorageROJ(i,:))/4 + ...
-                        mean(Decision.demandStorageFCOJ(i,:))/4) - ...
-                        OJ_object.storage_cap(stor_open(i),1);
-                    %can be positive or negative number
-                end
-                
+%                 rho4 = 1.01; %parameter > 1 for buffer space of storage unit
+%                 for i = 1:length(stor_open)
+%                     Decision.storage_dec(stor_open(i),1) = ...
+%                         rho4*(mean(Decision.demandStorageORA(i,:))/4 + ...
+%                         mean(Decision.demandStoragePOJ(i,:))/4 + ...
+%                         mean(Decision.demandStorageROJ(i,:))/4 + ...
+%                         mean(Decision.demandStorageFCOJ(i,:))/4) - ...
+%                         OJ_object.storage_cap(stor_open(i),1);
+%                     %can be positive or negative number
+%                 end
+%                 
                 
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
