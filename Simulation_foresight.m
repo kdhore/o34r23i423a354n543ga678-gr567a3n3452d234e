@@ -113,12 +113,12 @@ cities_match_storage = matchCitiestoStorage(storage_open, storage2market.(s2m));
        
 % Draw grove prices matrix, fx grove => US$ prices, and use actual
 % quantity purchased and the purchasing cost
-    grove_spot = grovePrices(); %Need to write function
-    fx = foreignEx(); % Need to write function
-    adj_BRASPA_USPrice = grove_spot(5:6,:).*fx;
-    adj_USP = [grove_spot(1:4,:); adj_BRASPA_USPrice];
+    %grove_spot = grovePrices(); %Need to write function
+    %fx = foreignEx(); % Need to write function
+    %adj_BRASPA_USPrice = grove_spot(5:6,:).*fx;
+    %adj_USP = [grove_spot(1:4,:); adj_BRASPA_USPrice];
     %updateModels();
-    %adj_USP = genPrices();
+    adj_USP = genPrices();
     act_quant_mult = zeros(6,12);
     for h = 1:6
         mult_1 = decisions.quant_mult_dec(h,1);
