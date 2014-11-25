@@ -278,16 +278,16 @@ classdef Decisions
                     for i = 1:length(stor_open)
                         Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).POJ = ...
                             AverageProcPlantPOJPercent(stor_open(i),plants_open(j)) + ...
-                            epsilon1*(sum(Decision.demandStoragePOJ(i,:))/...
+                            epsilon1*(max((sum(Decision.demandStoragePOJ(i,:))/...
                             CumDemandoverStoragePOJ -  ...
-                            AverageProcPlantPOJPercent(stor_open(i),plants_open(j)))...
+                            AverageProcPlantPOJPercent(stor_open(i),plants_open(j))),0))...
                             + epsilon2*(plant2storage(stor_open(i),plants_open(j)));
                         
                         Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).FCOJ = ...
                             AverageProcPlantFCOJPercent(stor_open(i),plants_open(j)) + ...
-                            epsilon3*(sum(Decision.demandStorageFCOJ(i,:))/...
+                            epsilon3*(max((sum(Decision.demandStorageFCOJ(i,:))/...
                             CumDemandoverStorageFCOJ -  ...
-                            AverageProcPlantFCOJPercent(stor_open(i),plants_open(j)))...
+                            AverageProcPlantFCOJPercent(stor_open(i),plants_open(j))),0))...
                             + epsilon4*(plant2storage(stor_open(i),plants_open(j)));
                         
                     end
@@ -354,9 +354,9 @@ classdef Decisions
                             if Decision.ship_proc_plant_storage_dec(stor_open(k),plants_open(i)).FCOJ ~= 0
                                 index = k;
                                 Decision.demandProcPlantFCOJ(i, month) = ...
-                                    (Decision.demandStorageFCOJ(index, month)+...
+                                    max((Decision.demandStorageFCOJ(index, month)+...
                                     Decision.demandStorageROJ(index, month)-...
-                                    fcojCurrentTotalFutures*Decision.futures_ship_dec(stor_open(index),1))/...
+                                    fcojCurrentTotalFutures*Decision.futures_ship_dec(stor_open(index),1)),0)/...
                                     Decision.ship_proc_plant_storage_dec(stor_open(index),plants_open(i)).FCOJ;
                             else
                                 Decision.demandProcPlantFCOJ(i, month) = 0;
@@ -470,9 +470,9 @@ classdef Decisions
                 end
                 
                 theta5 = 1;
-                theta6 = -1/10000;
+                theta6 = 1;
                 theta7 = 1;
-                theta8 = -1/10000;
+                theta8 = 1;
                 
                 Decision.ship_grove_dec = zeros(6, length(plants_open) +...
                     length(stor_open));
@@ -496,8 +496,8 @@ classdef Decisions
                 for i = 1:6
                     for j = 1:length(stor_open)
                         Decision.ship_grove_dec(i, length(plants_open)+j)...
-                            =(sum(Decision.demandStorageORA(j, :)) - ...
-                            Decision.futures_ship_dec(stor_open(j),1)*TotalCurrentFutures)/...
+                            =max((sum(Decision.demandStorageORA(j, :)) - ...
+                            Decision.futures_ship_dec(stor_open(j),1)*TotalCurrentFutures),0)/...
                             CumDemandoverStorageORA;
                     end
                 end
@@ -507,7 +507,7 @@ classdef Decisions
                     for j = 1:length(stor_open)
                         Decision.ship_grove_dec(i,length(plants_open)+j)= ...
                             theta5*(Decision.ship_grove_dec(i,length(plants_open)+j))...
-                            +theta6*(Dist_Grove_Storage(j, i));
+                            +theta6*(1/Dist_Grove_Storage(j, i));
                     end
                 end
                 
@@ -529,7 +529,7 @@ classdef Decisions
                     for j = 1:length(plants_open)
                         Decision.ship_grove_dec(i,j)= ...
                             theta7*(Decision.ship_grove_dec(i,j))...
-                            +theta8*(Dist_Grove_Proc_Plant(j, i));
+                            +theta8*(1/Dist_Grove_Proc_Plant(j, i));
                     end
                 end
                 
@@ -717,7 +717,7 @@ classdef Decisions
                 for i = 1:5
                     
                     if Decision.future_mark_dec_ORA(i,1) < theta2
-                        Decision.future_mark_dec_ORA(i,2) = theta1*(cumDemand - FuturesMaturing(1,i));
+                        Decision.future_mark_dec_ORA(i,2) = max(theta1*(cumDemand - FuturesMaturing(1,i)),0);
                         
                     else
                         Decision.future_mark_dec_ORA(i,2) = 0;
@@ -781,7 +781,7 @@ classdef Decisions
                 for i = 1:5
                     
                     if Decision.future_mark_dec_FCOJ(i,1) < theta4
-                        Decision.future_mark_dec_FCOJ(i,2) = theta3*(cumDemandFCOJ - FCOJFuturesMaturing(1,i));
+                        Decision.future_mark_dec_FCOJ(i,2) = theta3*max((cumDemandFCOJ - FCOJFuturesMaturing(1,i)),0);
                         
                     else
                         Decision.future_mark_dec_FCOJ(i,2) = 0;
@@ -902,6 +902,30 @@ classdef Decisions
                 
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                % Correct formatting for percent decisions               %
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                % Convert all percents to 100 times decimal              
+                
+                Decision.arr_future_dec_ORA = ...
+                    100.*Decision.arr_future_dec_ORA;
+                Decision.arr_future_dec_FCOJ = ...
+                        100.*Decision.arr_future_dec_FCOJ;
+                Decision.ship_grove_dec = 100.*Decision.ship_grove_dec;
+                Decision.manufac_proc_plant_dec = ...
+                    100.*Decision.manufac_proc_plant_dec;
+                Decision.futures_ship_dec = 100.*Decision.futures_ship_dec;
+                Decision.reconst_storage_dec = ...
+                    100.*Decision.reconst_storage_dec;
+                          
+                for (i=1:71)
+                    for(j =1:10)
+                        Decision.ship_proc_plant_storage_dec(i,j).POJ = ...
+                            100*Decision.ship_proc_plant_storage_dec(i,j).POJ;
+                         Decision.ship_proc_plant_storage_dec(i,j).FCOJ = ...
+                            100*Decision.ship_proc_plant_storage_dec(i,j).FCOJ;
+                    end
+                end
                 
                 
                 
