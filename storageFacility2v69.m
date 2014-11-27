@@ -115,9 +115,13 @@ classdef storageFacility2v69 < handle
 			avails = zeros(4,1);
             sf.revReceived = zeros(4,1);
             
-            % get how much is rotten this week
-            for i=1:length(sf.inventory)
-                sf.rotten(i) = sf.inventory{i}(length(sf.inventory{i}));
+                        % age inventory 1 week
+			for i=1:length(sf.inventory)
+				m = length(sf.inventory{i});
+				for j=m:-1:2
+					sf.inventory{i}(j) = sf.inventory{i}(j-1);
+				end
+				sf.inventory{i}(1) = 0;	
             end
             
 			% add in new inventory
@@ -131,13 +135,12 @@ classdef storageFacility2v69 < handle
                 sf.inventory{2}(4) = sf.inventory{2}(4) + newInv{sim_index}.POJ_4Week;
                 
                 % update FCOJ inventories
-                sf.inventory{4}(1) = sf.inventory{4}(1) + newInv{sim_index}.FCOJ_1Week + ...
-                    futures_per_week_FCOJ;
+                sf.inventory{4}(1) = sf.inventory{4}(1) + newInv{sim_index}.FCOJ_1Week;
                 sf.inventory{4}(2) = sf.inventory{4}(2) + newInv{sim_index}.FCOJ_2Week;
                 sf.inventory{4}(3) = sf.inventory{4}(3) + newInv{sim_index}.FCOJ_3Week;
                 sf.inventory{4}(4) = sf.inventory{4}(4) + newInv{sim_index}.FCOJ_4Week;
             end
-            
+            sf.inventory{4}(1) = sf.inventory{4}(1) + futures_per_week_FCOJ;
             for i = 2:length(sf.inventory{4})
                 sf.inventory{4}(i) = sf.inventory{4}(i) - sf.roj_temp(i-1);
             end
@@ -302,18 +305,18 @@ classdef storageFacility2v69 < handle
             sf.sold(4) = sum(sf.ship_out{4});
                 
             sf.excessDemand = demand;
-            % get holding cost
-			sf.holdCost = (sum(avails) - sum(sf.sold))*sf.holdC;
             
-            % age inventory 1 week
-			for i=1:length(sf.inventory)
-				m = length(sf.inventory{i});
-				for j=m:-1:2
-					sf.inventory{i}(j) = sf.inventory{i}(j-1);
-				end
-				sf.inventory{i}(1) = 0;	
-                %sf.rotten(i) = sf.inventory{i}(length(sf.inventory{i}));
+            for i = 1:4
+                sf.rotten(i) = sf.inventory{i}(length(sf.inventory{i}));
             end
+            % get holding cost
+            totAvail = zeros(4,1);
+            for i=1:4
+				l = length(sf.inventory{i});
+				totAvail(i) = sum(sf.inventory{i}(1:l-1));
+            end
+			sf.holdCost = (sum(totAvail) - sum(sf.sold))*sf.holdC;
+          
 
 		end
 	end

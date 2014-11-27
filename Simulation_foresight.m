@@ -58,13 +58,14 @@ thirdShippingSchedule{3}{stor_open(1)}.FCOJ_1Week = 83.18653665;
 thirdShippingSchedule{3}{stor_open(1)}.Tankers = 5;
 thirdShippingSchedule{4}{stor_open(1)}.POJ_2Week = 431.2320904;
 thirdShippingSchedule{4}{stor_open(1)}.FCOJ_2Week = 536.908316;
-thirdShippingSchedule{3}{stor_open(2)}.POJ_1Week = 946.6295265;
-thirdShippingSchedule{3}{stor_open(2)}.FCOJ_1Week = 493.3704735;
-thirdShippingSchedule{3}{stor_open(2)}.Tankers = 48;
-thirdShippingSchedule{5}{stor_open(2)}.POJ_3Week = 630.5147272;
-thirdShippingSchedule{5}{stor_open(2)}.FCOJ_3Week = 328.6157264;
-thirdShippingSchedule{3}{stor_open(2)}.POJ_2Week = 1577.144254;
-thirdShippingSchedule{3}{stor_open(2)}.FCOJ_2Week = 821.9862;
+thirdShippingSchedule{3}{stor_open(3)}.POJ_1Week = 946.6295265;
+thirdShippingSchedule{3}{stor_open(3)}.FCOJ_1Week = 493.3704735;
+thirdShippingSchedule{3}{stor_open(3)}.Tankers = 48;
+thirdShippingSchedule{5}{stor_open(3)}.POJ_3Week = 630.5147272;
+thirdShippingSchedule{5}{stor_open(3)}.FCOJ_3Week = 328.6157264;
+thirdShippingSchedule{3}{stor_open(3)}.POJ_2Week = 1577.144254;
+thirdShippingSchedule{3}{stor_open(3)}.FCOJ_2Week = 821.9862;
+
 %            
 % plants_open = find(OJgameobj.proc_plant_cap);
 % proc_plants = cell(length(plants_open),1);
@@ -109,17 +110,25 @@ for i = 1:length(storage_open)
     storage{i} = storageFacility2v69(OJgameobj.storage_cap(storage_open(i)),OJgameobj.storage_inv(storage_open(i)),650,60,decisions.reconst_storage_dec(storage_open(i),:),storage_open(i),length(plants_open));
 end
 
+for i = 1:3
+    storage{i}.roj_temp = zeros(48,1);
+end
+storage{1}.roj_temp(1) = 1090.146*74.418/100;
+storage{1}.roj_temp(2) = 421.7002*74.418/100;
+storage{1}.roj_temp(3) = 292.6738*74.418/100;
+storage{3}.roj_temp(2) = 328.6157*68.254/100;
+
 cities_match_storage = matchCitiestoStorage(storage_open, storage2market.(s2m));
        
 % Draw grove prices matrix, fx grove => US$ prices, and use actual
 % quantity purchased and the purchasing cost
-    %grove_spot = grovePrices(); %Need to write function
-    %fx = foreignEx(); % Need to write function
-    %adj_BRASPA_USPrice = grove_spot(5:6,:).*fx;
-    %adj_USP = [grove_spot(1:4,:); adj_BRASPA_USPrice];
+    grove_spot = grovePrices(); %Need to write function
+    fx = foreignEx(); % Need to write function
+    adj_BRASPA_USPrice = grove_spot(5:6,:).*fx;
+    adj_USP = [grove_spot(1:4,:); adj_BRASPA_USPrice];
     %updateModels();
-    adj_USP = genPrices();
-    act_quant_mult = zeros(6,12);
+    %adj_USP = genPrices();
+    %act_quant_mult = zeros(6,12);
     for h = 1:6
         mult_1 = decisions.quant_mult_dec(h,1);
         price_1 = decisions.quant_mult_dec(h,2);
@@ -277,9 +286,9 @@ transCostfromGroves_ORA = sum(sum(transCost_fromGroves));
          monthly_amt_futures_shipped_FCOJ = futures_arr_FCOJ*fraction_shipped_futures*.01;
          indicies = strcmp(char(storageNamesInUse(storage_open(j))),cities_match_storage(:,2));
          cities = cities_match_storage(indicies,:);
-         %name = char(storageNamesInUse(storage_open(j)));
-         %[ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, big_D, big_P] = drawDemand(decisions,cities,i, demand_city_ORA, demand_city_POJ, demand_city_ROJ, demand_city_FCOJ, decisions.storage_res(name), indicies); % will need to give it a price, and do this for all products
-         [ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, big_D, big_P] = drawDemand(decisions,cities,i, demand_city_ORA, demand_city_POJ, demand_city_ROJ, demand_city_FCOJ);
+         name = char(storageNamesInUse(storage_open(j)));
+         [ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, big_D, big_P] = drawDemand(decisions,cities,i, demand_city_ORA, demand_city_POJ, demand_city_ROJ, demand_city_FCOJ, decisions.storage_res(name), indicies); % will need to give it a price, and do this for all products
+         %[ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, big_D, big_P] = drawDemand(decisions,cities,i, demand_city_ORA, demand_city_POJ, demand_city_ROJ, demand_city_FCOJ);
          storage{j} = storage{j}.iterateWeek(sum_shipped, (monthly_amt_futures_shipped_FCOJ(ceil(i/4)))/4, proc_plants, big_D, big_P, i, ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, cities, storage_open(j), plants_open);
          soldORA(j,i) = storage{j}.sold(1);
          soldPOJ(j,i) = storage{j}.sold(2);
