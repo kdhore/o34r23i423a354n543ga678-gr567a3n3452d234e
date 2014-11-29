@@ -253,10 +253,11 @@ classdef storageFacility2v69 < handle
             sf.ROJman = sum(sf.roj_temp);
              % store in temp variable what we make from this week FCOJ
              for i = 1:length(sf.roj_temp)
-                 sf.roj_temp(i) = sf.inventory{4}(i)* sf.reconPercent(ceil(time/4))/100;
+                 sf.roj_temp(i) = sf.inventory{4}(i)*sf.reconPercent(ceil(time/4))/100;
              end
-            
+             
             % satisfy demand from FCOJ - ROJ
+            inventory_temp = sf.inventory;
             demand = big_D;
             sf.transCost = 0;
             for i=1:3
@@ -285,7 +286,7 @@ classdef storageFacility2v69 < handle
             i = 4;
             for k=1:length(cities)
                 j = length(sf.inventory{i})-1;
-                    while ((demand(k,i) > 0) && (sum((sf.inventory{i}(1:j)))-sum(sf.roj_temp)) > 0)
+                    while ((demand(k,i) > 0) && sum((sf.inventory{i}(1:j))) > 0)
                         if (demand(k,i) > sf.inventory{i}(j)-sf.roj_temp(j))
                             sf.ship_out{i}(j) = sf.ship_out{i}(j) + sf.inventory{i}(j)-sf.roj_temp(j);
                             demand(k,i) = demand(k,i) - (sf.inventory{i}(j)-sf.roj_temp(j));
@@ -309,12 +310,15 @@ classdef storageFacility2v69 < handle
             for i = 1:4
                 sf.rotten(i) = sf.inventory{i}(length(sf.inventory{i}));
             end
+            
             % get holding cost
             totAvail = zeros(4,1);
-            for i=1:4
-				l = length(sf.inventory{i});
-				totAvail(i) = sum(sf.inventory{i}(1:l-1));
+            for i=1:3
+				l = length(inventory_temp{i});
+				totAvail(i) = sum(inventory_temp{i}(1:l-1));
             end
+            i = 4;
+            totAvail(i) = sum(inventory_temp{i}(1:length(inventory_temp{i})-1))*(1-sf.reconPercent(ceil(time/4))/100);
 			sf.holdCost = (sum(totAvail) - sum(sf.sold))*sf.holdC;
           
 

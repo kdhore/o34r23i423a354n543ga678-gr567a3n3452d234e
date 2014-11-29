@@ -396,8 +396,6 @@ classdef YearDataWShipping
                 end
                 for (i=1:num_stor)
                     shtname = char(storageNamesInUse(non_zero2(i)));
-                    [~, ~, roj_temp] = xlsread(filename,shtname,'AZ14');
-                    roj_temp = cell2mat(cellNaNReplace(roj_temp,0));
                     [~, ~, ora_ship_in] = xlsread(filename,shtname,'D9:AY9');
                     ora_ship_in = cell2mat(cellNaNReplace(ora_ship_in,0));
                     [~, ~, poj_ship_in] = xlsread(filename,shtname,'D10:AY13');
@@ -447,6 +445,8 @@ classdef YearDataWShipping
                     ora_inven(1:4,49) = ora_inven(1:4,49) - ora_ship_out(:,49);
                     poj_inven(1:8,49) = poj_inven(1:8,49) - poj_ship_out(:,49);
                     roj_inven(1:12,49) = roj_inven(1:12,49) - roj_ship_out(:,49);
+                    reconstPercent = xlsread(filename,shtname,'AY172');
+                    roj_temp = fcoj_inven(1:48,49)*reconstPercent;
                     fcoj_inven(1:48,49) = fcoj_inven(1:48,49) - fcoj_ship_out(:,49);
                     together = struct('roj_temp', roj_temp, 'ORA_Shipped_In', ora_ship_in, 'POJ_Shipped_In', poj_ship_in,...
                                       'ROJ_Shipped_In', roj_ship_in, 'FCOJ_Shipped_In', fcoj_ship_in,...
