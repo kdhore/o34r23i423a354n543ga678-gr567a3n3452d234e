@@ -497,7 +497,7 @@ classdef Decisions
                 %dimensions (# procs x 12)
                 proc_plant_total_ORA_demand = Decision.demandProcPlantORA + ...
                     Decision.demandProcPlantPOJ + ...
-                    Decision.demandProcPlantFCOJ; 
+                    Decision.demandProcPlantFCOJ;
                 
                 
                 proc_ORA_demand = zeros(1,length(plants_open));
@@ -532,31 +532,29 @@ classdef Decisions
                 
                 %initial allocation
                 x0 = zeros(size(Decision.ship_grove_dec)); %6 x (#procs + #stor)
+                for i = 1:size(zeros,1)
+                    x0(i,:) = max(totalORAdemand);
+                end
                 a = @(x)grove_ship_network(x, mean_grove_prices,Dist_Total);
                 b = @(x)constraints_grove_ship(x, totalORAdemand);
-                lb = zeros(size(x0));
-                ub = zeros(size(x0));
-                for i = 1:size(zeros,1)
-                    ub(i,:) = max(totalORAdemand);
-                end
-                %coeffs = zeros(1,6);
-                %coeffs(1,:) = 1;
                 
-                %x = fmincon(fun,x0,A,b,Aeq,beq,lb,ub)
-                %[x, fval] = fmincon(a,x0,[],[],coeffs,totalORAdemand,0,max(totalORAdemand));
+                lb = zeros(size(x0)); %lower bounds on soln
+                
+                ub = zeros(size(x0));
+                for i = 1:size(ub,1)
+                    ub(i,:) = max(totalORAdemand);
+                end %upper bounds on soln
                 
                 options = optimoptions(@fmincon,'Algorithm','sqp');
                 [x, fval] = fmincon(a,x0,[],[],[],[],lb,ub,b,options);
-                fmin = fval; %the total cost of the solution
+                fmin = fval %the total cost of the solution
                 xmin = x; %the solution of shipping what to where
                 
                 %x is dimensioned 6 x (# procs + # storages)
                 for i = 1:6
-                    for j = 1:length(plants_open) %the plant decisions
+                    for j = 1:length(plants_open) + length(stor_open)
+                        %the plant and storage decisions
                         Decision.ship_grove_dec(i,j) = xmin(i,j);
-                    end
-                    for j = 1:length(stor_open) %the storage decisions
-                        Decision.ship_grove_dec(i,length(plants_open)+j) = xmin(i,j);
                     end
                 end
                         
