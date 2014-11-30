@@ -512,7 +512,7 @@ classdef Decisions
                     stor_ORA_demand(1,i) = ...
                         mean(Decision.demandStorageORA(i,:));
                 end
-                totalORAdemand = cat(2,proc_ORA_demand,stor_ORA_demand)
+                totalORAdemand = cat(2,proc_ORA_demand,stor_ORA_demand);
                 %sized 1 x (#procs + #stor)
                     
                 
@@ -532,9 +532,6 @@ classdef Decisions
                 
                 %initial allocation
                 x0 = zeros(size(Decision.ship_grove_dec)); %6 x (#procs + #stor)
-%                 for i = 1:size(zeros,1)
-%                     x0(i,:) = max(totalORAdemand);
-%                 end
                 a = @(x)grove_ship_network(x, mean_grove_prices,Dist_Total);
                 b = @(x)constraints_grove_ship(x, totalORAdemand);
                 
@@ -556,9 +553,12 @@ classdef Decisions
                     for j = 1:length(plants_open) + length(stor_open)
                         %the plant and storage decisions
                         Decision.ship_grove_dec(i,j) = xmin(i,j)/sum(xmin(i,:));
+                        if Decision.ship_grove_dec(i,j) < 0.01
+                            Decision.ship_grove_dec(i,j) = 0;
+                        end
                     end
                 end
-                   %expressed in percentages     
+                %expressed in percentages     
                 
                 
                 
