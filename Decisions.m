@@ -477,79 +477,144 @@ classdef Decisions
                     end
                 end
                 
-                theta5 = 1;
-                theta6 = 1;
-                theta7 = 1;
-                theta8 = 1;
+%                 theta5 = 1;
+%                 theta6 = 1;
+%                 theta7 = 1;
+%                 theta8 = 1;
                 
                 Decision.ship_grove_dec = zeros(6, length(plants_open) +...
                     length(stor_open));
                 
                 % Set the decisions for the storage units
                 
-                CumDemandoverStorageORA = 0;
-                CumDemandoverProcPlantORA = 0;
-                TotalCurrentFutures = 0;
                 
-                for i = 1:5
-                    TotalCurrentFutures = TotalCurrentFutures + ...
-                        OJ_object.ora_futures_current(1,2*i);
-                end
+                %all the distances, with processing plant distances first
+                %dimensions 6 x (# procs + # storages)
+                Dist_Total = cat(2,transpose(Dist_Grove_Proc_Plant),...
+                    transpose(Dist_Grove_Storage));
                 
-                for i = 1:length(stor_open)
-                    CumDemandoverStorageORA = CumDemandoverStorageORA + ...
-                        sum(Decision.demandStorageORA(i, :));
-                end
-                
-                for i = 1:6
-                    for j = 1:length(stor_open)
-                        Decision.ship_grove_dec(i, length(plants_open)+j)...
-                            =max((sum(Decision.demandStorageORA(j, :)) - ...
-                            Decision.futures_ship_dec(stor_open(j),1)*TotalCurrentFutures),0)/...
-                            CumDemandoverStorageORA;
-                    end
-                end
+                %how many oranges the processing plant needs
+                %dimensions (# procs x 12)
+                proc_plant_total_ORA_demand = Decisions.demandProcPlantORA + ...
+                    Decisions.demandProcPlantPOJ + ...
+                    Decisions.demandProcPlantFCOJ; 
                 
                 
-                for i = 1:6
-                    for j = 1:length(stor_open)
-                        Decision.ship_grove_dec(i,length(plants_open)+j)= ...
-                            theta5*(Decision.ship_grove_dec(i,length(plants_open)+j))...
-                            +theta6*(1/Dist_Grove_Storage(j, i));
-                    end
-                end
-                
+                proc_ORA_demand = zeros(1,length(plants_open));
+                %make the proc plant demand = average of the demands
                 for i = 1:length(plants_open)
-                    CumDemandoverProcPlantORA = CumDemandoverProcPlantORA + ...
-                        sum(Decision.demandProcPlantORA(i, :));
+                    proc_ORA_demand(1,n) = ...
+                        mean(proc_plant_total_ORA_demand(i,:));
+                end
+                %make the storage demand = average of the demands
+                stor_ORA_demand = zeros(1,length(stor_open));
+                for i = 1:length(stor_open)
+                    stor_ORA_demand(1,n) = ...
+                        mean(Decisions.demandStorageORA(i,:));
+                end
+                totalORAdemand = cat(2,proc_ORA_demand,stor_ORA_demand);
+                    
+                
+                %NEED ACCURATE PRICE FORECASTS. Using mean prices over the
+                %years won't really cut it, as below
+                mean_grove_prices = zeros(6,1);
+                
+                for j = 1:6
+                    for i = 1:length(YearDataRecord)
+                        mean_grove_prices(j) = mean_grove_prices(j) + ...
+                            mean(YearDataRecord(i).us_price_spot_res(j,:));
+                    end
+                    mean_grove_prices(j) = mean_grove_prices(j)...
+                        /length(YearDataRecord);
                 end
                 
+                
+                %initial allocation
+                x0 = zeros(size(Decisions.ship_grove_dec));
+                
+                a = @(x)grove_ship_network(x, mean_grove_prices,Dist_Total);
+                b = @(x)constraints_grove_ship(x, totalORAdemand);
+                options = optimoptions(@fmincon,'Algorithm','sqp');
+                [x, fval] = fmincon(a,x0,[],[],[],[],[],[],b,options);
+                fmin = fval; %the total cost of the solution
+                xmin = x; %the solution of shipping what to where
+                
+                %x is dimensioned 6 x (# procs + # storages)
                 for i = 1:6
-                    for j = 1:length(plants_open)
-                        Decision.ship_grove_dec(i, j)...
-                            =min((sum(Decision.demandProcPlantORA(j, :))),OJ_object.proc_plant_cap(plants_open(j),1))/...
-                            CumDemandoverProcPlantORA;
+                    for j = 1:length(plants_open) %the plant decisions
+                        Decisions.ship_grove_dec(i,j) = xmin(i,j);
+                    end
+                    for j = 1:length(stor_open) %the storage decisions
+                        Decisions.ship_grove_dec(i,length(plants_open)+j) = xmin(i,j);
                     end
                 end
-                
-                
-                for i = 1:6
-                    for j = 1:length(plants_open)
-                        Decision.ship_grove_dec(i,j)= ...
-                            theta7*(Decision.ship_grove_dec(i,j))...
-                            +theta8*(1/Dist_Grove_Proc_Plant(j, i));
-                    end
-                end
-                
-                for i = 1:6
-                    tempSum = sum(Decision.ship_grove_dec(i,:));
-                    for j = 1:(length(plants_open) + length(stor_open))
                         
-                        Decision.ship_grove_dec(i,j) = ...
-                            Decision.ship_grove_dec(i,j)/tempSum;
-                    end
-                end
                 
+                
+                
+%                 CumDemandoverStorageORA = 0;
+%                 CumDemandoverProcPlantORA = 0;
+%                 TotalCurrentFutures = 0;
+%                 
+%                 for i = 1:5
+%                     TotalCurrentFutures = TotalCurrentFutures + ...
+%                         OJ_object.ora_futures_current(1,2*i);
+%                 end
+%                 
+%                 for i = 1:length(stor_open)
+%                     CumDemandoverStorageORA = CumDemandoverStorageORA + ...
+%                         sum(Decision.demandStorageORA(i, :));
+%                 end
+%                 
+%                 for i = 1:6
+%                     for j = 1:length(stor_open)
+%                         Decision.ship_grove_dec(i, length(plants_open)+j)...
+%                             =max((sum(Decision.demandStorageORA(j, :)) - ...
+%                             Decision.futures_ship_dec(stor_open(j),1)*TotalCurrentFutures),0)/...
+%                             CumDemandoverStorageORA;
+%                     end
+%                 end
+%                 
+%                 
+%                 for i = 1:6
+%                     for j = 1:length(stor_open)
+%                         Decision.ship_grove_dec(i,length(plants_open)+j)= ...
+%                             theta5*(Decision.ship_grove_dec(i,length(plants_open)+j))...
+%                             +theta6*(1/Dist_Grove_Storage(j, i));
+%                     end
+%                 end
+%                 
+%                 for i = 1:length(plants_open)
+%                     CumDemandoverProcPlantORA = CumDemandoverProcPlantORA + ...
+%                         sum(Decision.demandProcPlantORA(i, :));
+%                 end
+%                 
+%                 for i = 1:6
+%                     for j = 1:length(plants_open)
+%                         Decision.ship_grove_dec(i, j)...
+%                             =min((sum(Decision.demandProcPlantORA(j, :))),OJ_object.proc_plant_cap(plants_open(j),1))/...
+%                             CumDemandoverProcPlantORA;
+%                     end
+%                 end
+%                 
+%                 
+%                 for i = 1:6
+%                     for j = 1:length(plants_open)
+%                         Decision.ship_grove_dec(i,j)= ...
+%                             theta7*(Decision.ship_grove_dec(i,j))...
+%                             +theta8*(1/Dist_Grove_Proc_Plant(j, i));
+%                     end
+%                 end
+%                 
+%                 for i = 1:6
+%                     tempSum = sum(Decision.ship_grove_dec(i,:));
+%                     for j = 1:(length(plants_open) + length(stor_open))
+%                         
+%                         Decision.ship_grove_dec(i,j) = ...
+%                             Decision.ship_grove_dec(i,j)/tempSum;
+%                     end
+%                 end
+%                 
                 % Processing plants manufacturing decisions
                 
                 
