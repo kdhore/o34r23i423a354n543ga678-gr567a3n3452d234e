@@ -495,28 +495,29 @@ classdef Decisions
                 
                 %how many oranges the processing plant needs
                 %dimensions (# procs x 12)
-                proc_plant_total_ORA_demand = Decisions.demandProcPlantORA + ...
-                    Decisions.demandProcPlantPOJ + ...
-                    Decisions.demandProcPlantFCOJ; 
+                proc_plant_total_ORA_demand = Decision.demandProcPlantORA + ...
+                    Decision.demandProcPlantPOJ + ...
+                    Decision.demandProcPlantFCOJ; 
                 
                 
                 proc_ORA_demand = zeros(1,length(plants_open));
                 %make the proc plant demand = average of the demands
                 for i = 1:length(plants_open)
-                    proc_ORA_demand(1,n) = ...
+                    proc_ORA_demand(1,i) = ...
                         mean(proc_plant_total_ORA_demand(i,:));
                 end
                 %make the storage demand = average of the demands
                 stor_ORA_demand = zeros(1,length(stor_open));
                 for i = 1:length(stor_open)
-                    stor_ORA_demand(1,n) = ...
-                        mean(Decisions.demandStorageORA(i,:));
+                    stor_ORA_demand(1,i) = ...
+                        mean(Decision.demandStorageORA(i,:));
                 end
                 totalORAdemand = cat(2,proc_ORA_demand,stor_ORA_demand);
+                %sized 1 x (#procs + #stor)
                     
                 
                 %NEED ACCURATE PRICE FORECASTS. Using mean prices over the
-                %years won't really cut it, as below
+                %years (as below) won't really cut it
                 mean_grove_prices = zeros(6,1);
                 
                 for j = 1:6
@@ -530,22 +531,32 @@ classdef Decisions
                 
                 
                 %initial allocation
-                x0 = zeros(size(Decisions.ship_grove_dec));
-                
+                x0 = zeros(size(Decision.ship_grove_dec)); %6 x (#procs + #stor)
                 a = @(x)grove_ship_network(x, mean_grove_prices,Dist_Total);
                 b = @(x)constraints_grove_ship(x, totalORAdemand);
+                lb = zeros(size(x0));
+                ub = zeros(size(x0));
+                for i = 1:size(zeros,1)
+                    ub(i,:) = max(totalORAdemand);
+                end
+                %coeffs = zeros(1,6);
+                %coeffs(1,:) = 1;
+                
+                %x = fmincon(fun,x0,A,b,Aeq,beq,lb,ub)
+                %[x, fval] = fmincon(a,x0,[],[],coeffs,totalORAdemand,0,max(totalORAdemand));
+                
                 options = optimoptions(@fmincon,'Algorithm','sqp');
-                [x, fval] = fmincon(a,x0,[],[],[],[],[],[],b,options);
+                [x, fval] = fmincon(a,x0,[],[],[],[],lb,ub,b,options);
                 fmin = fval; %the total cost of the solution
                 xmin = x; %the solution of shipping what to where
                 
                 %x is dimensioned 6 x (# procs + # storages)
                 for i = 1:6
                     for j = 1:length(plants_open) %the plant decisions
-                        Decisions.ship_grove_dec(i,j) = xmin(i,j);
+                        Decision.ship_grove_dec(i,j) = xmin(i,j);
                     end
                     for j = 1:length(stor_open) %the storage decisions
-                        Decisions.ship_grove_dec(i,length(plants_open)+j) = xmin(i,j);
+                        Decision.ship_grove_dec(i,length(plants_open)+j) = xmin(i,j);
                     end
                 end
                         
