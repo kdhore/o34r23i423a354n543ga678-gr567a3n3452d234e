@@ -312,14 +312,14 @@ classdef Decisions
                 %x0 = zeros(10,71); %10x71array of struct
                 x0 = zeros(length(plants_open),length(stor_open));
                 
-                a = @(x)proc_plant_ship_network_POJ(x, procStorageDist);
-                b = @(x)constraints_proc_plants_ship_POJ(x, totalPOJdemand);
+                a = @(x)proc_plant_ship_network(x, procStorageDist);
+                b = @(x)constraints_proc_plants_ship(x, totalPOJdemand);
                 
                 lb = zeros(size(x0)); %lower bounds on soln
                 
                 ub = zeros(size(x0));
                 for i = 1:size(ub,1)
-                    ub(stor_open(i),:) = max(totalPOJdemand);
+                    ub(i,:) = max(totalPOJdemand);
                 end %upper bounds on soln
                 
                 
@@ -330,7 +330,7 @@ classdef Decisions
                 
                 %expand the decisions to the original 71x10 matrix below
                 xmin = transpose(xmin);
-                %x is dimensioned 71 x 10
+                %xmin is dimensioned storages x plants
                 for i = 1:length(stor_open)
                     for j = 1:length(plants_open)
                         %the plant and storage decisions
@@ -345,9 +345,9 @@ classdef Decisions
                         Decision.ship_proc_plant_storage_dec(stor_open(i),...
                             plants_open(j)).POJ = xmin(i,j)...
                             /sum(xmin(i,:)); %as percentage of all procs to that storage
-                        if Decision.ship_grove_dec(stor_open(i),...
+                        if Decision.ship_proc_plant_storage_dec(stor_open(i),...
                                 plants_open(j)).POJ < 0.01
-                            Decision.ship_grove_dec(stor_open(i),...
+                            Decision.ship_proc_plant_storage_dec(stor_open(i),...
                                 plants_open(j)).POJ = 0;
                         end
                     end
@@ -361,18 +361,17 @@ classdef Decisions
                 
                 ub = zeros(size(x0));
                 for i = 1:size(ub,1)
-                    ub(stor_open(i),:) = max(totalFCOJdemand);
+                    ub(i,:) = max(totalFCOJdemand);
                 end %upper bounds on soln
-                
-                a = @(x)proc_plant_ship_network_POJ(x, procStorageDist);
-                b = @(x)constraints_proc_plants_ship_POJ(x, totalFCOJdemand);
+                a = @(x)proc_plant_ship_network(x, procStorageDist);
+                b = @(x)constraints_proc_plants_ship(x, totalFCOJdemand);
                 options = optimoptions(@fmincon,'Algorithm','sqp');
                 [x, fval] = fmincon(a,x0,[],[],[],[],lb,ub,b,options);
                 fminFCOJ = fval; %the total cost of the solution
                 xmin = x; %the solution of shipping what to where
                 
                 xmin = transpose(xmin);
-                %x is dimensioned 71 x 10
+                %xmin is dimensioned storages x plants
                 for i = 1:length(stor_open)
                     for j = 1:length(plants_open)
                         %the plant and storage decisions
@@ -387,9 +386,9 @@ classdef Decisions
                         Decision.ship_proc_plant_storage_dec(stor_open(i),...
                             plants_open(j)).FCOJ = xmin(i,j)...
                             /sum(xmin(i,:));
-                        if Decision.ship_grove_dec(stor_open(i),...
+                        if Decision.ship_proc_plant_storage_dec(stor_open(i),...
                             plants_open(j)).FCOJ < 0.01
-                            Decision.ship_grove_dec(stor_open(i),...
+                            Decision.ship_proc_plant_storage_dec(stor_open(i),...
                             plants_open(j)).FCOJ = 0;
                         end
                     end
@@ -398,25 +397,25 @@ classdef Decisions
                 
                 % Normalizing across all proc plants and storage units to
                 % ensure they add up to 1
-                for j = 1:length(plants_open)
-                    tempsumPOJ = 0;
-                    tempsumFCOJ = 0;
-                    for x = 1:length(stor_open)
-                        tempsumPOJ = tempsumPOJ + ...
-                            Decision.ship_proc_plant_storage_dec(stor_open(x),plants_open(j)).POJ;
-                        tempsumFCOJ = tempsumFCOJ + ...
-                            Decision.ship_proc_plant_storage_dec(stor_open(x),plants_open(j)).FCOJ;
-                    end
-                    for i = 1:length(stor_open)
-                        
-                        Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).POJ = ...
-                            Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).POJ...
-                            /tempsumPOJ;
-                        Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).FCOJ = ...
-                            Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).FCOJ...
-                            /tempsumFCOJ;
-                    end
-                end
+%                 for j = 1:length(plants_open)
+%                     tempsumPOJ = 0;
+%                     tempsumFCOJ = 0;
+%                     for x = 1:length(stor_open)
+%                         tempsumPOJ = tempsumPOJ + ...
+%                             Decision.ship_proc_plant_storage_dec(stor_open(x),plants_open(j)).POJ;
+%                         tempsumFCOJ = tempsumFCOJ + ...
+%                             Decision.ship_proc_plant_storage_dec(stor_open(x),plants_open(j)).FCOJ;
+%                     end
+%                     for i = 1:length(stor_open)
+%                         
+%                         Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).POJ = ...
+%                             Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).POJ...
+%                             /tempsumPOJ;
+%                         Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).FCOJ = ...
+%                             Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).FCOJ...
+%                             /tempsumFCOJ;
+%                     end
+%                 end
                 
 %                 epsilon1 = 1;
 %                 epsilon2 = 1/10000;
@@ -635,7 +634,7 @@ classdef Decisions
                 
                 %all the distances, with processing plant distances first
                 %dimensions 6 x (# procs + # storages)
-                Dist_Total = cat(2,transpose(Dist_Grove_Proc_Plant),...
+                Dist_Total1 = cat(2,transpose(Dist_Grove_Proc_Plant),...
                     transpose(Dist_Grove_Storage));
                 
                 %how many oranges the processing plant needs per month
@@ -677,7 +676,7 @@ classdef Decisions
                 
                 %initial allocation
                 x0 = zeros(size(Decision.ship_grove_dec)); %6 x (#procs + #stor)
-                a = @(x)grove_ship_network(x, mean_grove_prices,Dist_Total);
+                a = @(x)grove_ship_network(x, mean_grove_prices,Dist_Total1);
                 b = @(x)constraints_grove_ship(x, totalORAdemand);
                 
                 lb = zeros(size(x0)); %lower bounds on soln
