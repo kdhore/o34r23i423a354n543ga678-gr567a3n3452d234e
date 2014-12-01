@@ -48,6 +48,10 @@ classdef Decisions
         monthlyDemandORA;
         
         monthlyDemandFCOJ;
+        
+         indep_carrier;
+         tanker_cost;
+         
     end
     
     methods
@@ -233,73 +237,134 @@ classdef Decisions
                     end
                 end
                 
-                AverageProcPlantPOJPercent = zeros(71,10);
-                AverageProcPlantFCOJPercent = zeros(71,10);
+%                 AverageProcPlantPOJPercent = zeros(71,10);
+%                 AverageProcPlantFCOJPercent = zeros(71,10);
                 
-                % Calculate average of these percentages over the past
-                % years
-                for i = length(stor_open)
-                    for j = length(plants_open)
-                        for k = 1:length(YearDataRecord)
-                            AverageProcPlantPOJPercent(stor_open(i),plants_open(j)) ...
-                                = AverageProcPlantPOJPercent(stor_open(i),plants_open(j))...
-                                +YearDataRecord(k).ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).POJ;
-                            AverageProcPlantFCOJPercent(stor_open(i),plants_open(j)) ...
-                                = AverageProcPlantFCOJPercent(stor_open(i),plants_open(j))...
-                                +YearDataRecord(k).ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).FCOJ;
-                        end
-                    end
-                end
-                
-                for i = length(stor_open)
-                    for j = length(plants_open)
-                        AverageProcPlantPOJPercent(stor_open(i),plants_open(j)) = ...
-                            AverageProcPlantPOJPercent(stor_open(i),plants_open(j))/...
-                            length(YearDataRecord);
-                        AverageProcPlantFCOJPercent(stor_open(i),plants_open(j)) = ...
-                            AverageProcPlantFCOJPercent(stor_open(i),plants_open(j))/...
-                            length(YearDataRecord);
-                    end
-                end
+%                 % Calculate average of these percentages over the past
+%                 % years
+%                 for i = length(stor_open)
+%                     for j = length(plants_open)
+%                         for k = 1:length(YearDataRecord)
+%                             AverageProcPlantPOJPercent(stor_open(i),plants_open(j)) ...
+%                                 = AverageProcPlantPOJPercent(stor_open(i),plants_open(j))...
+%                                 +YearDataRecord(k).ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).POJ;
+%                             AverageProcPlantFCOJPercent(stor_open(i),plants_open(j)) ...
+%                                 = AverageProcPlantFCOJPercent(stor_open(i),plants_open(j))...
+%                                 +YearDataRecord(k).ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).FCOJ;
+%                         end
+%                     end
+%                 end
+%                 
+%                 for i = length(stor_open)
+%                     for j = length(plants_open)
+%                         AverageProcPlantPOJPercent(stor_open(i),plants_open(j)) = ...
+%                             AverageProcPlantPOJPercent(stor_open(i),plants_open(j))/...
+%                             length(YearDataRecord);
+%                         AverageProcPlantFCOJPercent(stor_open(i),plants_open(j)) = ...
+%                             AverageProcPlantFCOJPercent(stor_open(i),plants_open(j))/...
+%                             length(YearDataRecord);
+%                     end
+%                 end
                 
                 plant2storage = load('plant2storage_dist.mat');
                 p2s = genvarname('processing2storage_dist');
                 plant2storage = plant2storage.(p2s);
                 % rows are storage, columns are plants
                 plant2storage = cell2mat(plant2storage);
-                
-                
-                epsilon1 = 1;
-                epsilon2 = 1/10000;
-                epsilon3 = 1;
-                epsilon4 = 1/10000;
-                
-                CumDemandoverStoragePOJ = 0;
+                % Distances rows are 71 storage units and 10 proc plant
+                % columns
+                Dist_Total = plant2storage; 
+                              
+                %make the storage demand = average of the demands
+                stor_POJ_demand = zeros(1,length(stor_open));
+                stor_FCOJ_demand = zeros(1,length(stor_open));
                 for i = 1:length(stor_open)
-                    CumDemandoverStoragePOJ = CumDemandoverStoragePOJ + ...
-                        sum(Decision.demandStoragePOJ(i, :));
+                    stor_POJ_demand(1,i) = ...
+                        mean(Decision.demandStoragePOJ(i,:));
+                    stor_FCOJ_demand(1,i) = ...
+                        mean(Decision.demandStorageFCOJ(i,:));
                 end
                 
-                %%%% NEED TO MAKE SURE THE PERCENT OVER ALL STORAGE UNITS
-                %%%% IS 1 in a more efficient way
-                for j = 1:length(plants_open)
-                    for i = 1:length(stor_open)
-                        Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).POJ = ...
-                            AverageProcPlantPOJPercent(stor_open(i),plants_open(j)) + ...
-                            epsilon1*(max((sum(Decision.demandStoragePOJ(i,:))/...
-                            CumDemandoverStoragePOJ -  ...
-                            AverageProcPlantPOJPercent(stor_open(i),plants_open(j))),0))...
-                            + epsilon2*(plant2storage(stor_open(i),plants_open(j)));
-                        
-                        Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).FCOJ = ...
-                            AverageProcPlantFCOJPercent(stor_open(i),plants_open(j)) + ...
-                            epsilon3*(max((sum(Decision.demandStorageFCOJ(i,:))/...
-                            CumDemandoverStorageFCOJ -  ...
-                            AverageProcPlantFCOJPercent(stor_open(i),plants_open(j))),0))...
-                            + epsilon4*(plant2storage(stor_open(i),plants_open(j)));
-                        
+                totalPOJdemand = stor_POJ_demand;
+                totalFCOJdemand = stor_FCOJ_demand;
+                %sized 1 x (#stor)
+                    
+                % Define transportation costs to be used
+                % Indep carrier $0.65/ton/mile
+                indep_carrier = 0.65;
+                % Tanker cars = $36/car/mile
+                tanker_cost = 36;
+                
+                %initial allocation for POJ
+                x0 = zeros(71,10); %71x10 array of 
+                a = @(x)proc_plant_ship_network_POJ(x, indep_carrier, tanker_cost, Dist_Total);
+                b = @(x)constraints_proc_plants_ship_POJ(x, totalPOJdemand);
+                
+                lb = zeros(size(x0)); %lower bounds on soln
+                
+                ub = zeros(size(x0));
+                for i = 1:size(ub,1)
+                    ub(stor_open(i),:) = max(totalPOJdemand);
+                end %upper bounds on soln
+                
+                
+                options = optimoptions(@fmincon,'Algorithm','sqp');
+                [x, fval] = fmincon(a,x0,[],[],[],[],lb,ub,b,options);
+                fmin = fval; %the total cost of the solution
+                xmin = x; %the solution of shipping what to where
+                
+                %x is dimensioned 71 x 10
+                for i = 1:length(stor_open)
+                    for j = 1:length(plants_open)
+                        %the plant and storage decisions
+                        Decision.ship_proc_plant_storage_dec(stor_open(i),...
+                            plants_open(j)).POJ = xmin(stor_open(i),plants_open(j))...
+                            /sum(xmin(stor_open(i),:));
+                        if Decision.ship_grove_dec(stor_open(i),...
+                            plants_open(j)).POJ < 0.01
+                            Decision.ship_grove_dec(stor_open(i),...
+                            plants_open(j)).POJ = 0;
+                        end
                     end
                 end
+                %expressed in percentages
+                
+                %initial allocation for FCOJ
+                x0 = zeros(71,10); %71x10 array of struct 
+                a = @(x)proc_plant_ship_network_FCOJ(x, indep_carrier, tanker_cost, Dist_Total);
+                b = @(x)constraints_proc_plants_ship_FCOJ(x, totalFCOJdemand);
+                
+                lb = zeros(size(x0)); %lower bounds on soln
+                
+                ub = zeros(size(x0));
+                for i = 1:size(ub,1)
+                    ub(stor_open(i),:) = max(totalFCOJdemand);
+                end %upper bounds on soln
+                
+                
+                options = optimoptions(@fmincon,'Algorithm','sqp');
+                [x, fval] = fmincon(a,x0,[],[],[],[],lb,ub,b,options);
+                fmin = fval; %the total cost of the solution
+                xmin = x; %the solution of shipping what to where
+                
+                %x is dimensioned 71 x 10
+                for i = 1:length(stor_open)
+                    for j = 1:length(plants_open)
+                        %the plant and storage decisions
+                        Decision.ship_proc_plant_storage_dec(stor_open(i),...
+                            plants_open(j)).FCOJ = xmin(stor_open(i),plants_open(j))...
+                            /sum(xmin(stor_open(i),:));
+                        if Decision.ship_grove_dec(stor_open(i),...
+                            plants_open(j)).FCOJ < 0.01
+                            Decision.ship_grove_dec(stor_open(i),...
+                            plants_open(j)).FCOJ = 0;
+                        end
+                    end
+                end
+                %expressed in percentages
+                
+                % Normalizing across all proc plants and storage units to
+                % ensure they add up to 1
                 for j = 1:length(plants_open)
                     tempsumPOJ = 0;
                     tempsumFCOJ = 0;
@@ -319,21 +384,71 @@ classdef Decisions
                             /tempsumFCOJ;
                     end
                 end
-%                     % at this point i = length(stor_open)-1
-%                     sumPOJ = 0;
-%                     sumFCOJ = 0;
-%                     for k = 1:length(stor_open)-1
-%                         sumPOJ = sumPOJ + Decision.ship_proc_plant_storage_dec(stor_open(k),plants_open(j)).POJ;
-%                         sumFCOJ = sumFCOJ + Decision.ship_proc_plant_storage_dec(stor_open(k),plants_open(j)).FCOJ;
+                
+%                 epsilon1 = 1;
+%                 epsilon2 = 1/10000;
+%                 epsilon3 = 1;
+%                 epsilon4 = 1/10000;
+%                 
+%                 CumDemandoverStoragePOJ = 0;
+%                 for i = 1:length(stor_open)
+%                     CumDemandoverStoragePOJ = CumDemandoverStoragePOJ + ...
+%                         sum(Decision.demandStoragePOJ(i, :));
+%                 end
+                
+%                 %%%% NEED TO MAKE SURE THE PERCENT OVER ALL STORAGE UNITS
+%                 %%%% IS 1 in a more efficient way
+%                 for j = 1:length(plants_open)
+%                     for i = 1:length(stor_open)
+%                         Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).POJ = ...
+%                             AverageProcPlantPOJPercent(stor_open(i),plants_open(j)) + ...
+%                             epsilon1*(max((sum(Decision.demandStoragePOJ(i,:))/...
+%                             CumDemandoverStoragePOJ -  ...
+%                             AverageProcPlantPOJPercent(stor_open(i),plants_open(j))),0))...
+%                             + epsilon2*(plant2storage(stor_open(i),plants_open(j)));
+%                         
+%                         Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).FCOJ = ...
+%                             AverageProcPlantFCOJPercent(stor_open(i),plants_open(j)) + ...
+%                             epsilon3*(max((sum(Decision.demandStorageFCOJ(i,:))/...
+%                             CumDemandoverStorageFCOJ -  ...
+%                             AverageProcPlantFCOJPercent(stor_open(i),plants_open(j))),0))...
+%                             + epsilon4*(plant2storage(stor_open(i),plants_open(j)));
+%                         
 %                     end
-%                     
-%                     Decision.ship_proc_plant_storage_dec(stor_open(i+1),plants_open(j)).POJ = ...
-%                         1 - sumPOJ;
-%                     Decision.ship_proc_plant_storage_dec(stor_open(i+1),plants_open(j)).FCOJ = ...
-%                         1 - sumFCOJ;
-                
-                
-                
+%                 end
+%                 for j = 1:length(plants_open)
+%                     tempsumPOJ = 0;
+%                     tempsumFCOJ = 0;
+%                     for x = 1:length(stor_open)
+%                         tempsumPOJ = tempsumPOJ + ...
+%                             Decision.ship_proc_plant_storage_dec(stor_open(x),plants_open(j)).POJ;
+%                         tempsumFCOJ = tempsumFCOJ + ...
+%                             Decision.ship_proc_plant_storage_dec(stor_open(x),plants_open(j)).FCOJ;
+%                     end
+%                     for i = 1:length(stor_open)
+%                         
+%                         Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).POJ = ...
+%                             Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).POJ...
+%                             /tempsumPOJ;
+%                         Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).FCOJ = ...
+%                             Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).FCOJ...
+%                             /tempsumFCOJ;
+%                     end
+%                 end
+
+% %                     % at this point i = length(stor_open)-1
+% %                     sumPOJ = 0;
+% %                     sumFCOJ = 0;
+% %                     for k = 1:length(stor_open)-1
+% %                         sumPOJ = sumPOJ + Decision.ship_proc_plant_storage_dec(stor_open(k),plants_open(j)).POJ;
+% %                         sumFCOJ = sumFCOJ + Decision.ship_proc_plant_storage_dec(stor_open(k),plants_open(j)).FCOJ;
+% %                     end
+% %                     
+% %                     Decision.ship_proc_plant_storage_dec(stor_open(i+1),plants_open(j)).POJ = ...
+% %                         1 - sumPOJ;
+% %                     Decision.ship_proc_plant_storage_dec(stor_open(i+1),plants_open(j)).FCOJ = ...
+% %                         1 - sumFCOJ;
+
                 Decision.demandProcPlantORA = zeros(length(plants_open),12);
                 Decision.demandProcPlantPOJ = zeros(length(plants_open),12);
                 Decision.demandProcPlantFCOJ = zeros(length(plants_open),12);
@@ -357,9 +472,21 @@ classdef Decisions
                                     Decision.demandStoragePOJ(index, month)/...
                                     Decision.ship_proc_plant_storage_dec(stor_open(index),plants_open(i)).POJ;
                             else
-                                Decision.demandProcPlantPOJ(i, month) = 0;
+                                % If no POJ was shipped from this proc
+                                % plant to this storage unit
+                                
+                                % If this proc plant's POJ demand is
+                                % already assigned leave it as is
+                                if (Decision.demandProcPlantPOJ(i, month) > 0)
+                                 Decision.demandProcPlantPOJ(i, month) = ...
+                                     Decision.demandProcPlantPOJ(i, month);
+                                else
+                                % If this proc plant's POJ demand is not
+                                % already assigned ensure it remains 0
+                                 Decision.demandProcPlantPOJ(i, month) = 0;
+                                end
                             end
-                            if Decision.ship_proc_plant_storage_dec(stor_open(k),plants_open(i)).FCOJ ~= 0
+                            if (Decision.ship_proc_plant_storage_dec(stor_open(k),plants_open(i)).FCOJ ~= 0)
                                 index = k;
                                 Decision.demandProcPlantFCOJ(i, month) = ...
                                     max((Decision.demandStorageFCOJ(index, month)+...
@@ -367,7 +494,19 @@ classdef Decisions
                                     fcojCurrentTotalFutures*Decision.futures_ship_dec(stor_open(index),1)),0)/...
                                     Decision.ship_proc_plant_storage_dec(stor_open(index),plants_open(i)).FCOJ;
                             else
-                                Decision.demandProcPlantFCOJ(i, month) = 0;
+                                % If no FCOJ was shipped from this proc
+                                % plant to this storage unit
+                                
+                                % If this proc plant's FCOJ demand is
+                                % already assigned leave it as is
+                                if (Decision.demandProcPlantFCOJ(i, month) > 0)
+                                 Decision.demandProcPlantFCOJ(i, month) = ...
+                                     Decision.demandProcPlantFCOJ(i, month);
+                                else
+                                % If this proc plant's FCOJ demand is not
+                                % already assigned ensure it remains 0
+                                 Decision.demandProcPlantFCOJ(i, month) = 0;
+                                end
                             end
                         end
                     end
@@ -403,36 +542,9 @@ classdef Decisions
                 
                 for month = 1:12
                     for i = 1:length(plants_open)
-                        %for k = 1:length(stor_open)
-                        %                             if (Decisions.ship_proc_plant_storage_dec(k,i).POJ ~= 0)
-                        %                                 % Find the first non-zero % of POJ sent
-                        %                                 % from storage to proc. plant
-                        %                                 index = k;
-                        %                             end
-                        %                             Decisions.demandProcPlantPOJ(i, month) = ...
-                        %                                 Decisions.demandStoragePOJ(index, month)/...
-                        %                                 Decisions.ship_proc_plant_storage_dec(index,i).POJ;
-                        %                             Decisions.demandProcPlantFCOJ(i, month) = ...
-                        %                                 (Decisions.demandStorageFCOJ(index, month)+...
-                        %                                 Decisions.demandStorageROJ(index, month)-...
-                        %                                 fcojCurrentTotalFutures*Decisions.futures_ship_dec(index,1))/...
-                        %                                 Decisions.ship_proc_plant_storage_dec(index,i).FCOJ;
-                        if (Decision.manufac_proc_plant_dec(1,i) ~= 0)
-                            Decision.demandProcPlantORA(i, month) = ...
-                                Decision.demandProcPlantPOJ(i, month)/...
-                                Decision.manufac_proc_plant_dec(1,i);
-                            
-                            
-                            
-                        elseif (Decision.manufac_proc_plant_dec(2,i) ~= 0)
-                            Decision.demandProcPlantORA(i, month) = ...
-                                Decision.demandProcPlantFCOJ(i, month)/...
-                                Decision.manufac_proc_plant_dec(2,i);
-                            
-                        end
-                        
-                        
-                        %end
+                        Decision.demandProcPlantORA(i, month) = ...
+                            Decision.demandProcPlantPOJ(i, month)+ ...
+                        Decision.demandProcPlantFCOJ(i, month);
                     end
                 end
                 
@@ -495,7 +607,7 @@ classdef Decisions
                 
                 %how many oranges the processing plant needs per month
                 %dimensions (# procs x 12)
-                proc_plant_total_ORA_demand = Decision.demandProcPlantORA + ...
+                proc_plant_total_ORA_demand =  ...
                     Decision.demandProcPlantPOJ + ...
                     Decision.demandProcPlantFCOJ;
                 
