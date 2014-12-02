@@ -48,9 +48,6 @@ classdef Decisions
         monthlyDemandORA;
         
         monthlyDemandFCOJ;
-        
-        %indep_carrier;
-        %tanker_cost;
          
     end
     
@@ -136,33 +133,6 @@ classdef Decisions
                         Decision.pricing_FCOJ_weekly_dec(i,(4*j-3):(4*j)) = Decision.pricing_FCOJ_dec(i,j);
                     end
                 end
-               
-                
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                % Reading in pricing tab
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                % Manually enter the market price for each product where
-                % each row is a region (NE, MA, SE, MW, DS, NW, SW) and the
-                % columns are months Sep-Aug
-%                 Decision.pricing_ORA_dec = zeros(7,12);
-%                 Decision.pricing_POJ_dec = zeros(7,12);
-%                 Decision.pricing_ROJ_dec = zeros(7,12);
-%                 Decision.pricing_FCOJ_dec = zeros(7,12);
-%                 
-%                 for i = 1:7
-%                     for j = 1:12
-%                         Decision.pricing_ORA_dec(i,j) = 3;
-%                         Decision.pricing_POJ_dec(i,j) = 3;
-%                         Decision.pricing_ROJ_dec(i,j) = 3;
-%                         Decision.pricing_FCOJ_dec(i,j) = 3;
-%                     end
-%                 end
-%                 
-                % Set the prices of each product either manually or by
-                % looping through the regions and the months
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                
-                
                 
                 Decision.demandStorageORA = zeros(length(stor_open),12);
                 Decision.demandStoragePOJ = zeros(length(stor_open),12);
@@ -237,47 +207,68 @@ classdef Decisions
                     end
                 end
                 
-%                 AverageProcPlantPOJPercent = zeros(71,10);
-%                 AverageProcPlantFCOJPercent = zeros(71,10);
-                
-%                 % Calculate average of these percentages over the past
-%                 % years
-%                 for i = length(stor_open)
-%                     for j = length(plants_open)
-%                         for k = 1:length(YearDataRecord)
-%                             AverageProcPlantPOJPercent(stor_open(i),plants_open(j)) ...
-%                                 = AverageProcPlantPOJPercent(stor_open(i),plants_open(j))...
-%                                 +YearDataRecord(k).ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).POJ;
-%                             AverageProcPlantFCOJPercent(stor_open(i),plants_open(j)) ...
-%                                 = AverageProcPlantFCOJPercent(stor_open(i),plants_open(j))...
-%                                 +YearDataRecord(k).ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).FCOJ;
-%                         end
-%                     end
-%                 end
-%                 
-%                 for i = length(stor_open)
-%                     for j = length(plants_open)
-%                         AverageProcPlantPOJPercent(stor_open(i),plants_open(j)) = ...
-%                             AverageProcPlantPOJPercent(stor_open(i),plants_open(j))/...
-%                             length(YearDataRecord);
-%                         AverageProcPlantFCOJPercent(stor_open(i),plants_open(j)) = ...
-%                             AverageProcPlantFCOJPercent(stor_open(i),plants_open(j))/...
-%                             length(YearDataRecord);
-%                     end
-%                 end
-                
+
                 plant2storage = load('plant2storage_dist.mat');
                 p2s = genvarname('processing2storage_dist');
                 plant2storage = plant2storage.(p2s);
                 % rows are storage, columns are plants
                 plant2storage = cell2mat(plant2storage);
+                
+                % Set the percent of ORA to ship from groves to
+                % either processing or storage plants. Each row is one of
+                % the grove locations (FLA, CAL, TEX, ARZ,
+                %  BRA, SPA) and the columns represent each processing plan
+                %  and each storage unit that is currently open
+                % Find the storage and processing plants currently open
+                % from the OJ object.
+                
+                grove2processing_storage = load('grove2processing_storage.mat');
+                g2ps = genvarname('grove2processing_storage_dist');
+                grove2processing_storage = grove2processing_storage.(g2ps);
+                grove2processing_storage = cell2mat(grove2processing_storage);
+                grove2processing_storage = [grove2processing_storage, ...
+                    grove2processing_storage(:,1),...
+                    grove2processing_storage(:,1)];
+                
+                Dist_Grove_Storage = zeros(length(stor_open),6);
+                Dist_Grove_Proc_Plant = zeros(length(plants_open),6);
+                
+                for i = 1:6
+                    for j = 1:length(stor_open)
+                        Dist_Grove_Storage(j, i) =...
+                            grove2processing_storage(10+stor_open(j), i);
+                    end
+                end
+                
+                fcojCurrentTotalFutures = 0;
+                for i = 1:5
+                    fcojCurrentTotalFutures = fcojCurrentTotalFutures +...
+                        OJ_object.fcoj_futures_current(1,i*2);
+                end
+                
+                
                 % Distances rows are 71 storage units and 10 proc plant
                 % columns
                 Dist_Total = plant2storage; 
                 
                 Dist_Total = transpose(Dist_Total);
                 %dimensioned 10 x 71 for consistency with rows = origin,
-                %columns = destination
+                %columns = destination. procs to storage
+                
+                storCapacities = OJ_object.storage_cap(stor_open); %storages x 1
+                procCapacities = OJ_object.proc_plant_cap(plants_open); %plants x 1
+                
+                tankNums = OJ_object.tank_cars_num(plants_open); %plants x 1
+                
+                Dist_Grove_Proc_Plant = zeros(length(plants_open),6);
+                for i = 1:6
+                    for j = 1:length(plants_open)
+                        Dist_Grove_Proc_Plant(j, i) =...
+                            grove2processing_storage(plants_open(j), i);
+                    end
+                end
+                Dist_Grove_Proc_Plant = transpose(Dist_Grove_Proc_Plant);
+                %shrunk. Dist_Grove_Proc_Plant is 6 x procs
                 
                 %shrink the distances to procs x storages
                 procStorageDist = zeros(length(plants_open), length(stor_open));
@@ -287,7 +278,13 @@ classdef Decisions
                             Dist_Total(plants_open(i),stor_open(j));
                     end
                 end
-                              
+                
+                %only groves to proc plants
+                decision_Distances_1 = zeros(6, length(plants_open)*length(stor_open));
+                %only proc plants to storages
+                decision_Distances_2 = zeros(6, length(plants_open)*length(stor_open));
+                
+                
                 %make the storage demand = average of the demands
                 stor_POJ_demand = zeros(1,length(stor_open));
                 stor_FCOJ_demand = zeros(1,length(stor_open));
@@ -295,192 +292,81 @@ classdef Decisions
                     stor_POJ_demand(1,i) = ...
                         mean(Decision.demandStoragePOJ(i,:));
                     stor_FCOJ_demand(1,i) = ...
-                        mean(Decision.demandStorageFCOJ(i,:));
+                        max((mean(Decision.demandStorageFCOJ(i,:))+...
+                        mean(Decision.demandStorageROJ(i,:))-...
+                        fcojCurrentTotalFutures*Decision.futures_ship_dec(stor_open(i),1)),0);
                 end
                 
-                totalPOJdemand = stor_POJ_demand;
-                totalFCOJdemand = stor_FCOJ_demand;
-                %sized 1 x (#stor)
-                    
-                % Define transportation costs to be used
-                % Indep carrier $0.65/ton/mile
-                %indep_carrier = 0.65;
-                % Tanker cars = $36/car/mile
-                %tanker_cost = 36;
                 
-                %initial allocation for POJ
-                %x0 = zeros(10,71); %10x71array of struct
-                x0 = zeros(length(plants_open),length(stor_open));
+                for i = 1:6
+                    for j = 1:length(plants_open)
+                        for k = 1:length(stor_open)
+                            
+                            decision_Distances_1(i,k+(j-1)*length(stor_open)) = ...
+                                Dist_Grove_Proc_Plant(i,j);
+                            
+                            decision_Distances_2(i,k+(j-1)*length(stor_open)) = ...
+                                procStorageDist(j,k);
+                        end
+                    end
+                end
+                decision_Distances_1 = horzcat(decision_Distances_1,decision_Distances_1);
+                decision_Distances_2 = horzcat(decision_Distances_2,decision_Distances_2);
                 
-                a = @(x)proc_plant_ship_network(x, procStorageDist);
-                b = @(x)constraints_proc_plants_ship(x, totalPOJdemand);
+                
+                %NEED ACCURATE PRICE FORECASTS. Using mean prices over the
+                %years (as below) won't really cut it
+                mean_grove_prices = zeros(6,1);
+                
+                for j = 1:6
+                    for i = 1:length(YearDataRecord)
+                        mean_grove_prices(j) = mean_grove_prices(j) + ...
+                            mean(YearDataRecord(i).us_price_spot_res(j,:));
+                    end
+                    mean_grove_prices(j) = mean_grove_prices(j)...
+                        /length(YearDataRecord);
+                end
+                
+                mean_grove_prices = horzcat(mean_grove_prices);
+                
+                %Dimensioned groves x (procs * storages)
+                x0 = zeros(size(decision_Distances_1));
+                
+                a = @(x)proc_plant_ship_network(x, decision_Distances_1,...
+                    decision_Distances_2, tankNums, mean_grove_prices,...
+                    length(plants_open),length(stor_open));
+                b = @(x)constraints_proc_plants_ship(x, storCapacities, procCapacities,...
+                    length(plants_open),length(stor_open),stor_POJ_demand,stor_FCOJ_demand);
                 
                 lb = zeros(size(x0)); %lower bounds on soln
                 
-                ub = zeros(size(x0));
-                for i = 1:size(ub,1)
-                    ub(i,:) = max(totalPOJdemand);
-                end %upper bounds on soln
-                
-                
                 options = optimoptions(@fmincon,'Algorithm','sqp');
-                [x, fval] = fmincon(a,x0,[],[],[],[],lb,ub,b,options);
-                fminPOJ = fval; %the total cost of the so%lution
-                xmin = x; %the solution of shipping what to where
+                [x, fval] = fmincon(a,x0,[],[],[],[],lb,[],b,options);
+                fminPOJFCOJ = fval; %the total cost of the so%lution
+                xminPOJFCOJ = x; %the solution of shipping what to where
                 
                 %expand the decisions to the original 71x10 matrix below
-                xmin = transpose(xmin);
-                %xmin is dimensioned storages x plants
-                for i = 1:length(stor_open)
-                    for j = 1:length(plants_open)
-                        %the plant and storage decisions
-                        %                         Decision.ship_proc_plant_storage_dec(stor_open(i),...
-                        %                             plants_open(j)).POJ = xmin(stor_open(i),plants_open(j))...
-                        %                             /sum(xmin(stor_open(i),:));
-                        %                         if Decision.ship_grove_dec(stor_open(i),...
-                        %                             plants_open(j)).POJ < 0.01
-                        %                             Decision.ship_grove_dec(stor_open(i),...
-                        %                             plants_open(j)).POJ = 0;
-                        %                         end
-                        Decision.ship_proc_plant_storage_dec(stor_open(i),...
-                            plants_open(j)).POJ = xmin(i,j)...
-                            /sum(xmin(i,:)); %as percentage of all procs to that storage
-                        if Decision.ship_proc_plant_storage_dec(stor_open(i),...
-                                plants_open(j)).POJ < 0.01
-                            Decision.ship_proc_plant_storage_dec(stor_open(i),...
-                                plants_open(j)).POJ = 0;
-                        end
-                    end
-                end
-                %expressed in percentages
-                
-                %initial allocation for FCOJ
-                x0 = zeros(length(plants_open),length(stor_open)); %71x10 array of struct 
-                
-                lb = zeros(size(x0)); %lower bounds on soln
-                
-                ub = zeros(size(x0));
-                for i = 1:size(ub,1)
-                    ub(i,:) = max(totalFCOJdemand);
-                end %upper bounds on soln
-                a = @(x)proc_plant_ship_network(x, procStorageDist);
-                b = @(x)constraints_proc_plants_ship(x, totalFCOJdemand);
-                options = optimoptions(@fmincon,'Algorithm','sqp');
-                [x, fval] = fmincon(a,x0,[],[],[],[],lb,ub,b,options);
-                fminFCOJ = fval; %the total cost of the solution
-                xmin = x; %the solution of shipping what to where
-                
-                xmin = transpose(xmin);
-                %xmin is dimensioned storages x plants
-                for i = 1:length(stor_open)
-                    for j = 1:length(plants_open)
-                        %the plant and storage decisions
-%                         Decision.ship_proc_plant_storage_dec(stor_open(i),...
-%                             plants_open(j)).FCOJ = xmin(stor_open(i),plants_open(j))...
-%                             /sum(xmin(stor_open(i),:));
-%                         if Decision.ship_grove_dec(stor_open(i),...
-%                             plants_open(j)).FCOJ < 0.01
-%                             Decision.ship_grove_dec(stor_open(i),...
-%                             plants_open(j)).FCOJ = 0;
-%                         end
-                        Decision.ship_proc_plant_storage_dec(stor_open(i),...
-                            plants_open(j)).FCOJ = xmin(i,j)...
-                            /sum(xmin(i,:));
-                        if Decision.ship_proc_plant_storage_dec(stor_open(i),...
-                            plants_open(j)).FCOJ < 0.01
-                            Decision.ship_proc_plant_storage_dec(stor_open(i),...
-                            plants_open(j)).FCOJ = 0;
-                        end
-                    end
-                end
-                %expressed in percentages
-                
-                % Normalizing across all proc plants and storage units to
-                % ensure they add up to 1
-%                 for j = 1:length(plants_open)
-%                     tempsumPOJ = 0;
-%                     tempsumFCOJ = 0;
-%                     for x = 1:length(stor_open)
-%                         tempsumPOJ = tempsumPOJ + ...
-%                             Decision.ship_proc_plant_storage_dec(stor_open(x),plants_open(j)).POJ;
-%                         tempsumFCOJ = tempsumFCOJ + ...
-%                             Decision.ship_proc_plant_storage_dec(stor_open(x),plants_open(j)).FCOJ;
-%                     end
-%                     for i = 1:length(stor_open)
-%                         
-%                         Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).POJ = ...
-%                             Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).POJ...
-%                             /tempsumPOJ;
-%                         Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).FCOJ = ...
-%                             Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).FCOJ...
-%                             /tempsumFCOJ;
-%                     end
-%                 end
-                
-%                 epsilon1 = 1;
-%                 epsilon2 = 1/10000;
-%                 epsilon3 = 1;
-%                 epsilon4 = 1/10000;
-%                 
-%                 CumDemandoverStoragePOJ = 0;
+%                 xmin = transpose(xmin);
+%                 %xmin is dimensioned storages x plants
 %                 for i = 1:length(stor_open)
-%                     CumDemandoverStoragePOJ = CumDemandoverStoragePOJ + ...
-%                         sum(Decision.demandStoragePOJ(i, :));
+%                     for j = 1:length(plants_open)
+%                         %the plant and storage decisions
+%                         Decision.ship_proc_plant_storage_dec(stor_open(i),...
+%                             plants_open(j)).POJ = xmin(i,j)...
+%                             /sum(xmin(i,:)); %as percentage of all procs to that storage
+%                         if Decision.ship_proc_plant_storage_dec(stor_open(i),...
+%                                 plants_open(j)).POJ < 0.01
+%                             Decision.ship_proc_plant_storage_dec(stor_open(i),...
+%                                 plants_open(j)).POJ = 0;
+%                         end
+%                     end
 %                 end
+                %expressed in percentages
                 
-%                 %%%% NEED TO MAKE SURE THE PERCENT OVER ALL STORAGE UNITS
-%                 %%%% IS 1 in a more efficient way
-%                 for j = 1:length(plants_open)
-%                     for i = 1:length(stor_open)
-%                         Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).POJ = ...
-%                             AverageProcPlantPOJPercent(stor_open(i),plants_open(j)) + ...
-%                             epsilon1*(max((sum(Decision.demandStoragePOJ(i,:))/...
-%                             CumDemandoverStoragePOJ -  ...
-%                             AverageProcPlantPOJPercent(stor_open(i),plants_open(j))),0))...
-%                             + epsilon2*(plant2storage(stor_open(i),plants_open(j)));
-%                         
-%                         Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).FCOJ = ...
-%                             AverageProcPlantFCOJPercent(stor_open(i),plants_open(j)) + ...
-%                             epsilon3*(max((sum(Decision.demandStorageFCOJ(i,:))/...
-%                             CumDemandoverStorageFCOJ -  ...
-%                             AverageProcPlantFCOJPercent(stor_open(i),plants_open(j))),0))...
-%                             + epsilon4*(plant2storage(stor_open(i),plants_open(j)));
-%                         
-%                     end
-%                 end
-%                 for j = 1:length(plants_open)
-%                     tempsumPOJ = 0;
-%                     tempsumFCOJ = 0;
-%                     for x = 1:length(stor_open)
-%                         tempsumPOJ = tempsumPOJ + ...
-%                             Decision.ship_proc_plant_storage_dec(stor_open(x),plants_open(j)).POJ;
-%                         tempsumFCOJ = tempsumFCOJ + ...
-%                             Decision.ship_proc_plant_storage_dec(stor_open(x),plants_open(j)).FCOJ;
-%                     end
-%                     for i = 1:length(stor_open)
-%                         
-%                         Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).POJ = ...
-%                             Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).POJ...
-%                             /tempsumPOJ;
-%                         Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).FCOJ = ...
-%                             Decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).FCOJ...
-%                             /tempsumFCOJ;
-%                     end
-%                 end
-
-% %                     % at this point i = length(stor_open)-1
-% %                     sumPOJ = 0;
-% %                     sumFCOJ = 0;
-% %                     for k = 1:length(stor_open)-1
-% %                         sumPOJ = sumPOJ + Decision.ship_proc_plant_storage_dec(stor_open(k),plants_open(j)).POJ;
-% %                         sumFCOJ = sumFCOJ + Decision.ship_proc_plant_storage_dec(stor_open(k),plants_open(j)).FCOJ;
-% %                     end
-% %                     
-% %                     Decision.ship_proc_plant_storage_dec(stor_open(i+1),plants_open(j)).POJ = ...
-% %                         1 - sumPOJ;
-% %                     Decision.ship_proc_plant_storage_dec(stor_open(i+1),plants_open(j)).FCOJ = ...
-% %                         1 - sumFCOJ;
-
+                
+                
+                
+                
                 Decision.demandProcPlantORA = zeros(length(plants_open),12);
                 Decision.demandProcPlantPOJ = zeros(length(plants_open),12);
                 Decision.demandProcPlantFCOJ = zeros(length(plants_open),12);
@@ -545,8 +431,6 @@ classdef Decisions
                     
                 end
                 
-%                 Decision.manufac_proc_plant_dec =...
-%                     struct('POJ', nan, 'FCOJ', nan);
                 denom = zeros(1,length(plants_open));
                 for i = 1:length(plants_open)
                     denom(1,i) = (sum(Decision.demandProcPlantPOJ(i,:))+...
@@ -588,45 +472,16 @@ classdef Decisions
                 % yr.ship_proc_plant_storage_dec(% for each stor_fac,% for each proc_plant).POJ = % enter the percent to ship to each storage
                 % yr.ship_proc_plant_storage_dec(% for each stor_fac,% for each proc_plant).FCOJ = % enter the percent to ship to each storage
                 
-                % Set the percent of ORA to ship from groves to
-                % either processing or storage plants. Each row is one of
-                % the grove locations (FLA, CAL, TEX, ARZ,
-                %  BRA, SPA) and the columns represent each processing plan
-                %  and each storage unit that is currently open
-                % Find the storage and processing plants currently open
-                % from the OJ object.
                 
-                grove2processing_storage = load('grove2processing_storage.mat');
-                g2ps = genvarname('grove2processing_storage_dist');
-                grove2processing_storage = grove2processing_storage.(g2ps);
-                grove2processing_storage = cell2mat(grove2processing_storage);
-                grove2processing_storage = [grove2processing_storage, ...
-                    grove2processing_storage(:,1),...
-                    grove2processing_storage(:,1)];
                 
-                Dist_Grove_Storage = zeros(length(stor_open),6);
-                Dist_Grove_Proc_Plant = zeros(length(plants_open),6);
+%                 for i = 1:6
+%                     for j = 1:length(plants_open)
+%                         Dist_Grove_Proc_Plant(j, i) =...
+%                             grove2processing_storage(plants_open(j), i);
+%                     end
+%                 end
                 
-                for i = 1:6
-                    for j = 1:length(stor_open)
-                        Dist_Grove_Storage(j, i) =...
-                            grove2processing_storage(10+stor_open(j), i);
-                    end
-                end
-                
-                for i = 1:6
-                    for j = 1:length(plants_open)
-                        Dist_Grove_Proc_Plant(j, i) =...
-                            grove2processing_storage(plants_open(j), i);
-                    end
-                end
-                
-%                 theta5 = 1;
-%                 theta6 = 1;
-%                 theta7 = 1;
-%                 theta8 = 1;
-                
-                Decision.ship_grove_dec = zeros(6, length(plants_open) +...
+                Decision.ship_grove_dec = zeros(6, length(plants_open) + ...
                     length(stor_open));
                 
                 % Set the decisions for the storage units
@@ -634,30 +489,16 @@ classdef Decisions
                 
                 %all the distances, with processing plant distances first
                 %dimensions 6 x (# procs + # storages)
-                Dist_Total1 = cat(2,transpose(Dist_Grove_Proc_Plant),...
-                    transpose(Dist_Grove_Storage));
-                
-                %how many oranges the processing plant needs per month
-                %dimensions (# procs x 12)
-                proc_plant_total_ORA_demand =  ...
-                    Decision.demandProcPlantPOJ + ...
-                    Decision.demandProcPlantFCOJ;
-                
-                
-                proc_ORA_demand = zeros(1,length(plants_open));
-                %make the proc plant demand = average of the demands
-                for i = 1:length(plants_open)
-                    proc_ORA_demand(1,i) = ...
-                        mean(proc_plant_total_ORA_demand(i,:));
-                end
-                %make the storage demand = average of the demands
+                Dist_Total_Grove_Storage = transpose(Dist_Grove_Storage);
+
                 stor_ORA_demand = zeros(1,length(stor_open));
                 for i = 1:length(stor_open)
                     stor_ORA_demand(1,i) = ...
                         mean(Decision.demandStorageORA(i,:));
                 end
-                totalORAdemand = cat(2,proc_ORA_demand,stor_ORA_demand);
-                %sized 1 x (#procs + #stor)
+                %totalORAdemand = cat(2,proc_ORA_demand,stor_ORA_demand);
+                totalORAdemand = stor_ORA_demand;
+                %sized 1 x (#stor)
                     
                 
                 %NEED ACCURATE PRICE FORECASTS. Using mean prices over the
@@ -675,102 +516,67 @@ classdef Decisions
                 
                 
                 %initial allocation
-                x0 = zeros(size(Decision.ship_grove_dec)); %6 x (#procs + #stor)
-                a = @(x)grove_ship_network(x, mean_grove_prices,Dist_Total1);
-                b = @(x)constraints_grove_ship(x, totalORAdemand);
+                x0 = zeros(6, length(stor_open)); %6 x (#stor)
+                a = @(x)grove_ship_network(x, mean_grove_prices,...
+                    Dist_Total_Grove_Storage);
+                b = @(x)constraints_grove_ship(x, totalORAdemand,...
+                    storCapacities);
                 
                 lb = zeros(size(x0)); %lower bounds on soln
                 
-                ub = zeros(size(x0));
-                for i = 1:size(ub,1)
-                    ub(i,:) = max(totalORAdemand);
-                end %upper bounds on soln
-                
                 
                 options = optimoptions(@fmincon,'Algorithm','sqp');
-                [x, fval] = fmincon(a,x0,[],[],[],[],lb,ub,b,options);
-                fmin = fval; %the total cost of the solution
-                xmin = x; %the solution of shipping what to where
+                [x, fval] = fmincon(a,x0,[],[],[],[],lb,[],b,options);
+                fminORA = fval; %the total cost of the solution
+                xminORA = x; %the solution of shipping what to where
+                
+                Decision.purchase_spotmkt_dec = zeros(6,12);
+                
+                for i = 1:6
+                    for j = 1:12
+                        Decision.purchase_spotmkt_dec(i,j) = ...
+                            (sum(xminPOJFCOJ(i,:)) + sum(xminORA(i,:)))/12;
+                    end
+                end
+                
+                for i = 1:length(plants_open)
+                    for j = 1:length(stor_open)
+                        for k = 1:6
+                            Decision.ship_grove_dec(k,i) = ...
+                                Decision.ship_grove_dec(k,i) + ...
+                                xminPOJFCOJ(k, j+(i-1)*length(stor_open)) + ...
+                                xminPOJFCOJ(k, ...
+                                length(plants_open)*length(stor_open)+j+(i-1)*length(stor_open));
+                        end
+                    end
+                end
+                
+                for i = 1:6
+                    for j = length(plants_open)+1:length(plants_open)+length(stor_open)
+                        Decision.ship_grove_dec(i,j) = xminORA(i,j-length(plants_open));
+                    end
+                end
+                
+                
                 
                 %x is dimensioned 6 x (# procs + # storages)
                 for i = 1:6
+                    denom = sum(Decision.ship_grove_dec(i,:));
                     for j = 1:length(plants_open) + length(stor_open)
                         %the plant and storage decisions
-                        Decision.ship_grove_dec(i,j) = xmin(i,j)/sum(xmin(i,:));
-                        if Decision.ship_grove_dec(i,j) < 0.01
+                        Decision.ship_grove_dec(i,j) = ...
+                            Decision.ship_grove_dec(i,j)/denom;
+                        if Decision.ship_grove_dec(i,j) < 0.0000001
                             Decision.ship_grove_dec(i,j) = 0;
                         end
                     end
                 end
                 %expressed in percentages     
                 
-                
-                
-%                 CumDemandoverStorageORA = 0;
-%                 CumDemandoverProcPlantORA = 0;
-%                 TotalCurrentFutures = 0;
-%                 
-%                 for i = 1:5
-%                     TotalCurrentFutures = TotalCurrentFutures + ...
-%                         OJ_object.ora_futures_current(1,2*i);
-%                 end
-%                 
-%                 for i = 1:length(stor_open)
-%                     CumDemandoverStorageORA = CumDemandoverStorageORA + ...
-%                         sum(Decision.demandStorageORA(i, :));
-%                 end
-%                 
-%                 for i = 1:6
-%                     for j = 1:length(stor_open)
-%                         Decision.ship_grove_dec(i, length(plants_open)+j)...
-%                             =max((sum(Decision.demandStorageORA(j, :)) - ...
-%                             Decision.futures_ship_dec(stor_open(j),1)*TotalCurrentFutures),0)/...
-%                             CumDemandoverStorageORA;
-%                     end
-%                 end
-%                 
-%                 
-%                 for i = 1:6
-%                     for j = 1:length(stor_open)
-%                         Decision.ship_grove_dec(i,length(plants_open)+j)= ...
-%                             theta5*(Decision.ship_grove_dec(i,length(plants_open)+j))...
-%                             +theta6*(1/Dist_Grove_Storage(j, i));
-%                     end
-%                 end
-%                 
-%                 for i = 1:length(plants_open)
-%                     CumDemandoverProcPlantORA = CumDemandoverProcPlantORA + ...
-%                         sum(Decision.demandProcPlantORA(i, :));
-%                 end
-%                 
-%                 for i = 1:6
-%                     for j = 1:length(plants_open)
-%                         Decision.ship_grove_dec(i, j)...
-%                             =min((sum(Decision.demandProcPlantORA(j, :))),OJ_object.proc_plant_cap(plants_open(j),1))/...
-%                             CumDemandoverProcPlantORA;
-%                     end
-%                 end
-%                 
-%                 
-%                 for i = 1:6
-%                     for j = 1:length(plants_open)
-%                         Decision.ship_grove_dec(i,j)= ...
-%                             theta7*(Decision.ship_grove_dec(i,j))...
-%                             +theta8*(1/Dist_Grove_Proc_Plant(j, i));
-%                     end
-%                 end
-%                 
-%                 for i = 1:6
-%                     tempSum = sum(Decision.ship_grove_dec(i,:));
-%                     for j = 1:(length(plants_open) + length(stor_open))
-%                         
-%                         Decision.ship_grove_dec(i,j) = ...
-%                             Decision.ship_grove_dec(i,j)/tempSum;
-%                     end
-%                 end
-%                 
+                  
                 % Processing plants manufacturing decisions
                 
+                Decision.manufac_proc_plant_dec 
                 
                 % Set the % of FCOJ to reconstitute to ROJ at each
                 % storage unit each month where each row is an open storage
@@ -805,13 +611,13 @@ classdef Decisions
                 %  where each row is grove location (FLA, CAL, TEX, ARZ,
                 %  BRA, SPA respectively) and each column is a month of the
                 %  year starting in September
-                Decision.purchase_spotmkt_dec = zeros(6,12);
+                
                 % assign the buying quantity (tons per week in a month)
                 % either manually or by looping through locations/months
                 
                 Decision.demandGroveORA = zeros(6,12);
                 index1 = 0;
-                index2 = 0;
+                index2 = 1;
                 for month = 1:12
                     for grove = 1:6
                         for i = 1:length(plants_open)
@@ -839,14 +645,14 @@ classdef Decisions
                     end
                 end
                 
-                xi1 = 0.5;
-                % Finally, set the value of the decisions
-                for i = 1:6
-                    for j = 1:12
-                        Decision.purchase_spotmkt_dec(i,j) = ...
-                            xi1*Decision.demandGroveORA(i,j);
-                    end
-                end
+%                 xi1 = 0.5;
+%                 % Finally, set the value of the decisions
+%                 for i = 1:6
+%                     for j = 1:12
+%                         Decision.purchase_spotmkt_dec(i,j) = ...
+%                             xi1*Decision.demandGroveORA(i,j);
+%                     end
+%                 end
                 
                 %  Set the multipliers equal to matrix
                 %  where each row is grove location (FLA, CAL, TEX, ARZ,
@@ -1105,8 +911,8 @@ classdef Decisions
                 % Manually define the storage units in use to have some
                 % capacity to buy/sell. For example, for index i:
                 % yr.storage_dec(i) = capacity;
-                Decision.storage_dec(4,1) = -31000;
-                Decision.storage_dec(stor_open(3),1) = -20000;
+%                 Decision.storage_dec(4,1) = -31000;
+%                 Decision.storage_dec(stor_open(3),1) = -20000;
                 
                 %Add a storage unit if:
                 %capacity sold + transportation savings > price of new
