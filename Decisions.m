@@ -431,30 +431,7 @@ classdef Decisions
                     
                 end
                 
-                denom = zeros(1,length(plants_open));
-                for i = 1:length(plants_open)
-                    denom(1,i) = (sum(Decision.demandProcPlantPOJ(i,:))+...
-                        sum(Decision.demandProcPlantFCOJ(i,:)));
-                          
-                end
-                
-                for i = 1:10
-                    % First row is POJ
-                    Decision.manufac_proc_plant_dec(1,i) = 0;
-                    % Second row is FCOJ
-                    Decision.manufac_proc_plant_dec(2,i) = 0;
-                    
-                end
-                
-                for i = 1:length(plants_open)
-                    % Decisions for POJ
-                    Decision.manufac_proc_plant_dec(1,plants_open(i)) = ...
-                        sum(Decision.demandProcPlantPOJ(i,:))/denom(1,i);
-                    % Decisions for FCOJ
-                    Decision.manufac_proc_plant_dec(2,plants_open(i)) = ...
-                        1 - Decision.manufac_proc_plant_dec(1,plants_open(i));
-                    
-                end
+               
                 
                 for month = 1:12
                     for i = 1:length(plants_open)
@@ -576,7 +553,26 @@ classdef Decisions
                   
                 % Processing plants manufacturing decisions
                 
-                Decision.manufac_proc_plant_dec 
+                for i = 1:length(plants_open)
+                    denom = sum(xminPOJFCOJ(:,j+(i-1)*length(stor_open))) + ...
+                        sum(xminPOJFCOJ(:,j+(i-1)*length(stor_open)+length(plants_open)*length(stor_open)));
+                    for j = 1:length(stor_open)
+                        % 1st row is POJ
+                        Decision.manufac_proc_plant_dec(1, plants_open(i)) = ...
+                            Decision.manufac_proc_plant_dec(1, plants_open(i)) + ...
+                            sum(xminPOJFCOJ(:, j + (i-1)*length(stor_open)));
+                    end
+                    Decision.manufac_proc_plant_dec(1, plants_open(i)) = ...
+                        Decision.manufac_proc_plant_dec(1, plants_open(i))/denom;
+                    
+                    %the below is FCOJ
+                    Decision.manufac_proc_plant_dec(2, plants_open(i)) = ...
+                        1 - Decision.manufac_proc_plant_dec(1, plants_open(i));
+                end
+                        
+                    
+                
+                
                 
                 % Set the % of FCOJ to reconstitute to ROJ at each
                 % storage unit each month where each row is an open storage
