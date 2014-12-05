@@ -1,4 +1,4 @@
-classdef Decisions
+classdef DecisionsPousch
     % This is the decision class.  The input to this class is all the
     % YearData objects as well as the OJGame object.  It then sets the
     % properties values of this class to the decisions. This can obviously
@@ -57,55 +57,55 @@ classdef Decisions
     methods
         % Constructor where you update each of the properties of the
         % decision in the Decision file inputted
-        function Decision = Decisions(filename,OJ_object,pricesORA,...
+        function Decision = DecisionsPousch(filename,OJ_object,pricesORA,...
                 pricesPOJ, pricesROJ, pricesFCOJ)
             
              
                 
                 % For now this needs to be MANUALLY updated
                 % Load the year data objects
-                yr2004 = load('yr2004.mat');
+                yr2004 = load('YearData Offline/yr2004.mat');
                 yr2004temp = genvarname('yr2004');
                 yr2004 = yr2004.(yr2004temp);
                 
-                yr2005 = load('yr2005.mat');
+                yr2005 = load('YearData Offline/yr2005.mat');
                 yr2005temp = genvarname('yr2005');
                 yr2005 = yr2005.(yr2005temp);
                 
-                yr2006 = load('yr2006.mat');
+                yr2006 = load('YearData Offline/yr2006.mat');
                 yr2006temp = genvarname('yr2006');
                 yr2006 = yr2006.(yr2006temp);
                 
-                yr2007 = load('yr2007.mat');
+                yr2007 = load('YearData Offline/yr2007.mat');
                 yr2007temp = genvarname('yr2007');
                 yr2007 = yr2007.(yr2007temp);
                 
-                yr2008 = load('yr2008.mat');
+                yr2008 = load('YearData Offline/yr2008.mat');
                 yr2008temp = genvarname('yr2008');
                 yr2008 = yr2008.(yr2008temp);
                 
-                yr2009 = load('yr2009.mat');
+                yr2009 = load('YearData Offline/yr2009.mat');
                 yr2009temp = genvarname('yr2009');
                 yr2009 = yr2009.(yr2009temp);
                 
-                yr2010 = load('yr2010.mat');
+                yr2010 = load('YearData Offline/yr2010.mat');
                 yr2010temp = genvarname('yr2010');
                 yr2010 = yr2010.(yr2010temp);
                 
-                yr2011 = load('yr2011.mat');
+                yr2011 = load('YearData Offline/yr2011.mat');
                 yr2011temp = genvarname('yr2011');
                 yr2011 = yr2011.(yr2011temp);
                 
-                yr2012 = load('yr2012.mat');
+                yr2012 = load('YearData Offline/yr2012.mat');
                 yr2012temp = genvarname('yr2012');
                 yr2012 = yr2012.(yr2012temp);
                 
-                yr2013 = load('yr2013.mat');
+                yr2013 = load('YearData Offline/yr2013.mat');
                 yr2013temp = genvarname('yr2013');
                 yr2013 = yr2013.(yr2013temp);
                 
-                yr2014 = load('yr2014.mat');
-                yr2014temp = genvarname('yr2014_orianga');
+                yr2014 = load('YearData Orianga/yr2014.mat');
+                yr2014temp = genvarname('yr2014');
                 yr2014 = yr2014.(yr2014temp);
                 
                 YearDataRecord = [yr2004, yr2005, yr2006, yr2007, yr2008,...
@@ -169,7 +169,7 @@ classdef Decisions
                 Decision.demandStorageROJ = zeros(length(stor_open),12);
                 Decision.demandStorageFCOJ = zeros(length(stor_open),12);
                 
-                storage2market_dist = load('storage2market_dist.mat');
+                storage2market_dist = load('Distance Data/storage2market_dist.mat');
                 storage2market_dist_temp = genvarname('storage2market_dist');
                 storage2market_dist = cell2mat(storage2market_dist.(storage2market_dist_temp));
                 
@@ -266,7 +266,7 @@ classdef Decisions
 %                     end
 %                 end
                 
-                plant2storage = load('plant2storage_dist.mat');
+                plant2storage = load('Distance Data/plant2storage_dist.mat');
                 p2s = genvarname('processing2storage_dist');
                 plant2storage = plant2storage.(p2s);
                 % rows are storage, columns are plants
@@ -321,7 +321,6 @@ classdef Decisions
                 for i = 1:size(ub,1)
                     ub(i,:) = max(totalPOJdemand);
                 end %upper bounds on soln
-                
                 
                 options = optimoptions(@fmincon,'Algorithm','sqp');
                 [x, fval] = fmincon(a,x0,[],[],[],[],lb,ub,b,options);
@@ -596,7 +595,7 @@ classdef Decisions
                 % Find the storage and processing plants currently open
                 % from the OJ object.
                 
-                grove2processing_storage = load('grove2processing_storage.mat');
+                grove2processing_storage = load('Distance Data/grove2processing_storage.mat');
                 g2ps = genvarname('grove2processing_storage_dist');
                 grove2processing_storage = grove2processing_storage.(g2ps);
                 grove2processing_storage = cell2mat(grove2processing_storage);
@@ -894,7 +893,7 @@ classdef Decisions
                 %  Set the amount (in tons) of ORA futures to
                 %  purchase in each year from the year after the current to
                 %  5 years after the current
-                theta1 = [0.90,0.85,0.81,0.78,0.76];
+                theta1 = 1;
                 theta2 = 1;
                 
                 cumDemand = 0;
@@ -958,7 +957,7 @@ classdef Decisions
                 %  purchase in each year from the year after the current to
                 %  5 years after the current
                 
-                theta3 = [1.05,1.00,0.96,0.93,0.91];
+                theta3 = 1;
                 theta4 = 1;
                 
                 cumDemandFCOJ = 0;

@@ -12,8 +12,8 @@ function [] = fitCensoredDemandCurves2(yearMax)
 		c{i} = load(strcat('YearData Offline/yr',num2str(yrs(i)),'.mat'));
 	end
 
-	c{length(yrs)+1} = load('yr2014a.mat');
-	c{length(yrs)+2} = load('yr2014b.mat');
+	c{length(yrs)+1} = load('YearData Offline/yr2014a.mat');
+	c{length(yrs)+2} = load('YearData Offline/yr2014b.mat');
 
  	for i=1:length(yrs2)
  		c{i+12} = load(strcat('YearData Orianga/yr',num2str(yrs2(i)),'.mat'));
@@ -64,7 +64,7 @@ function [] = fitCensoredDemandCurves2(yearMax)
 		FCOJ_res = [];
 
 		% get associated storage units, then process accordingly
-        OJ_object = OJGame('MomPop2004Results.xlsm');
+        OJ_object = OJGame('Excel Files/MomPop2004Results.xlsm');
 		for j=1:length(c)
 			
 			% which storage facility corresponds to the region
@@ -74,11 +74,11 @@ function [] = fitCensoredDemandCurves2(yearMax)
 			if (j < 11)
 				vn = genvarname(strcat('yr',num2str(yrs(j))));
 			elseif (j == 11)
-				vn = genvarname('yr2014a_orianga');
+				vn = genvarname('yr2014a');
 			elseif (j == 12)
-				vn = genvarname('yr2014b_orianga');
+				vn = genvarname('yr2014b');
 			elseif (j < length(c)+1)
-				vn = genvarname(strcat('yr',num2str(yrs2(j-12)),'_new'));
+				vn = genvarname(strcat('yr',num2str(yrs2(j-12))));
 			end
 
 			% putting all the prices for each region in one place, for easier manipulation

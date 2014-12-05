@@ -1,4 +1,4 @@
-classdef Decisions
+classdef DecisionsPousch
     % This is the decision class.  The input to this class is all the
     % YearData objects as well as the OJGame object.  It then sets the
     % properties values of this class to the decisions. This can obviously
@@ -57,7 +57,7 @@ classdef Decisions
     methods
         % Constructor where you update each of the properties of the
         % decision in the Decision file inputted
-        function Decision = Decisions(filename,OJ_object,pricesORA,...
+        function Decision = DecisionsPouschm(filename,OJ_object,pricesORA,...
                 pricesPOJ, pricesROJ, pricesFCOJ)
             
              
@@ -894,7 +894,7 @@ classdef Decisions
                 %  Set the amount (in tons) of ORA futures to
                 %  purchase in each year from the year after the current to
                 %  5 years after the current
-                theta1 = [0.90,0.85,0.81,0.78,0.76];
+                theta1 = 1;
                 theta2 = 1;
                 
                 cumDemand = 0;
@@ -958,7 +958,7 @@ classdef Decisions
                 %  purchase in each year from the year after the current to
                 %  5 years after the current
                 
-                theta3 = [1.05,1.00,0.96,0.93,0.91];
+                theta3 = 1;
                 theta4 = 1;
                 
                 cumDemandFCOJ = 0;

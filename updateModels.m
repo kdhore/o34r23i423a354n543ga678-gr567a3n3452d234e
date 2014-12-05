@@ -1,6 +1,6 @@
 function [] = updateModels(yearMax)
 	years = 2004:2013;
-	%years2 = 2014:yearMax;
+	years2 = 2014:yearMax;
 	%fn1 = 'MomPop';
 	%fn2 = 'Results.xlsm';
 	fn1 = 'yr';
@@ -69,9 +69,9 @@ function [] = updateModels(yearMax)
 		xrates{j} = [xrates{j} ratedat(j,:)];
 	end
 
-	%{
+	
 	for i=1:length(years2)
-		fname = strcat(fn1, num2str(years2(i)),fn2);
+		fname = strcat('yr', num2str(years2(i)),'_new');
 		vn = genvarname(fname);
 
 		data = load(fname);
@@ -85,9 +85,7 @@ function [] = updateModels(yearMax)
 		for j=1:2
 			xrates{j} = [xrates{j} data.(vn).fx_exch_res(j,:)];
 		end
-	end
-	%}
-	
+    end	
 
 	oPrices = Prices;
 
