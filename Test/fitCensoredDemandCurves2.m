@@ -40,6 +40,11 @@ function [] = fitCensoredDemandCurves2(yearMax)
 	ROJ_fits = cell(7,1);
 	FCOJ_fits = cell(7,1);
 
+	ORA_params = cell(7,2);
+	POJ_params = cell(7,2);
+	ROJ_params = cell(7,2);
+	FCOJ_params = cell(7,2);
+
 	% for every region
 	for i=1:length(region)
 		% initialization fort later use
@@ -327,6 +332,19 @@ function [] = fitCensoredDemandCurves2(yearMax)
 		roj_res = ROJ_sales_out - roj_model;
 		fcoj_res = FCOJ_sales_out - fcoj_model;
 
+		% calculating statistics for samplig distribution
+		ORA_params{i,1} = mean(ora_res);
+		POJ_params{i,1} = mean(poj_res);
+		ROJ_params{i,1} = mean(roj_res);
+		FCOJ_params{i,1} = mean(fcoj_res);
+
+		ORA_params{i,2} = var(ora_res);
+		POJ_params{i,2} = var(poj_res);
+		ROJ_params{i,2} = var(roj_res);
+		FCOJ_params{i,2} = var(fcoj_res);
+
+		% for r-squared values
+		%{
 		ora_ss_res = sum(ora_res.^2);
 		poj_ss_res = sum(poj_res.^2);
 		roj_ss_res = sum(roj_res.^2);
@@ -369,6 +387,7 @@ function [] = fitCensoredDemandCurves2(yearMax)
 		scatter(FCOJ_prices_out,fcoj_model,'r')
 		grid on
 		title(strcat('lin FCOJ, ', region(i),',',num2str(fcoj_rsq)));
+		%}
 			
 	end
 	% save as coefficients, note: generated values still need to be de-logged
@@ -377,4 +396,9 @@ function [] = fitCensoredDemandCurves2(yearMax)
 	save('POJ_fits_log.mat','POJ_fits');
 	save('ROJ_fits_log.mat','ROJ_fits');
 	save('FCOJ_fits_log.mat','FCOJ_fits');
+
+	save('ORA_params.mat','ORA_params');
+	save('POJ_params.mat','POJ_params');
+	save('ROJ_params.mat','ROJ_params');
+	save('FCOJ_params.mat','FCOJ_params');
 end
