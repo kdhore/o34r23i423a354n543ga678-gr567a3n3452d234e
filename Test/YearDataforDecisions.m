@@ -181,7 +181,8 @@ classdef YearDataforDecisions
 
                 col_2 = char('C' + 2*num_proc -1);
                 range = strcat('C19:',col_2,'19');
-                raw_manufac = xlsread(filename,'shipping_manufacturing',range);
+                [~, ~, raw_manufac] = xlsread(filename,'shipping_manufacturing',range);
+                raw_manufac = cell2mat(cellNaNReplace(raw_manufac,0));
                 reshape_manufac = reshape(raw_manufac,2,length(raw_manufac)/2);
                 non_zero = find(OJ_object.proc_plant_cap);
                 for i=1:num_proc 

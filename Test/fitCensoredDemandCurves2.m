@@ -9,14 +9,14 @@ function [] = fitCensoredDemandCurves2(yearMax)
 	c = cell(length(yrs)+2+length(yrs2),1);
 
 	for i=1:length(yrs)
-		c{i} = load(strcat('YearData Offline/yr',num2str(yrs(i)),'.mat'));
+		c{i} = load(strcat('yr',num2str(yrs(i))));
 	end
 
-	c{length(yrs)+1} = load('YearData Offline/yr2014a.mat');
-	c{length(yrs)+2} = load('YearData Offline/yr2014b.mat');
+	c{length(yrs)+1} = load('yr2014a.mat');
+	c{length(yrs)+2} = load('yr2014b.mat');
 
  	for i=1:length(yrs2)
- 		c{i+12} = load(strcat('YearData Orianga/yr',num2str(yrs2(i)),'.mat'));
+ 		c{i+12} = load(strcat('yr',num2str(yrs2(i)),'_new'));
  	end
 
 	compiled_prices_ORA = [];
@@ -39,11 +39,6 @@ function [] = fitCensoredDemandCurves2(yearMax)
 	POJ_fits = cell(7,1);
 	ROJ_fits = cell(7,1);
 	FCOJ_fits = cell(7,1);
-
-	ORA_params = cell(7,2);
-	POJ_params = cell(7,2);
-	ROJ_params = cell(7,2);
-	FCOJ_params = cell(7,2);
 
 	% for every region
 	for i=1:length(region)
@@ -69,7 +64,7 @@ function [] = fitCensoredDemandCurves2(yearMax)
 		FCOJ_res = [];
 
 		% get associated storage units, then process accordingly
-        OJ_object = OJGame('Excel Files/MomPop2004Results.xlsm');
+        OJ_object = OJGame('MomPop2004Results.xlsm');
 		for j=1:length(c)
 			
 			% which storage facility corresponds to the region
@@ -79,11 +74,11 @@ function [] = fitCensoredDemandCurves2(yearMax)
 			if (j < 11)
 				vn = genvarname(strcat('yr',num2str(yrs(j))));
 			elseif (j == 11)
-				vn = genvarname('yr2014a');
+				vn = genvarname('yr2014a_orianga');
 			elseif (j == 12)
-				vn = genvarname('yr2014b');
+				vn = genvarname('yr2014b_orianga');
 			elseif (j < length(c)+1)
-				vn = genvarname(strcat('yr',num2str(yrs2(j-12))));
+				vn = genvarname(strcat('yr',num2str(yrs2(j-12)),'_new'));
 			end
 
 			% putting all the prices for each region in one place, for easier manipulation
@@ -332,19 +327,6 @@ function [] = fitCensoredDemandCurves2(yearMax)
 		roj_res = ROJ_sales_out - roj_model;
 		fcoj_res = FCOJ_sales_out - fcoj_model;
 
-		% calculating statistics for samplig distribution
-		ORA_params{i,1} = mean(ora_res);
-		POJ_params{i,1} = mean(poj_res);
-		ROJ_params{i,1} = mean(roj_res);
-		FCOJ_params{i,1} = mean(fcoj_res);
-
-		ORA_params{i,2} = var(ora_res);
-		POJ_params{i,2} = var(poj_res);
-		ROJ_params{i,2} = var(roj_res);
-		FCOJ_params{i,2} = var(fcoj_res);
-
-		% for r-squared values
-		%{
 		ora_ss_res = sum(ora_res.^2);
 		poj_ss_res = sum(poj_res.^2);
 		roj_ss_res = sum(roj_res.^2);
@@ -387,7 +369,6 @@ function [] = fitCensoredDemandCurves2(yearMax)
 		scatter(FCOJ_prices_out,fcoj_model,'r')
 		grid on
 		title(strcat('lin FCOJ, ', region(i),',',num2str(fcoj_rsq)));
-		%}
 			
 	end
 	% save as coefficients, note: generated values still need to be de-logged
@@ -396,9 +377,4 @@ function [] = fitCensoredDemandCurves2(yearMax)
 	save('POJ_fits_log.mat','POJ_fits');
 	save('ROJ_fits_log.mat','ROJ_fits');
 	save('FCOJ_fits_log.mat','FCOJ_fits');
-
-	save('ORA_params.mat','ORA_params');
-	save('POJ_params.mat','POJ_params');
-	save('ROJ_params.mat','ROJ_params');
-	save('FCOJ_params.mat','FCOJ_params');
 end

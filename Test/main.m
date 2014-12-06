@@ -55,6 +55,9 @@ initial_str = 'Excel Files Orianga/oriangagrande2014Results.xlsm';
 % yr2015 = YearData('Excel Files Orianga/oriangagrande2015Results.xlsm', ojObject);
 % ojObject = ojObject.update(yr2015);
 % save('YearData Orianga/yr2015.mat','yr2015');
+% yr2016 = YearData('Excel Files Orianga/oriangagrande2016Results.xlsm', ojObject);
+% ojObject = ojObject.update(yr2016);
+% save('YearData Orianga/yr2016.mat','yr2016');
     
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Only have to run to above code once to store the files
@@ -120,6 +123,3 @@ for i = 1:numIter
         ojObject = ojObject.updatefromSim(decisions, proc_plants, storage);
     end
 end
-
-
-    

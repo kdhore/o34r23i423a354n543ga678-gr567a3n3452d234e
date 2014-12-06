@@ -61,11 +61,11 @@ cities_match_storage = matchCitiestoStorage(storage_open, storage2market.(s2m));
        
 % Draw grove prices matrix, fx grove => US$ prices, and use actual
 % quantity purchased and the purchasing cost
-    grove_spot = grovePrices(); %Need to write function
-    fx = foreignEx(); % Need to write function
-    adj_BRASPA_USPrice = grove_spot(5:6,:).*fx;
-    adj_USP = [grove_spot(1:4,:); adj_BRASPA_USPrice];
-    %adj_USP = genPrices();
+    %grove_spot = grovePrices(); %Need to write function
+    %fx = foreignEx(); % Need to write function
+    %adj_BRASPA_USPrice = grove_spot(5:6,:).*fx;
+    %adj_USP = [grove_spot(1:4,:); adj_BRASPA_USPrice];
+    adj_USP = genPrices();
     act_quant_mult = zeros(6,12);
     for h = 1:6
         mult_1 = decisions.quant_mult_dec(h,1);
@@ -160,8 +160,8 @@ end
 transCostfromGroves_ORA = sum(sum(transCost_fromGroves));
     
  % Iterate over all the months
- POJ_man = zeros(length(proc_plants),48); 
- FCOJ_man = zeros(length(proc_plants),48); 
+ POJ_man = zeros(length(plants_open),48); 
+ FCOJ_man = zeros(length(plants_open),48); 
  ROJ_man = zeros(length(storage_open),48); 
  soldORA = zeros(length(storage_open),48);
  soldPOJ = zeros(length(storage_open),48);
@@ -171,20 +171,20 @@ transCostfromGroves_ORA = sum(sum(transCost_fromGroves));
  toss_outStorPOJ = zeros(length(storage_open),48);
  toss_outStorROJ = zeros(length(storage_open),48);
  toss_outStorFCOJ = zeros(length(storage_open),48);
- toss_outProc = zeros(length(proc_plants),48); 
+ toss_outProc = zeros(length(plants_open),48); 
  rottenStorORA = zeros(length(storage_open),48);
  rottenStorPOJ = zeros(length(storage_open),48);
  rottenStorROJ = zeros(length(storage_open),48);
  rottenStorFCOJ = zeros(length(storage_open),48);
- rottenProc = zeros(length(proc_plants),48);
+ rottenProc = zeros(length(plants_open),48);
  revReceivedORA = zeros(length(storage_open),48);
  revReceivedPOJ = zeros(length(storage_open),48);
  revReceivedROJ = zeros(length(storage_open),48);
  revReceivedFCOJ = zeros(length(storage_open),48);
- transCfromPlants_tank = zeros(length(proc_plants),48); 
- transCfromPlants_carrier = zeros(length(proc_plants),48); 
+ transCfromPlants_tank = cell(length(plants_open),48); 
+ transCfromPlants_carrier = cell(length(plants_open),48); 
  holdCost = zeros(length(storage_open),48); 
- tankersHoldC = zeros(length(proc_plants),48);
+ tankersHoldC = zeros(length(plants_open),48);
  transport2cities_cost = zeros(length(storage_open),48);
  for i = 1:48
      for j = 1:length(plants_open)
@@ -206,8 +206,8 @@ transCostfromGroves_ORA = sum(sum(transCost_fromGroves));
          POJ_man(j,i) = proc_plants{plants_open(j)}.poj;
          FCOJ_man(j,i) = proc_plants{plants_open(j)}.fcoj;
          tankersHoldC(j,i) = proc_plants{plants_open(j)}.tankersHoldC;
-         transCfromPlants_tank(j,i) = proc_plants{plants_open(j)}.shipped_out_cost_tank;
-         transCfromPlants_carrier(j,i) = proc_plants{plants_open(j)}.shipped_out_cost_carrier;
+         transCfromPlants_tank{j,i} = proc_plants{plants_open(j)}.shipped_out_cost_tank;
+         transCfromPlants_carrier{j,i} = proc_plants{plants_open(j)}.shipped_out_cost_carrier;
          rottenProc(j,i) = proc_plants{plants_open(j)}.rotten;
          toss_outProc(j,i) = proc_plants{plants_open(j)}.throwaway;
      end
@@ -267,8 +267,28 @@ transCostfromGroves_ORA = sum(sum(transCost_fromGroves));
  totRevReceivedPOJ = sum(sum(revReceivedPOJ));
  totRevReceivedROJ = sum(sum(revReceivedROJ));
  totRevReceivedFCOJ = sum(sum(revReceivedFCOJ));
- totTransCfromPlants_tank = sum(sum(transCfromPlants_tank)); 
- totTransCfromPlants_carrier = sum(sum(transCfromPlants_carrier)); 
+ totTransCfromPlants_tank_temp = zeros(length(plants_open),length(storage_open));
+ for i = 1:length(plants_open)
+     for k = 1:length(storage_open)
+         tempSum = 0;
+        for j = 1:48
+             tempSum = tempSum + transCfromPlants_tank{i,j}(k);
+        end
+        totTransCfromPlants_tank_temp(i,k) = tempSum;
+     end
+ end
+ totTransCfromPlants_tank = sum(sum(totTransCfromPlants_tank_temp)); 
+ totTransCfromPlants_carrier_temp = zeros(length(plants_open),length(storage_open));
+ for i = 1:length(plants_open)
+     for k = 1:length(storage_open)
+        tempSum = 0;
+         for j = 1:48
+             tempSum = tempSum + transCfromPlants_carrier{i,j}(k);
+        end
+        totTransCfromPlants_carrier_temp(i,k) = tempSum;
+     end
+ end
+ totTransCfromPlants_carrier = sum(sum(totTransCfromPlants_carrier_temp));
  totHoldCost = sum(sum(holdCost)); 
  totTankHoldCost = sum(sum(tankersHoldC));
  totTransport2cities_cost = sum(sum(transport2cities_cost));
