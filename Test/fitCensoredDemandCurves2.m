@@ -327,6 +327,21 @@ function [] = fitCensoredDemandCurves2(yearMax)
 		roj_res = ROJ_sales_out - roj_model;
 		fcoj_res = FCOJ_sales_out - fcoj_model;
 
+<<<<<<< HEAD
+=======
+		% calculating statistics for samplig distribution
+		ORA_params{i,1} = mean(ora_res);
+		POJ_params{i,1} = mean(poj_res);
+		ROJ_params{i,1} = mean(roj_res);
+		FCOJ_params{i,1} = mean(fcoj_res);
+
+		ORA_params{i,2} = var(ora_res);
+		POJ_params{i,2} = var(poj_res);
+		ROJ_params{i,2} = var(roj_res);
+		FCOJ_params{i,2} = var(fcoj_res);
+
+		% for r-squared values
+>>>>>>> FETCH_HEAD
 		ora_ss_res = sum(ora_res.^2);
 		poj_ss_res = sum(poj_res.^2);
 		roj_ss_res = sum(roj_res.^2);
