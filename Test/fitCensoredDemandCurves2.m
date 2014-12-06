@@ -344,7 +344,6 @@ function [] = fitCensoredDemandCurves2(yearMax)
 		FCOJ_params{i,2} = var(fcoj_res);
 
 		% for r-squared values
-		%{
 		ora_ss_res = sum(ora_res.^2);
 		poj_ss_res = sum(poj_res.^2);
 		roj_ss_res = sum(roj_res.^2);
@@ -387,7 +386,6 @@ function [] = fitCensoredDemandCurves2(yearMax)
 		scatter(FCOJ_prices_out,fcoj_model,'r')
 		grid on
 		title(strcat('lin FCOJ, ', region(i),',',num2str(fcoj_rsq)));
-		%}
 			
 	end
 	% save as coefficients, note: generated values still need to be de-logged
