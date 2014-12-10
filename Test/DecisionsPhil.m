@@ -1,4 +1,4 @@
-classdef Decisions
+classdef DecisionsPhil
     % This is the decision class.  The input to this class is all the
     % YearData objects as well as the OJGame object.  It then sets the
     % properties values of this class to the decisions. This can obviously
@@ -53,7 +53,7 @@ classdef Decisions
     methods
         % Constructor where you update each of the properties of the
         % decision in the Decision file inputted
-        function Decision = Decisions(filename,OJ_object,pricesORA,...
+        function Decision = DecisionsPhil(filename,OJ_object,pricesORA,...
                 pricesPOJ, pricesROJ, pricesFCOJ)
             
             
@@ -123,6 +123,42 @@ classdef Decisions
                 Decision.pricing_ROJ_dec = zeros(7,12);
                 Decision.pricing_FCOJ_dec = zeros(7,12);
                 
+                
+                
+                %Michelle's most recent prices for 2015
+                Decision.pricing_ORA_dec(1,:) = 1.7;
+                Decision.pricing_ORA_dec(2,:) = 2;
+                Decision.pricing_ORA_dec(3,:) = 2.25;
+                Decision.pricing_ORA_dec(4,:) = 2.25;
+                Decision.pricing_ORA_dec(5,:) = 2.5;
+                Decision.pricing_ORA_dec(6,:) = 2.6;
+                Decision.pricing_ORA_dec(7,:) = 2.7;
+                
+                Decision.pricing_POJ_dec(1,:) = 3.3;
+                Decision.pricing_POJ_dec(2,:) = 3.3;
+                Decision.pricing_POJ_dec(3,:) = 3.3;
+                Decision.pricing_POJ_dec(4,:) = 3.3;
+                Decision.pricing_POJ_dec(5,:) = 3.3;
+                Decision.pricing_POJ_dec(6,:) = 3.2;
+                Decision.pricing_POJ_dec(7,:) = 3.2;
+                
+                Decision.pricing_ROJ_dec(1,:) = 3.9;
+                Decision.pricing_ROJ_dec(2,:) = 3.9;
+                Decision.pricing_ROJ_dec(3,:) = 3.9;
+                Decision.pricing_ROJ_dec(4,:) = 3.9;
+                Decision.pricing_ROJ_dec(5,:) = 3.9;
+                Decision.pricing_ROJ_dec(6,:) = 3.9;
+                Decision.pricing_ROJ_dec(7,:) = 3.9;
+                
+                Decision.pricing_FCOJ_dec(1,:) = 2.7;
+                Decision.pricing_FCOJ_dec(2,:) = 2.4;
+                Decision.pricing_FCOJ_dec(3,:) = 2.3;
+                Decision.pricing_FCOJ_dec(4,:) = 2.5;
+                Decision.pricing_FCOJ_dec(5,:) = 2.6;
+                Decision.pricing_FCOJ_dec(6,:) = 2.8;
+                Decision.pricing_FCOJ_dec(7,:) = 2.6;
+                
+                
 %                 %Michelle's most recent prices for 2015
 %                 Decision.pricing_ORA_dec(1,:) = 2;
 %                 Decision.pricing_ORA_dec(2,:) = 2.5;
@@ -156,10 +192,10 @@ classdef Decisions
 %                 Decision.pricing_FCOJ_dec(6,:) = 2.8;
 %                 Decision.pricing_FCOJ_dec(7,:) = 2.6;
                 
-                Decision.pricing_ORA_dec = pricesORA;
-                Decision.pricing_FCOJ_dec = pricesFCOJ;
-                Decision.pricing_ROJ_dec = pricesROJ;
-                Decision.pricing_POJ_dec = pricesPOJ;
+%                 Decision.pricing_ORA_dec = pricesORA;
+%                 Decision.pricing_FCOJ_dec = pricesFCOJ;
+%                 Decision.pricing_ROJ_dec = pricesROJ;
+%                 Decision.pricing_POJ_dec = pricesPOJ;
                 
                 Decision.pricing_ORA_weekly_dec = zeros(7,48);
                 Decision.pricing_POJ_weekly_dec = zeros(7,48);
@@ -716,7 +752,7 @@ classdef Decisions
                 %  purchase in each year from the year after the current to
                 %  5 years after the current
 %                 theta1 = [0.90,0.85,0.81,0.78,0.76];
-                theta1 = 0.9;
+                theta1 = 1;
                 theta2 = 1;
                 
                 cumDemand = 0;
@@ -781,7 +817,7 @@ classdef Decisions
                 %  5 years after the current
                 
 %                 theta3 = [1.05,1.00,0.96,0.93,0.91];
-                theta3 = 1;
+                theta3 = 18;
                 theta4 = 1;
                 
                 cumDemandFCOJ = 0;
