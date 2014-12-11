@@ -282,7 +282,7 @@ classdef Decisions
                     end
                 end
                 
-                fcojCurrentTotal = 0;
+                fcojCurrentTotalFutures = 0;
                 for i = 1:5
                     fcojCurrentTotalFutures = fcojCurrentTotalFutures +...
                         OJ_object.fcoj_futures_current(1,i*2);
@@ -355,10 +355,9 @@ classdef Decisions
                 decision_Distances_1 = horzcat(decision_Distances_1,decision_Distances_1);
                 decision_Distances_2 = horzcat(decision_Distances_2,decision_Distances_2);
                 
-                
+                %{
                 %NEED ACCURATE PRICE FORECASTS. Using mean prices over the
                 %years (as below) won't really cut it
-                
                 mean_grove_prices = zeros(6,1);
                 
                 for j = 1:6
@@ -373,21 +372,21 @@ classdef Decisions
                 mean_grove_prices = horzcat(mean_grove_prices);
                 
                 %Dimensioned groves x (procs * storages)
-%                 x0 = zeros(size(decision_Distances_1));
-%                 
-%                 a = @(x)proc_plant_ship_network(x, decision_Distances_1,...
-%                     decision_Distances_2, tankNums, mean_grove_prices,...
-%                     length(plants_open),length(stor_open));
-%                 b = @(x)constraints_proc_plants_ship(x, storCapacities, procCapacities,...
-%                     length(plants_open),length(stor_open),stor_POJ_demand,stor_FCOJ_demand);
-%                 
-%                 lb = zeros(size(x0)); %lower bounds on soln
-%                 
-%                 options = optimoptions(@fmincon,'Algorithm','sqp');
-%                 [x, fval] = fmincon(a,x0,[],[],[],[],lb,[],b,options);
-%                 fminPOJFCOJ = fval; %the total cost of the so%lution
-%                 xminPOJFCOJ = x; %the solution of shipping what to where
-               
+                x0 = zeros(size(decision_Distances_1));
+                
+                a = @(x)proc_plant_ship_network(x, decision_Distances_1,...
+                    decision_Distances_2, tankNums, mean_grove_prices,...
+                    length(plants_open),length(stor_open));
+                b = @(x)constraints_proc_plants_ship(x, storCapacities, procCapacities,...
+                    length(plants_open),length(stor_open),stor_POJ_demand,stor_FCOJ_demand);
+                
+                lb = zeros(size(x0)); %lower bounds on soln
+                
+                options = optimoptions(@fmincon,'Algorithm','sqp');
+                [x, fval] = fmincon(a,x0,[],[],[],[],lb,[],b,options);
+                fminPOJFCOJ = fval; %the total cost of the so%lution
+                xminPOJFCOJ = x; %the solution of shipping what to where
+                
                 denomPOJ = zeros(length(plants_open),1);
                 denomFCOJ = zeros(length(plants_open),1);
                 
@@ -402,7 +401,7 @@ classdef Decisions
                         
                     end
                 end
-                
+               
                 %expand the decisions to the original 71x10 matrix below
                 for i = 1:length(plants_open)
                     for j = 1:length(stor_open)
@@ -433,7 +432,7 @@ classdef Decisions
                     
                 end
                 %expressed in percentages
-                
+               %} 
                 
                 Decision.demandProcPlantORA = zeros(length(plants_open),12);
                 Decision.demandProcPlantPOJ = zeros(length(plants_open),12);
@@ -544,7 +543,7 @@ classdef Decisions
                         /length(YearDataRecord);
                 end
                 
-                
+                %{
                 %initial allocation
                 x0 = zeros(6, length(stor_open)); %6 x (#stor)
                 a = @(x)grove_ship_network(x, mean_grove_prices,...
@@ -629,7 +628,7 @@ classdef Decisions
                         1 - Decision.manufac_proc_plant_dec(1, plants_open(i));
                 end
                 
-                
+                %}
                 
                 % Set the % of FCOJ to reconstitute to ROJ at each
                 % storage unit each month where each row is an open storage
@@ -716,8 +715,8 @@ classdef Decisions
                 %  Set the amount (in tons) of ORA futures to
                 %  purchase in each year from the year after the current to
                 %  5 years after the current
-%                 theta1 = [0.90,0.85,0.81,0.78,0.76];
-                theta1 = 1;
+%                 theta1 = [0.90,0.85,0.81,0.78,0.76, 1.1];
+                theta1 = 0.76;
                 theta2 = 1;
                 
                 cumDemand = 0;

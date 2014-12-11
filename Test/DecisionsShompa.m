@@ -53,7 +53,7 @@ classdef Decisions
     methods
         % Constructor where you update each of the properties of the
         % decision in the Decision file inputted
-        function Decision = Decisions(filename,OJ_object,pricesORA,...
+        function Decision = DecisionsShompa(filename,OJ_object,pricesORA,...
                 pricesPOJ, pricesROJ, pricesFCOJ)
             
             
@@ -544,7 +544,7 @@ classdef Decisions
                         /length(YearDataRecord);
                 end
                 
-                
+               %{ 
                 %initial allocation
                 x0 = zeros(6, length(stor_open)); %6 x (#stor)
                 a = @(x)grove_ship_network(x, mean_grove_prices,...
@@ -587,7 +587,7 @@ classdef Decisions
                     end
                 end
                 
-                
+                %}
                 
                 %x is dimensioned 6 x (# procs + # storages)
                 for i = 1:6
