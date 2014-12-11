@@ -26,7 +26,7 @@ cities_match_storage = matchCitiestoStorage(storage_open, storage2market.(s2m));
 for j = 1:length(storage_open)
     indicies = strcmp(char(storageNamesInUse(storage_open(j))),cities_match_storage(:,2));
     cities = cities_match_storage(indicies,:);
-    [ORA_demand(j), POJ_demand(j), FCOJ_demand(j), ROJ_demand(j), ~, ~] = drawDemandPousch(decisions,cities,1, demand_city_ORA, demand_city_POJ, demand_city_ROJ, demand_city_FCOJ);
+    [ORA_demand(j), POJ_demand(j), FCOJ_demand(j), ROJ_demand(j), ~, ~] = drawDemand(decisions,cities,1, demand_city_ORA, demand_city_POJ, demand_city_ROJ, demand_city_FCOJ);
 end
 FCOJ_futures = 0;
 for i=2:2:length(decisions.future_mark_dec_FCOJ_current)
