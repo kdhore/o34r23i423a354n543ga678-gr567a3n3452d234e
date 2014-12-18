@@ -1,6 +1,6 @@
 % Hacky script to get demands for storage unit based for different products
 
-decisions = YearDataforDecisions('Decisions/oriangagrande2017test.xlsm', ojObject);
+decisions = YearDataforDecisions('Excel Files Orianga/oriangagrande2017Results.xlsm', ojObject);
 %decisions = YearDataforDecisions('Decisions/oriangagrande2017test_pousch.xlsm', ojObject);
 storage2market = load('Distance Data/storage2market_dist.mat');
 s2m = genvarname('storage2market_dist');

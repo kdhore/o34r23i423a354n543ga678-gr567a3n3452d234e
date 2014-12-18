@@ -18,7 +18,6 @@ classdef YearData
         year;
         proc_plant_dec;
         tank_car_dec;
-        %tank_status;
         storage_dec;
         purchase_spotmkt_dec;
         quant_mult_dec;

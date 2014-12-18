@@ -1,4 +1,4 @@
-function [ ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, big_D, big_P ] = drawDemand(decisions,cities,week,demand_city_ORA, demand_city_POJ, demand_city_ROJ, demand_city_FCOJ, temp, indicies)
+function [ ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, big_D, big_P ] = drawDemand(decisions,cities,week,demand_city_ORA, demand_city_POJ, demand_city_ROJ, demand_city_FCOJ, pricesORA, pricesPOJ, pricesROJ, pricesFCOJ)
    %,temp,indicies
 % Will return the demand for each city
     ORA_demand = 0;
@@ -7,10 +7,17 @@ function [ ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, big_D, big_P ] = dra
     ROJ_demand = 0;
     %transport_cost = 0;
     big_D = zeros(numel(cities)/3, 4);
-    ORA_price = decisions.pricing_ORA_weekly_dec(:,week);
-    POJ_price = decisions.pricing_POJ_weekly_dec(:,week);
-    FCOJ_price = decisions.pricing_FCOJ_weekly_dec(:,week);
-    ROJ_price = decisions.pricing_ROJ_weekly_dec(:,week);
+    if nargin > 7
+        ORA_price = pricesORA(:, ceil(week/4));
+        POJ_price = pricesPOJ(:, ceil(week/4));
+        FCOJ_price = pricesFCOJ(:, ceil(week/4));
+        ROJ_price = pricesROJ(:, ceil(week/4));
+    else
+        ORA_price = decisions.pricing_ORA_weekly_dec(:,week);
+        POJ_price = decisions.pricing_POJ_weekly_dec(:,week);
+        FCOJ_price = decisions.pricing_FCOJ_weekly_dec(:,week);
+        ROJ_price = decisions.pricing_ROJ_weekly_dec(:,week);
+    end
     %big_P = [ORA_price, POJ_price, FCOJ_price, ROJ_price];
     big_P = zeros(numel(cities)/3,4);
     for i = 1:numel(cities)/3
