@@ -6,17 +6,17 @@ function [] = fitCensoredDemandCurves2(yearMax)
 	yrs = 2004:2013;
 	yrs2 = 2014:yearMax;
 
-	c = cell(length(yrs)+2+length(yrs2),1);
+	c = cell(length(yrs)+length(yrs2),1);
 
 	for i=1:length(yrs)
-		c{i} = load(strcat('yr',num2str(yrs(i))));
+		c{i} = load(strcat('YearData Offline/yr',num2str(yrs(i))));
 	end
 
-	c{length(yrs)+1} = load('yr2014a.mat');
-	c{length(yrs)+2} = load('yr2014b.mat');
+	%c{length(yrs)+1} = load('yr2014a.mat');
+	%c{length(yrs)+2} = load('yr2014b.mat');
 
  	for i=1:length(yrs2)
- 		c{i+12} = load(strcat('yr',num2str(yrs2(i)),'_new'));
+ 		c{i+10} = load(strcat('YearData Orianga/yr',num2str(yrs2(i))));
  	end
 
 	compiled_prices_ORA = [];
@@ -73,12 +73,9 @@ function [] = fitCensoredDemandCurves2(yearMax)
 			vn = '';
 			if (j < 11)
 				vn = genvarname(strcat('yr',num2str(yrs(j))));
-			elseif (j == 11)
-				vn = genvarname('yr2014a_orianga');
-			elseif (j == 12)
-				vn = genvarname('yr2014b_orianga');
 			elseif (j < length(c)+1)
-				vn = genvarname(strcat('yr',num2str(yrs2(j-12)),'_new'));
+				%vn = genvarname(strcat('yr',num2str(yrs2(j-12)),'_new'));
+				vn = genvarname(strcat('yr',num2str(yrs2(j-10))));
 			end
 
 			% putting all the prices for each region in one place, for easier manipulation
@@ -229,8 +226,13 @@ function [] = fitCensoredDemandCurves2(yearMax)
 		fcoj_keep = ones(size(FCOJ_sales_out));
 
 		% remove the values that are outliers
+		% also, remove prices < 2 since we'll never price that low,
+		% and those might be fucking up the fits
 		for s=1:length(ORA_sales_out)
 			if(ora_res(s) < (ora_res_m - ora_res_var))
+				ora_keep(s) = 0;
+			end
+			if (ORA_prices_out(s) < 2)
 				ora_keep(s) = 0;
 			end
 		end
@@ -239,16 +241,25 @@ function [] = fitCensoredDemandCurves2(yearMax)
 			if(poj_res(s) < (poj_res_m - poj_res_var))
 				poj_keep(s) = 0;
 			end
+			if (POJ_prices_out(s) < 2)
+				poj_keep(s) = 0;
+			end
 		end
 
 		for s=1:length(ROJ_sales_out)
 			if(roj_res(s) < (roj_res_m - roj_res_var))
 				roj_keep(s) = 0;
 			end
+			if (ROJ_prices_out(s) < 2)
+				roj_keep(s) = 0;
+			end
 		end
 
 		for s=1:length(FCOJ_sales_out)
 			if(fcoj_res(s) < (fcoj_res_m - fcoj_res_var))
+				fcoj_keep(s) = 0;
+			end
+			if (FCOJ_prices_out(s) < 2)
 				fcoj_keep(s) = 0;
 			end
 		end
@@ -346,6 +357,8 @@ function [] = fitCensoredDemandCurves2(yearMax)
 		scatter(ORA_prices_out,ORA_sales_out);
 		hold on
 		scatter(ORA_prices_out,ora_model,'r')
+		%hold on
+		%scatter(ORA_prices_out(end-12:end),ora_model(end-12:end),'g')
 		grid on
 		title(strcat('lin ORA, ', region(i),',',num2str(ora_rsq)));
 
@@ -353,6 +366,8 @@ function [] = fitCensoredDemandCurves2(yearMax)
 		scatter(POJ_prices_out,POJ_sales_out);
 		hold on
 		scatter(POJ_prices_out,poj_model,'r')
+		%hold on
+		%scatter(POJ_prices_out(end-12:end),poj_model(end-12:end),'g')
 		grid on
 		title(strcat('lin POJ, ', region(i),',',num2str(poj_rsq)));
 
@@ -360,6 +375,8 @@ function [] = fitCensoredDemandCurves2(yearMax)
 		scatter(ROJ_prices_out,ROJ_sales_out);
 		hold on
 		scatter(ROJ_prices_out,roj_model,'r')
+		%hold on
+		%scatter(ROJ_prices_out(end-12:end),roj_model(end-12:end),'g')
 		grid on
 		title(strcat('lin ROJ, ', region(i),',',num2str(roj_rsq)));
 
@@ -367,6 +384,8 @@ function [] = fitCensoredDemandCurves2(yearMax)
 		scatter(FCOJ_prices_out,FCOJ_sales_out);
 		hold on
 		scatter(FCOJ_prices_out,fcoj_model,'r')
+		%hold on
+		%scatter(FCOJ_prices_out(end-12:end),fcoj_model(end-12:end),'g')
 		grid on
 		title(strcat('lin FCOJ, ', region(i),',',num2str(fcoj_rsq)));
 			
