@@ -46,29 +46,29 @@ function [] = updateModels(yearMax)
 		end
 	end
 
-	mat = load('YearData Offline/yr2014a.mat');
-	data = mat.yr2014a.price_orange_spot_res;
-	ratedat = mat.yr2014a.fx_exch_res;
+	% mat = load('YearData Offline/yr2014a.mat');
+	% data = mat.yr2014a.price_orange_spot_res;
+	% ratedat = mat.yr2014a.fx_exch_res;
 
-	for j=1:6
-		Prices{j} = [Prices{j} data(j,:)];
-	end
+	% for j=1:6
+	% 	Prices{j} = [Prices{j} data(j,:)];
+	% end
 
-	for j=1:2
-		xrates{j} = [xrates{j} ratedat(j,:)];
-	end
+	% for j=1:2
+	% 	xrates{j} = [xrates{j} ratedat(j,:)];
+	% end
 
-	mat = load('YearData Offline/yr2014b.mat');
-	data = mat.yr2014b.price_orange_spot_res;
-	ratedat = mat.yr2014b.fx_exch_res;
+	% mat = load('YearData Offline/yr2014b.mat');
+	% data = mat.yr2014b.price_orange_spot_res;
+	% ratedat = mat.yr2014b.fx_exch_res;
 
-	for j=1:6
-		Prices{j} = [Prices{j} data(j,:)];
-	end
+	% for j=1:6
+	% 	Prices{j} = [Prices{j} data(j,:)];
+	% end
 
-	for j=1:2
-		xrates{j} = [xrates{j} ratedat(j,:)];
-	end
+	% for j=1:2
+	% 	xrates{j} = [xrates{j} ratedat(j,:)];
+	% end
 
 	
 	for i=1:length(years2)
@@ -144,6 +144,7 @@ function [] = updateModels(yearMax)
 	weights = [1.25, 1.25, 1, 1,10,10];
 	tests = cell(6,1);
 	inits = zeros(2,1);
+	tests = cell(6,1);
 
 	for i=1:num_models
 		numpts2 = length(Prices{i});
@@ -154,12 +155,26 @@ function [] = updateModels(yearMax)
 
 		mdls{i} = arima('Constant',(m+unifrnd(-1,1)*st), 'ARLags', [1:ubound(i)], 'MALags', [1,12]);
 		estmdls{i} = estimate(mdls{i},transpose(Prices{i}));
+		tests{i} = simulate(estmdls{i},length(Prices{i}));
 	end
 
 	inits(1) = xrates{1}(length(xrates{1}));
 	inits(2) = xrates{2}(length(xrates{2}));
 
-	save('Grove Price Model/ARMAModels.mat','estmdls');
-	save('Grove Price Model/probs.mat','spikesAt','probSpike','probMonth');
-	save('Grove Price Model/inits.mat','inits');
+	size(Prices{1})
+	size(tests{1})
+	diffs = zeros(6,1);
+
+	for i=1:num_models
+		figure
+		%plot(Prices{i},'b');
+		%hold on
+		%plot(tests{i},'r');
+		diffs(i) = mean(Prices{i} - transpose(tests{i}))
+		plot(Prices{i}-transpose(tests{i}));
+	end
+
+	% save('Grove Price Model/ARMAModels.mat','estmdls');
+	% save('Grove Price Model/probs.mat','spikesAt','probSpike','probMonth');
+	% save('Grove Price Model/inits.mat','inits');
 end
