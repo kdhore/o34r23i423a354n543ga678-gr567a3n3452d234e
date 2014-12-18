@@ -18,8 +18,8 @@ classdef ProcessingPlant
         poj = 0;
         fcoj = 0;
         tankersHoldC = 0;
-        shipped_out_cost_tank = 0;
-        shipped_out_cost_carrier = 0;
+        shipped_out_cost_tank;
+        shipped_out_cost_carrier;
         rotten = 0;
         throwaway = 0;
 		% other properties tbd
@@ -43,8 +43,8 @@ classdef ProcessingPlant
             pp.poj = 0;
             pp.fcoj = 0;
             pp.tankersHoldC = 0;
-            pp.shipped_out_cost_tank = 0;
-            pp.shipped_out_cost_carrier = 0;
+            pp.shipped_out_cost_tank = zeros(stor_num,1);
+            pp.shipped_out_cost_carrier = zeros(stor_num,1);
             pp.rotten = 0;
             pp.throwaway = 0;
             pp.shippingSchedule = shippingSchedule;          
@@ -58,8 +58,8 @@ classdef ProcessingPlant
             obj.poj = 0;
             obj.fcoj = 0;
             obj.tankersHoldC = 0;
-            obj.shipped_out_cost_tank = 0;
-            obj.shipped_out_cost_carrier = 0;
+            obj.shipped_out_cost_tank = zeros(length(storage_open),1);
+            obj.shipped_out_cost_carrier = zeros(length(storage_open),1);
             obj.rotten = 0;
             obj.throwaway = 0;
             %pojC = 0;
@@ -124,7 +124,7 @@ classdef ProcessingPlant
                         obj.shippingSchedule{3}{stor}.POJ_1Week = stor_percentPOJ*0.01*obj.poj;
                         obj.shippingSchedule{3}{stor}.FCOJ_1Week = stor_percentFCOJ*0.01*obj.fcoj;
                         obj.shippingSchedule{3}{stor}.Tankers = ceil((stor_percentPOJ*0.01*obj.poj + stor_percentFCOJ*0.01*obj.fcoj)/30);
-                        obj.shipped_out_cost_tank = obj.shipped_out_cost_tank + 36*obj.shippingSchedule{3}{stor}.Tankers*processing2storage_dist(storage_open(j),obj.index);
+                        obj.shipped_out_cost_tank(j) = obj.shipped_out_cost_tank(j) + 36*obj.shippingSchedule{3}{stor}.Tankers*processing2storage_dist(storage_open(j),obj.index);
                         
                     end 
                 else
@@ -140,13 +140,13 @@ classdef ProcessingPlant
                            obj.shippingSchedule{3}{stor}.POJ_1Week = stor_percentPOJ*0.01*obj.poj;
                             obj.shippingSchedule{3}{stor}.FCOJ_1Week = stor_percentFCOJ*0.01*obj.fcoj;
                             obj.shippingSchedule{3}{stor}.Tankers = ceil((stor_percentPOJ*0.01*obj.poj + stor_percentFCOJ*0.01*obj.fcoj)/30);
-                            obj.shipped_out_cost_tank = obj.shipped_out_cost_tank + 36*obj.shippingSchedule{3}{stor}.Tankers*processing2storage_dist(storage_open(j),obj.index);
+                            obj.shipped_out_cost_tank(j) = obj.shipped_out_cost_tank(j) + 36*obj.shippingSchedule{3}{stor}.Tankers*processing2storage_dist(storage_open(j),obj.index);
                             temp_tankers = temp_tankers - obj.shippingSchedule{3}{stor}.Tankers;
                             sent = sent + stor_percentPOJ*0.01*obj.poj + stor_percentFCOJ*0.01*obj.fcoj;
                             j = j + 1;
                         else
                             tankerAmount = temp_tankers*30;
-                            obj.shipped_out_cost_tank = obj.shipped_out_cost_tank + 36*temp_tankers*processing2storage_dist(storage_open(j),obj.index);
+                            obj.shipped_out_cost_tank(j) = obj.shipped_out_cost_tank(j) + 36*temp_tankers*processing2storage_dist(storage_open(j),obj.index);
                             POJsentviaTanker = (stor_percentPOJ*0.01*obj.poj)/((stor_percentPOJ*0.01*obj.poj) + (stor_percentFCOJ*0.01*obj.fcoj))*tankerAmount;
                             FCOJsentviaTanker = (stor_percentFCOJ*0.01*obj.fcoj)/((stor_percentPOJ*0.01*obj.poj) + (stor_percentFCOJ*0.01*obj.fcoj))*tankerAmount;
                             obj.shippingSchedule{3}{stor}.POJ_1Week = POJsentviaTanker;
@@ -156,7 +156,7 @@ classdef ProcessingPlant
                             POJlefttobeSent = stor_percentPOJ*0.01*obj.poj - POJsentviaTanker;
                             FCOJlefttobeSent = stor_percentFCOJ*0.01*obj.fcoj - FCOJsentviaTanker;
                             distance = processing2storage_dist(storage_open(j),obj.index);
-                            obj.shipped_out_cost_carrier = obj.shipped_out_cost_carrier + 0.65*(FCOJlefttobeSent+POJlefttobeSent)*distance;
+                            obj.shipped_out_cost_carrier(j) = obj.shipped_out_cost_carrier(j) + 0.65*(FCOJlefttobeSent+POJlefttobeSent)*distance;
                             if distance < 2000
                                 delay = rand;
                                 if (delay < 0.09)
@@ -200,7 +200,7 @@ classdef ProcessingPlant
                         POJtobeSent = stor_percentPOJ*0.01*obj.poj;
                         FCOJtobeSent = stor_percentFCOJ*0.01*obj.fcoj;
                         distance = processing2storage_dist(storage_open(j),obj.index);
-                        obj.shipped_out_cost_carrier = obj.shipped_out_cost_carrier + 0.65*distance*(FCOJtobeSent+POJtobeSent);
+                        obj.shipped_out_cost_carrier(j) = obj.shipped_out_cost_carrier(j) + 0.65*distance*(FCOJtobeSent+POJtobeSent);
                         if distance < 2000
                            delay = rand;
                            if (delay < 0.09)

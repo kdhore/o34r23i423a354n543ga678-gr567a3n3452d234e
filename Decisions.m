@@ -123,39 +123,43 @@ classdef Decisions
                 Decision.pricing_ROJ_dec = zeros(7,12);
                 Decision.pricing_FCOJ_dec = zeros(7,12);
                 
-                %Michelle's most recent prices for 2015
-                Decision.pricing_ORA_dec(1,:) = 2;
-                Decision.pricing_ORA_dec(2,:) = 2.5;
-                Decision.pricing_ORA_dec(3,:) = 2.7;
-                Decision.pricing_ORA_dec(4,:) = 2.7;
-                Decision.pricing_ORA_dec(5,:) = 2.5;
-                Decision.pricing_ORA_dec(6,:) = 2.6;
-                Decision.pricing_ORA_dec(7,:) = 2.7;
+%                 %Michelle's most recent prices for 2015
+%                 Decision.pricing_ORA_dec(1,:) = 2;
+%                 Decision.pricing_ORA_dec(2,:) = 2.5;
+%                 Decision.pricing_ORA_dec(3,:) = 2.7;
+%                 Decision.pricing_ORA_dec(4,:) = 2.7;
+%                 Decision.pricing_ORA_dec(5,:) = 2.5;
+%                 Decision.pricing_ORA_dec(6,:) = 2.6;
+%                 Decision.pricing_ORA_dec(7,:) = 2.7;
+%                 
+%                 Decision.pricing_POJ_dec(1,:) = 3.3;
+%                 Decision.pricing_POJ_dec(2,:) = 3.3;
+%                 Decision.pricing_POJ_dec(3,:) = 3.3;
+%                 Decision.pricing_POJ_dec(4,:) = 3.3;
+%                 Decision.pricing_POJ_dec(5,:) = 3.3;
+%                 Decision.pricing_POJ_dec(6,:) = 3.2;
+%                 Decision.pricing_POJ_dec(7,:) = 3.2;
+%                 
+%                 Decision.pricing_ROJ_dec(1,:) = 3.1;
+%                 Decision.pricing_ROJ_dec(2,:) = 3.1;
+%                 Decision.pricing_ROJ_dec(3,:) = 3.1;
+%                 Decision.pricing_ROJ_dec(4,:) = 3.3;
+%                 Decision.pricing_ROJ_dec(5,:) = 3.1;
+%                 Decision.pricing_ROJ_dec(6,:) = 3.1;
+%                 Decision.pricing_ROJ_dec(7,:) = 3.1;
+%                 
+%                 Decision.pricing_FCOJ_dec(1,:) = 2.7;
+%                 Decision.pricing_FCOJ_dec(2,:) = 2.4;
+%                 Decision.pricing_FCOJ_dec(3,:) = 2.3;
+%                 Decision.pricing_FCOJ_dec(4,:) = 2.5;
+%                 Decision.pricing_FCOJ_dec(5,:) = 2.6;
+%                 Decision.pricing_FCOJ_dec(6,:) = 2.8;
+%                 Decision.pricing_FCOJ_dec(7,:) = 2.6;
                 
-                Decision.pricing_POJ_dec(1,:) = 3.3;
-                Decision.pricing_POJ_dec(2,:) = 3.3;
-                Decision.pricing_POJ_dec(3,:) = 3.3;
-                Decision.pricing_POJ_dec(4,:) = 3.3;
-                Decision.pricing_POJ_dec(5,:) = 3.3;
-                Decision.pricing_POJ_dec(6,:) = 3.2;
-                Decision.pricing_POJ_dec(7,:) = 3.2;
-                
-                Decision.pricing_ROJ_dec(1,:) = 3.1;
-                Decision.pricing_ROJ_dec(2,:) = 3.1;
-                Decision.pricing_ROJ_dec(3,:) = 3.1;
-                Decision.pricing_ROJ_dec(4,:) = 3.3;
-                Decision.pricing_ROJ_dec(5,:) = 3.1;
-                Decision.pricing_ROJ_dec(6,:) = 3.1;
-                Decision.pricing_ROJ_dec(7,:) = 3.1;
-                
-                Decision.pricing_FCOJ_dec(1,:) = 2.7;
-                Decision.pricing_FCOJ_dec(2,:) = 2.4;
-                Decision.pricing_FCOJ_dec(3,:) = 2.3;
-                Decision.pricing_FCOJ_dec(4,:) = 2.5;
-                Decision.pricing_FCOJ_dec(5,:) = 2.6;
-                Decision.pricing_FCOJ_dec(6,:) = 2.8;
-                Decision.pricing_FCOJ_dec(7,:) = 2.6;
-                
+                Decision.pricing_ORA_dec = pricesORA;
+                Decision.pricing_FCOJ_dec = pricesFCOJ;
+                Decision.pricing_ROJ_dec = pricesROJ;
+                Decision.pricing_POJ_dec = pricesPOJ;
                 
                 Decision.pricing_ORA_weekly_dec = zeros(7,48);
                 Decision.pricing_POJ_weekly_dec = zeros(7,48);
@@ -278,7 +282,7 @@ classdef Decisions
                     end
                 end
                 
-                fcojCurrentTotalFutures = 0;
+                fcojCurrentTotal = 0;
                 for i = 1:5
                     fcojCurrentTotalFutures = fcojCurrentTotalFutures +...
                         OJ_object.fcoj_futures_current(1,i*2);
@@ -354,6 +358,7 @@ classdef Decisions
                 
                 %NEED ACCURATE PRICE FORECASTS. Using mean prices over the
                 %years (as below) won't really cut it
+                
                 mean_grove_prices = zeros(6,1);
                 
                 for j = 1:6
@@ -368,21 +373,21 @@ classdef Decisions
                 mean_grove_prices = horzcat(mean_grove_prices);
                 
                 %Dimensioned groves x (procs * storages)
-                x0 = zeros(size(decision_Distances_1));
-                
-                a = @(x)proc_plant_ship_network(x, decision_Distances_1,...
-                    decision_Distances_2, tankNums, mean_grove_prices,...
-                    length(plants_open),length(stor_open));
-                b = @(x)constraints_proc_plants_ship(x, storCapacities, procCapacities,...
-                    length(plants_open),length(stor_open),stor_POJ_demand,stor_FCOJ_demand);
-                
-                lb = zeros(size(x0)); %lower bounds on soln
-                
-                options = optimoptions(@fmincon,'Algorithm','sqp');
-                [x, fval] = fmincon(a,x0,[],[],[],[],lb,[],b,options);
-                fminPOJFCOJ = fval; %the total cost of the so%lution
-                xminPOJFCOJ = x; %the solution of shipping what to where
-                
+%                 x0 = zeros(size(decision_Distances_1));
+%                 
+%                 a = @(x)proc_plant_ship_network(x, decision_Distances_1,...
+%                     decision_Distances_2, tankNums, mean_grove_prices,...
+%                     length(plants_open),length(stor_open));
+%                 b = @(x)constraints_proc_plants_ship(x, storCapacities, procCapacities,...
+%                     length(plants_open),length(stor_open),stor_POJ_demand,stor_FCOJ_demand);
+%                 
+%                 lb = zeros(size(x0)); %lower bounds on soln
+%                 
+%                 options = optimoptions(@fmincon,'Algorithm','sqp');
+%                 [x, fval] = fmincon(a,x0,[],[],[],[],lb,[],b,options);
+%                 fminPOJFCOJ = fval; %the total cost of the so%lution
+%                 xminPOJFCOJ = x; %the solution of shipping what to where
+               
                 denomPOJ = zeros(length(plants_open),1);
                 denomFCOJ = zeros(length(plants_open),1);
                 
@@ -711,7 +716,8 @@ classdef Decisions
                 %  Set the amount (in tons) of ORA futures to
                 %  purchase in each year from the year after the current to
                 %  5 years after the current
-                theta1 = [0.90,0.85,0.81,0.78,0.76];
+%                 theta1 = [0.90,0.85,0.81,0.78,0.76];
+                theta1 = 1;
                 theta2 = 1;
                 
                 cumDemand = 0;
@@ -775,7 +781,8 @@ classdef Decisions
                 %  purchase in each year from the year after the current to
                 %  5 years after the current
                 
-                theta3 = [1.05,1.00,0.96,0.93,0.91];
+%                 theta3 = [1.05,1.00,0.96,0.93,0.91];
+                theta3 = 1;
                 theta4 = 1;
                 
                 cumDemandFCOJ = 0;
