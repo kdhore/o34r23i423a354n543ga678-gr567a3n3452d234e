@@ -302,7 +302,7 @@ classdef decisionsMichelle
             end
             
             futures_arr_ORA = futuresmaturing(1)*decision.arr_future_dec_ORA(1)/100/4;
-            futures_arr_FCOJ = futuresmaturing(2)*decision.arr_future_dec_FCOJ(1)/100/4*decisions.futures_ship_dec(stor_open)/100;
+            futures_arr_FCOJ = futuresmaturing(2)*decision.arr_future_dec_FCOJ(1)/100/4*decision.futures_ship_dec(stor_open)/100;
 
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % Get shipping decisions (linear program)
@@ -347,9 +347,9 @@ classdef decisionsMichelle
                     end
                 end
             end
-            %plant2storage_avgcost = [867.75	1517.1	466.7;
-            %    877.3	92.83	2658.266855;
-            %    866.047104	1693.640179	349.338538];
+            plant2storage_avgcost = ...
+                [877.3	92.83	2658.266855;
+                866.047104	1693.640179	349.338538];
 
             [x, fval, purchase, percentpoj, percentroj, ship_from_grove, ship_from_plants] = linearProgram(OJ_object, plant2storage_avgcost, YearDataRecord, ORA_demand, POJ_demand, ROJ_demand, FCOJ_demand, futures_arr_ORA, futures_arr_FCOJ);
 

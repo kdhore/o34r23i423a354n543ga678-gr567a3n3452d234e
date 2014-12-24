@@ -9,7 +9,7 @@
 initial_str = 'Excel Files Orianga/oriangagrande2014Results.xlsm';
 
 % %Initalize the first OJGame Object
-% ojObject = OJGame(initial_str);
+ojObject = OJGame(initial_str);
 % 
 % if sum(strcmp(initial_str, 'Excel Files/MomPop2004Results.xlsm')) == 1
 %     yr2004 = YearData('Excel Files/MomPop2004Results.xlsm', ojObject);
@@ -65,9 +65,9 @@ initial_str = 'Excel Files Orianga/oriangagrande2014Results.xlsm';
 yearFiles = dir('YearData Orianga/*.mat');
 ojObject = OJGame(initial_str);
 for i = 1:(length(yearFiles) - 1)
-    year = load(strcat('YearData Orianga/',yearFiles(i).name));
-    yearVar = genvarname(strrep(yearFiles(i).name,'.mat',''));
-    ojObject = ojObject.update(year.(yearVar));
+   year = load(strcat('YearData Orianga/',yearFiles(i).name));
+   yearVar = genvarname(strrep(yearFiles(i).name,'.mat',''));
+   ojObject = ojObject.update(year.(yearVar));
 end
 recentYear = str2double(strrep(strrep(yearFiles(length(yearFiles)).name,'.mat',''),'yr',''));
 

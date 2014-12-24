@@ -67,38 +67,39 @@ for i = 1:(length(yearFiles) - 1)
     yearVar = genvarname(strrep(yearFiles(i).name,'.mat',''));
     ojObject = ojObject.update(year.(yearVar));
 end
-%recentYear = str2double(strrep(strrep(yearFiles(length(yearFiles)).name,'.mat',''),'yr',''));
+recentYear = str2double(strrep(strrep(yearFiles(length(yearFiles)).name,'.mat',''),'yr',''));
 
-% Set the number of iterations to be simulated
-%prompt = strcat('How many years to simulate? Starting year: ',num2str(recentYear+1), '\n');
-%numIter = input(prompt);
-%simResults = cell(numIter,2);
+%Set the number of iterations to be simulated
+prompt = strcat('How many years to simulate? Starting year: ',num2str(recentYear+1), '\n');
+numIter = input(prompt);
+simResults = cell(numIter,2);
 
-% shipping schedule from previous year
-%lastYear = load(strcat('YearData Orianga/',yearFiles(length(yearFiles)).name));
-%yearVar = genvarname(strrep(yearFiles(length(yearFiles)).name,'.mat',''));
-%lastYear = lastYear.(yearVar);
-%shippingSchedule = lastYear.shippingSchedule;
-%pp_open = find(ojObject.proc_plant_cap);
-%yrTankersAvailable = lastYear.tankersAvailable;
-%tankersAvailable = zeros(10,1);
-%for i = 1:length(pp_open)
-%    tankersAvailable(pp_open(i)) = lastYear.tankersAvailable(i) + lastYear.tank_car_dec(i);
-%end
-% Filling in intial ROJ_temp
-%stor_open = find(ojObject.storage_cap);
-%ROJ_temp = cell(71,1);
-% for i = 1:71
-%     ROJ_temp{i} = zeros(48,1);
-% end
-% for i = 1:length(stor_open)
-%     ROJ_temp{stor_open(i)} = lastYear.storage_res(char(storageNamesInUse(stor_open(i)))).roj_temp;
-% end
-% proc_plants = cell(10,1);
-% storage = cell(3,1);
-% ojObject = ojObject.update(lastYear);
-filename1 = 'Excel Files Orianga/oriangagrande2017Results.xlsm';
-filename2 = 'Excel Files Orianga/oriangagrande2016Results.xlsm';
+%shipping schedule from previous year
+lastYear = load(strcat('YearData Orianga/',yearFiles(length(yearFiles)).name));
+yearVar = genvarname(strrep(yearFiles(length(yearFiles)).name,'.mat',''));
+lastYear = lastYear.(yearVar);
+shippingSchedule = lastYear.shippingSchedule;
+pp_open = find(ojObject.proc_plant_cap);
+yrTankersAvailable = lastYear.tankersAvailable;
+tankersAvailable = zeros(10,1);
+for i = 1:length(pp_open)
+   tankersAvailable(pp_open(i)) = lastYear.tankersAvailable(i) + lastYear.tank_car_dec(i);
+end
+%Filling in intial ROJ_temp
+stor_open = find(ojObject.storage_cap);
+ROJ_temp = cell(71,1);
+for i = 1:71
+    ROJ_temp{i} = zeros(48,1);
+end
+for i = 1:length(stor_open)
+    ROJ_temp{stor_open(i)} = lastYear.storage_res(char(storageNamesInUse(stor_open(i)))).roj_temp;
+end
+proc_plants = cell(10,1);
+storage = cell(3,1);
+ojObject = ojObject.update(lastYear);
+
+filename1 = 'Decisions/oriangagrande2018.xlsm';
+filename2 = 'Excel Files Orianga/oriangagrande2017Results.xlsm';
 decisions = YearDataforDecisions(filename1, ojObject);
 
 decisionsMichelle(filename1,ojObject,decisions.pricing_ORA_dec,decisions.pricing_POJ_dec,decisions.pricing_ROJ_dec,decisions.pricing_FCOJ_dec,YearDataRecord,filename2);
