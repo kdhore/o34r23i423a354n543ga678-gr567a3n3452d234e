@@ -82,7 +82,7 @@ function [x, fval, purchase, percentpoj, percentroj, ship_from_grove, ship_from_
     x0 = zeros(6,numPlantsOpen*numStorOpen*2+numStorOpen);
     
     a = @(x)cost_obj_func(x, grove2plant_unitcost, grove2storage_unitcost,...
-        plant2storage_avgcost, numPlantsOpen, numStorOpen);
+        plant2storage_avgcost, numPlantsOpen, numStorOpen, ORA_arr_futures, mean_grove_prices);
     b = @(x)all_constraints(x, storCapacities, procCapacities,...
         numPlantsOpen,numStorOpen,POJ_demand(:,1),FCOJ_demand(:,1), ROJ_demand(:,1), ORA_demand(:,1),ORA_arr_futures,FCOJ_arr_futures);
     % here send FCOJ_demand - futures arriving... deal with futures, need
