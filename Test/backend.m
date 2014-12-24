@@ -99,7 +99,7 @@ storage = cell(3,1);
 ojObject = ojObject.update(lastYear);
 
 filename1 = 'Decisions/oriangagrande2018test.xlsm';
-filename2 = 'Excel Files Orianga/oriangagrande2017Results.xlsm';
+filename2 = 'Excel Files Orianga/oriangagrande2016Results.xlsm';
 decisions = YearDataforDecisions(filename1, ojObject);
 
 decisionsMichelle(filename1,ojObject,decisions.pricing_ORA_dec,decisions.pricing_POJ_dec,decisions.pricing_ROJ_dec,decisions.pricing_FCOJ_dec,YearDataRecord,filename2);

@@ -1,7 +1,7 @@
 %This is the objective function for processing plant shipping to storages
 %(POJ or FCOJ)
 function [f] = cost_obj_func(x, grove_plant_cost, grove_storage_cost,...
-    plant_storage_cost, numPlantsOpen, numStorOpen, ORA_arr_futures, mean_grove_prices)
+    plant_storage_cost, plants_open, stor_open, ORA_arr_futures, mean_grove_prices)
 
 % let x be like the excel spreadsheet: groves as rows and then columns are
 % as follows: first POJ shipped to processing plant-storage (go through
@@ -14,21 +14,21 @@ function [f] = cost_obj_func(x, grove_plant_cost, grove_storage_cost,...
 % grove_storage_cost is unit trans cost from each grove to each open
 % storage unit
 % plant_storage_cost is unit trans cost from plant to storage
-matrixLength = numPlantsOpen*numStorOpen;
+matrixLength = length(plants_open)*length(stor_open);
 poj_cost = zeros(6,1);
 fcoj_cost = zeros(6,1);
-for i = 1:numPlantsOpen
-    for j = 1:numStorOpen
-        poj_cost = poj_cost + grove_plant_cost(:,i).*x(:,numStorOpen*(i-1)+j)...
-            + plant_storage_cost(i,j)*x(:,numStorOpen*(i-1)+j);
+for i = 1:length(plants_open)
+    for j = 1:length(stor_open)
+        poj_cost = poj_cost + grove_plant_cost(:,i).*x(:,length(stor_open)*(i-1)+j)...
+            + plant_storage_cost(plants_open(i),stor_open(j))*x(:,length(stor_open)*(i-1)+j);
         fcoj_cost = fcoj_cost + ...
-            grove_plant_cost(:,i).*x(:,matrixLength + numStorOpen*(i-1)+j)...
-            + plant_storage_cost(i,j)*x(:,matrixLength + numStorOpen*(i-1)+j);
+            grove_plant_cost(:,i).*x(:,matrixLength + length(stor_open)*(i-1)+j)...
+            + plant_storage_cost(plants_open(i),stor_open(j))*x(:,matrixLength + length(stor_open)*(i-1)+j);
     end
 end
 % dont count the cost of purchase (grove price) for the futures
 ora_cost = zeros(6,1);
-for i = 1:numStorOpen
+for i = 1:length(stor_open)
     ora_cost = ora_cost + grove_storage_cost(:,i).*x(:,matrixLength*2+i);
     %ora_cost(2:6) = ora_cost(2:6) + grove_storage_cost(2:6,i).*x(2:6,matrixLength*2+i);
     %ora_cost(1) = ora_cost(1) + grove_storage_cost(1,i).*(x(1,matrixLength*2+i)-ORA_arr_futures)...
