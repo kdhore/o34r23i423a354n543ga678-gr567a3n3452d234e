@@ -1,4 +1,4 @@
-classdef decisions
+classdef Decisions
     % This is the decision class.  The input to this class is all the
     % YearData objects as well as the OJGame object.  It then sets the
     % properties values of this class to the decisions. This can obviously
@@ -33,7 +33,7 @@ classdef decisions
     methods
         % Constructor where you update each of the properties of the
         % decision in the Decision file inputted
-        function decision = decisions(filename,OJ_object,pricesORA,...
+        function decision = Decisions(filename,OJ_object,pricesORA,...
                 pricesPOJ, pricesROJ, pricesFCOJ, YearDataRecord)
 
             % For now this needs to be MANUALLY updated
