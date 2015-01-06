@@ -45,31 +45,6 @@ function [] = updateModels(yearMax)
 			xrates{j} = [xrates{j} data.(vn).fx_exch_res(j,:)];
 		end
 	end
-
-	% mat = load('YearData Offline/yr2014a.mat');
-	% data = mat.yr2014a.price_orange_spot_res;
-	% ratedat = mat.yr2014a.fx_exch_res;
-
-	% for j=1:6
-	% 	Prices{j} = [Prices{j} data(j,:)];
-	% end
-
-	% for j=1:2
-	% 	xrates{j} = [xrates{j} ratedat(j,:)];
-	% end
-
-	% mat = load('YearData Offline/yr2014b.mat');
-	% data = mat.yr2014b.price_orange_spot_res;
-	% ratedat = mat.yr2014b.fx_exch_res;
-
-	% for j=1:6
-	% 	Prices{j} = [Prices{j} data(j,:)];
-	% end
-
-	% for j=1:2
-	% 	xrates{j} = [xrates{j} ratedat(j,:)];
-	% end
-
 	
 	for i=1:length(years2)
 		fname = strcat(fn1_5, num2str(years2(i)));
@@ -90,9 +65,6 @@ function [] = updateModels(yearMax)
 
 	oPrices = Prices;
 
-	numpts = length(Prices{1});
-	tests = zeros(4,numpts);
-
 	for i=1:6
 		for j=0:11
 			MP(i,j+1) = mean(Prices{i}(months + j));
@@ -112,7 +84,7 @@ function [] = updateModels(yearMax)
 	end
 
 	% tunable
-	stdweights = [1,1.2,0.75,1,1.5,2];
+	stdweights = [1.2,1.2,1.5,1.5,1.5,2];
 	indices = cell(num_models,1);
 
 	for i=1:num_models
@@ -141,7 +113,6 @@ function [] = updateModels(yearMax)
 	end
 
 	ubound = [4,4,4,4,6,6];
-	weights = [1.25, 1.25, 1, 1,10,10];
 	tests = cell(6,1);
 	inits = zeros(2,1);
 	tests = cell(6,1);
@@ -155,24 +126,40 @@ function [] = updateModels(yearMax)
 
 		mdls{i} = arima('Constant',(m+unifrnd(-1,1)*st), 'ARLags', [1:ubound(i)], 'MALags', [1,12]);
 		estmdls{i} = estimate(mdls{i},transpose(Prices{i}));
-		tests{i} = simulate(estmdls{i},length(Prices{i}));
+		tests{i} = simulate(estmdls{i},length(oPrices{i}));
+
+		if i < 5
+			% re-introduce spikes
+			for j=1:12:length(tests{i})
+				m = mean(tests{i});
+				vals = rand(12,1);
+				for k=1:12
+					if (vals(k) < probMonth(i,k))
+						if (i ~= 5)
+							tests{i}(j+k) = 1.5*m;
+						else
+							tests{i}(j+k) = 1.1*m;
+						end
+					end
+				end
+			end
+		end
 	end
 
 	inits(1) = xrates{1}(length(xrates{1}));
 	inits(2) = xrates{2}(length(xrates{2}));
 
-	size(Prices{1})
-	size(tests{1})
-	diffs = zeros(6,1);
-
 	for i=1:num_models
 		figure
-		%plot(Prices{i},'b');
-		%hold on
-		%plot(tests{i},'r');
-		diffs(i) = mean(Prices{i} - transpose(tests{i}))
-		plot(Prices{i}-transpose(tests{i}));
+		plot(oPrices{i},'b');
+		hold on
+		plot(tests{i},'r');
+		legend('original prices','simulated prices');
+		diffs(i) = mean(oPrices{i} - transpose(tests{i}));
+		%plot(oPrices{i}-transpose(tests{i}));
 	end
+
+	diffs
 
 	% save('Grove Price Model/ARMAModels.mat','estmdls');
 	% save('Grove Price Model/probs.mat','spikesAt','probSpike','probMonth');

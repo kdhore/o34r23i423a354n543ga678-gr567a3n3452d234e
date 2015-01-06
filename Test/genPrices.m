@@ -15,7 +15,7 @@ function [pricesOut,ratesOut] = genPrices()
 			vals = rand(12,1);
 			ra = rand;
 			for k=1:12
-				if (vals(k) < probMonth(i,k) && ra < probSpike(i))
+				if (vals(k) < probMonth(i,k))
 					if (i ~= 5)
 						tests{i}(j+k) = 1.5*m;
 					else
@@ -44,5 +44,9 @@ function [pricesOut,ratesOut] = genPrices()
 	tests{6} = tests{6}.*ratesOut(2,:);
 
 	pricesOut = cell2mat(tests);
+	figure
+	plot(ratesOut(1,:))
+	hold on
+	plot(ratesOut(2,:))
 
 end

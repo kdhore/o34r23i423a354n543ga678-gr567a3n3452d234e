@@ -3,20 +3,16 @@ function [] = fitCensoredDemandCurves2(yearMax)
 	dist = load('Distance Data/storage2market_dist.mat');
 	dist = cell2mat(dist.storage2market_dist);
 
-	yrs = 2004:2013;
-	yrs2 = 2014:yearMax;
+	yrs = (yearMax - 9):yearMax;
 
-	c = cell(length(yrs)+length(yrs2),1);
+	c = cell(length(yrs),1);
 
 	for i=1:length(yrs)
-		c{i} = load(strcat('YearData Offline/yr',num2str(yrs(i))));
-	end
-
-	%c{length(yrs)+1} = load('yr2014a.mat');
-	%c{length(yrs)+2} = load('yr2014b.mat');
-
- 	for i=1:length(yrs2)
- 		c{i+10} = load(strcat('YearData Orianga/yr',num2str(yrs2(i))));
+		if (yrs(i) < 2014)
+			c{i} = load(strcat('YearData Offline/yr',num2str(yrs(i))));
+		else
+	 		c{i} = load(strcat('YearData Orianga/yr',num2str(yrs(i))));
+	 	end
  	end
 
 	compiled_prices_ORA = [];
@@ -71,11 +67,10 @@ function [] = fitCensoredDemandCurves2(yearMax)
 			sfac_name = matchRegiontoStorage(region(i),OJ_object,dist);
 			% the name associated with each YearData object, for accessing the struct
 			vn = '';
-			if (j < 11)
+			if (yrs(j) < 2014)
 				vn = genvarname(strcat('yr',num2str(yrs(j))));
-			elseif (j < length(c)+1)
-				%vn = genvarname(strcat('yr',num2str(yrs2(j-12)),'_new'));
-				vn = genvarname(strcat('yr',num2str(yrs2(j-10))));
+			else
+				vn = genvarname(strcat('yr',num2str(yrs(j))));
 			end
 
 			% putting all the prices for each region in one place, for easier manipulation
@@ -393,9 +388,9 @@ function [] = fitCensoredDemandCurves2(yearMax)
 			
 	end
 	% save as coefficients, note: generated values still need to be de-logged
-	save('fitCoefficients','ORA_fits','POJ_fits','ROJ_fits','FCOJ_fits');
-	save('ORA_fits_log.mat','ORA_fits');
-	save('POJ_fits_log.mat','POJ_fits');
-	save('ROJ_fits_log.mat','ROJ_fits');
-	save('FCOJ_fits_log.mat','FCOJ_fits');
+	% save('Demand Fits/fitCoefficients','ORA_fits','POJ_fits','ROJ_fits','FCOJ_fits');
+	save('Demand Fits/ORA_fits_log.mat','ORA_fits');
+	save('Demand Fits/POJ_fits_log.mat','POJ_fits');
+	save('Demand Fits/ROJ_fits_log.mat','ROJ_fits');
+	save('Demand Fits/FCOJ_fits_log.mat','FCOJ_fits');
 end
