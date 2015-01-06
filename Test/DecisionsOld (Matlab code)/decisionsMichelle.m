@@ -34,7 +34,7 @@ classdef decisionsMichelle
         % Constructor where you update each of the properties of the
         % decision in the Decision file inputted
         function decision = decisionsMichelle(filename,OJ_object,pricesORA,...
-                pricesPOJ, pricesROJ, pricesFCOJ, YearDataRecord, filename2)
+                pricesPOJ, pricesROJ, pricesFCOJ, YearDataRecord)
 
             % For now this needs to be MANUALLY updated
             % Load the year data objects
@@ -70,7 +70,7 @@ classdef decisionsMichelle
             FCOJ_demand = zeros(length(stor_open),12);
             ROJ_demand = zeros(length(stor_open),12);
             cities_match_storage = matchCitiestoStorage(stor_open, storage2market.(s2m));
-            decisions = YearDataforDecisions('Decisions/oriangagrande2017_305m.xlsm', OJ_object);
+            decisions = YearDataforDecisions('decisions (Excel)/oriangagrande2017_305m.xlsm', OJ_object);
             for i = 1:12
                 for j = 1:length(stor_open)
                     indicies = strcmp(char(storageNamesInUse(stor_open(j))),cities_match_storage(:,2));
@@ -307,49 +307,53 @@ classdef decisionsMichelle
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % Get shipping decisions (linear program)
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            bytank = zeros(length(plants_open),length(stor_open));
-            bycarrier = zeros(length(plants_open),length(stor_open));
-            costbytank = zeros(length(plants_open),length(stor_open));
-            costbycarrier = zeros(length(plants_open),length(stor_open));
-            plant2storage_avgcost = zeros(length(plants_open),length(stor_open));
+                % rows are storage, columns are plants
+            plant2stor_dist = load('plant2storage_dist.mat');
+            p2s = genvarname('processing2storage_dist');
+            plant2stor_dist = cell2mat(plant2stor_dist.(p2s));
+            
+            %bytank = zeros(length(plants_open),length(stor_open));
+            %bycarrier = zeros(length(plants_open),length(stor_open));
+            %costbytank = zeros(length(plants_open),length(stor_open));
+            %costbycarrier = zeros(length(plants_open),length(stor_open));
+            plant2storage_avgcost = zeros(10,71);
             for i = 1:length(plants_open)
                 for j = 1:length(stor_open)
-                    shtname = char(plantNamesInUse(plants_open(i)));
-                    start = 36 + 11*(j-1);
-                    [~, ~, bytank_temp] = xlsread(filename2,shtname,strcat('D',num2str(start),':AY',num2str(start+1)));
-                    bytank_temp = cell2mat(cellNaNReplace(bytank_temp,0));
-                    bytank(i,j) = sum(sum(bytank_temp));
-                    start = 39 + 11*(j-1);
-                    [~, ~, bycarrier_temp] = xlsread(filename2,shtname,strcat('D',num2str(start),':AY',num2str(start+1)));
-                    bycarrier_temp = cell2mat(cellNaNReplace(bycarrier_temp,0));
-                    bycarrier(i,j) = sum(sum(bycarrier_temp));
-                    start = 42 + 11*(j-1);
-                    [~, ~, costbytank_temp] = xlsread(filename2,shtname,strcat('AZ',num2str(start)));
-                    costbytank(i,j) = cell2mat(cellNaNReplace(costbytank_temp,0));
-                    start = 43 + 11*(j-1);
-                    [~, ~, costbycarrier_temp] = xlsread(filename2,shtname,strcat('AZ',num2str(start)));
-                    costbycarrier(i,j) = cell2mat(cellNaNReplace(costbycarrier_temp,0));
-                    if (bytank(i,j) == 0)
-                        unittankcost = 0;
-                    else
-                        unittankcost = costbytank(i,j)/bytank(i,j);
-                    end
-                    if (bycarrier(i,j) == 0)
-                        unitcarriercost = 0;
-                    else
-                        unitcarriercost = costbycarrier(i,j)/bycarrier(i,j);
-                    end
-                    if (bytank(i,j) + bycarrier(i,j) == 0)
-                        plant2storage_avgcost(i,j) = 0;
-                    else
-                        plant2storage_avgcost(i,j) = unittankcost*bytank(i,j)/(bytank(i,j)+bycarrier(i,j))...
-                            + unitcarriercost*bycarrier(i,j)/(bytank(i,j)+bycarrier(i,j));
-                    end
+                    plant2storage_avgcost(plants_open(i),stor_open(j)) = 0.65*plant2stor_dist(stor_open(j),plants_open(i));
+%                     shtname = char(plantNamesInUse(plants_open(i)));
+%                     start = 36 + 11*(j-1);
+%                     [~, ~, bytank_temp] = xlsread(filename2,shtname,strcat('D',num2str(start),':AY',num2str(start+1)));
+%                     bytank_temp = cell2mat(cellNaNReplace(bytank_temp,0));
+%                     bytank(i,j) = sum(sum(bytank_temp));
+%                     start = 39 + 11*(j-1);
+%                     [~, ~, bycarrier_temp] = xlsread(filename2,shtname,strcat('D',num2str(start),':AY',num2str(start+1)));
+%                     bycarrier_temp = cell2mat(cellNaNReplace(bycarrier_temp,0));
+%                     bycarrier(i,j) = sum(sum(bycarrier_temp));
+%                     start = 42 + 11*(j-1);
+%                     [~, ~, costbytank_temp] = xlsread(filename2,shtname,strcat('AZ',num2str(start)));
+%                     costbytank(i,j) = cell2mat(cellNaNReplace(costbytank_temp,0));
+%                     start = 43 + 11*(j-1);
+%                     [~, ~, costbycarrier_temp] = xlsread(filename2,shtname,strcat('AZ',num2str(start)));
+%                     costbycarrier(i,j) = cell2mat(cellNaNReplace(costbycarrier_temp,0));
+%                     if (bytank(i,j) == 0)
+%                         unittankcost = 0;
+%                     else
+%                         unittankcost = costbytank(i,j)/bytank(i,j);
+%                     end
+%                     if (bycarrier(i,j) == 0)
+%                         unitcarriercost = 0;
+%                     else
+%                         unitcarriercost = costbycarrier(i,j)/bycarrier(i,j);
+%                     end
+%                     if (bytank(i,j) + bycarrier(i,j) ~= 0)
+%                         plant2storage_avgcost(plants_open(i),stor_open(j)) = unittankcost*bytank(i,j)/(bytank(i,j)+bycarrier(i,j))...
+%                             + unitcarriercost*bycarrier(i,j)/(bytank(i,j)+bycarrier(i,j));
+%                     end
                 end
             end
-            plant2storage_avgcost = ...
-                [877.3	92.83	2658.266855;
-                866.047104	1693.640179	349.338538];
+            %plant2storage_avgcost = ...
+            %    [877.3	92.83	2658.266855;
+            %    866.047104	1693.640179	349.338538];
 
             [x, fval, purchase, percentpoj, percentroj, ship_from_grove, ship_from_plants] = linearProgram(OJ_object, plant2storage_avgcost, YearDataRecord, ORA_demand, POJ_demand, ROJ_demand, FCOJ_demand, futures_arr_ORA, futures_arr_FCOJ);
 
@@ -369,9 +373,9 @@ classdef decisionsMichelle
             
             for i = 1:length(stor_open)
                 for j = 1:length(plants_open)
-                    decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).FCOJ = ...
-                        ship_from_plants(i,2*(j-1)+1);
                     decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).POJ = ...
+                        ship_from_plants(i,2*(j-1)+1);
+                    decision.ship_proc_plant_storage_dec(stor_open(i),plants_open(j)).FCOJ = ...
                         ship_from_plants(i,2*(j-1)+2);
                     
                      if decision.ship_proc_plant_storage_dec(stor_open(i),...

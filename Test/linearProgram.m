@@ -21,7 +21,7 @@ function [x, fval, purchase, percentpoj, percentroj, ship_from_grove, ship_from_
     % get distance matrices
 
     % rows are plant/storage, columns are grove
-    grove2ps = load('grove2processing_storage.mat');
+    grove2ps = load('Distance Data/grove2processing_storage.mat');
     g2ps = genvarname('grove2processing_storage_dist');
     grove2ps = cell2mat(grove2ps.(g2ps));
     
