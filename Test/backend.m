@@ -101,4 +101,4 @@ ojObject = ojObject.update(lastYear);
 filename1 = 'Decisions/oriangagrande2018test.xlsm';
 decisions = YearDataforDecisions(filename1, ojObject);
 
-decisionsMichelle(filename1,ojObject,decisions.pricing_ORA_dec,decisions.pricing_POJ_dec,decisions.pricing_ROJ_dec,decisions.pricing_FCOJ_dec,YearDataRecord);
+decisions(filename1,ojObject,decisions.pricing_ORA_dec,decisions.pricing_POJ_dec,decisions.pricing_ROJ_dec,decisions.pricing_FCOJ_dec,YearDataRecord);
