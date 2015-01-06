@@ -34,7 +34,7 @@ classdef decisionsMichelle
         % Constructor where you update each of the properties of the
         % decision in the Decision file inputted
         function decision = decisionsMichelle(filename,OJ_object,pricesORA,...
-                pricesPOJ, pricesROJ, pricesFCOJ, YearDataRecord, filename2)
+                pricesPOJ, pricesROJ, pricesFCOJ, YearDataRecord)
 
             % For now this needs to be MANUALLY updated
             % Load the year data objects
