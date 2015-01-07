@@ -6,9 +6,8 @@ function [x, fval, purchase, percentpoj, percentroj, ship_from_grove, ship_from_
     numStorOpen = length(stor_open);
     storCapacities = ojObject.storage_cap(stor_open);
     procCapacities = ojObject.proc_plant_cap(plants_open);
-    %procCapacities(1) = 0;
+    
     % get grove prices
-    %mean_grove_prices = [1357.16;1409.33;1547;1444;1422;1573];
     mean_grove_prices = zeros(6,1);
     for j = 1:6
         for i = 1:length(YearDataRecord)
@@ -18,8 +17,6 @@ function [x, fval, purchase, percentpoj, percentroj, ship_from_grove, ship_from_
         mean_grove_prices(j) = 2000*mean_grove_prices(j)/length(YearDataRecord);
     end
           
-    % get distance matrices
-
     % rows are plant/storage, columns are grove
     grove2ps = load('Distance Data/grove2processing_storage.mat');
     g2ps = genvarname('grove2processing_storage_dist');
@@ -125,8 +122,8 @@ function [x, fval, purchase, percentpoj, percentroj, ship_from_grove, ship_from_
         totalSentPOJ = sum(sum(x(:,(start1+1:start1+numStorOpen))));
         totalSentFCOJ = sum(sum(x(:,(start2+1:start2+numStorOpen))));
         for j = 1:numStorOpen
-            ship_from_plants(j,2*(i-1)+2) = 100*sum(x(:,start1+j))/totalSentPOJ;
-            ship_from_plants(j,2*(i-1)+1) = 100*sum(x(:,start2+j))/totalSentFCOJ;
+            ship_from_plants(j,2*(i-1)+1) = 100*sum(x(:,start1+j))/totalSentPOJ;
+            ship_from_plants(j,2*(i-1)+2) = 100*sum(x(:,start2+j))/totalSentFCOJ;
         end
     end
     ship_from_plants(isnan(ship_from_plants)) = 0;
