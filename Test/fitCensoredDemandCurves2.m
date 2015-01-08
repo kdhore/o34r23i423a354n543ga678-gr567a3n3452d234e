@@ -60,7 +60,14 @@ function [] = fitCensoredDemandCurves2(yearMax)
 		FCOJ_res = [];
 
 		% get associated storage units, then process accordingly
-        OJ_object = OJGame('MomPop2004Results.xlsm');
+		fname = '';
+		if yrs(1) < 2014
+			fname = strcat('Excel Files/MomPop',num2str(yrs(1)),'Results.xlsm');
+		else
+			fname = strcat('Excel Files Orianga/oriangagrande',num2str(yrs(1)),'Results.xlsm');
+		end
+			
+        OJ_object = OJGame(fname);
 		for j=1:length(c)
 			
 			% which storage facility corresponds to the region
@@ -169,6 +176,22 @@ function [] = fitCensoredDemandCurves2(yearMax)
 		FCOJ_sales_out_indices = find(FCOJ_sales_out);
 		FCOJ_sales_out = log(FCOJ_sales_out(FCOJ_sales_out_indices));
 		FCOJ_prices_out = FCOJ_prices_out(FCOJ_sales_out_indices);
+
+		figure
+		scatter(ORA_prices_out, ORA_sales_out)
+		title(strcat('ORA, ',region(i)))
+
+		figure
+		scatter(POJ_prices_out, POJ_sales_out)
+		title(strcat('POJ, ',region(i)))
+
+		figure
+		scatter(ROJ_prices_out, ROJ_sales_out)
+		title(strcat('ROJ, ',region(i)))
+
+		figure
+		scatter(FCOJ_prices_out, FCOJ_sales_out)
+		title(strcat('FCOJ, ',region(i)))
 
 		% hardcoded, as 7 regions for 4 products
 		% manually assigned based on fits
@@ -350,45 +373,44 @@ function [] = fitCensoredDemandCurves2(yearMax)
 
 		%{
 		figure;
-		scatter(ORA_prices_out,ORA_sales_out);
+		scatter(ORA_prices_out,ORA_sales_out,'bo');
 		hold on
-		scatter(ORA_prices_out,ora_model,'r')
+		scatter(ORA_prices_out,ora_model,'r+')
 		%hold on
 		%scatter(ORA_prices_out(end-12:end),ora_model(end-12:end),'g')
 		grid on
-		title(strcat('lin ORA, ', region(i),',',num2str(ora_rsq)));
+		title(strcat('log demand ORA, ', region(i),',',num2str(ora_rsq)));
 
 		figure;
-		scatter(POJ_prices_out,POJ_sales_out);
+		scatter(POJ_prices_out,POJ_sales_out,'bo');
 		hold on
-		scatter(POJ_prices_out,poj_model,'r')
+		scatter(POJ_prices_out,poj_model,'r+')
 		%hold on
 		%scatter(POJ_prices_out(end-12:end),poj_model(end-12:end),'g')
 		grid on
-		title(strcat('lin POJ, ', region(i),',',num2str(poj_rsq)));
+		title(strcat('log demand POJ, ', region(i),',',num2str(poj_rsq)));
 
 		figure;
-		scatter(ROJ_prices_out,ROJ_sales_out);
+		scatter(ROJ_prices_out,ROJ_sales_out,'bo');
 		hold on
-		scatter(ROJ_prices_out,roj_model,'r')
+		scatter(ROJ_prices_out,roj_model,'r+')
 		%hold on
 		%scatter(ROJ_prices_out(end-12:end),roj_model(end-12:end),'g')
 		grid on
-		title(strcat('lin ROJ, ', region(i),',',num2str(roj_rsq)));
+		title(strcat('log demand ROJ, ', region(i),',',num2str(roj_rsq)));
 
 		figure;
-		scatter(FCOJ_prices_out,FCOJ_sales_out);
+		scatter(FCOJ_prices_out,FCOJ_sales_out,'bo');
 		hold on
-		scatter(FCOJ_prices_out,fcoj_model,'r')
+		scatter(FCOJ_prices_out,fcoj_model,'r+')
 		%hold on
 		%scatter(FCOJ_prices_out(end-12:end),fcoj_model(end-12:end),'g')
 		grid on
-		title(strcat('lin FCOJ, ', region(i),',',num2str(fcoj_rsq)));
+		title(strcat('log demand FCOJ, ', region(i),',',num2str(fcoj_rsq)));
 		%}
 			
 	end
 	% save as coefficients, note: generated values still need to be de-logged
-	% save('Demand Fits/fitCoefficients','ORA_fits','POJ_fits','ROJ_fits','FCOJ_fits');
 	save('Demand Fits/ORA_fits_log.mat','ORA_fits');
 	save('Demand Fits/POJ_fits_log.mat','POJ_fits');
 	save('Demand Fits/ROJ_fits_log.mat','ROJ_fits');

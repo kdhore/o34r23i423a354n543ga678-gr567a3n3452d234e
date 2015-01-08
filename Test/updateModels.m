@@ -149,17 +149,17 @@ function [] = updateModels(yearMax)
 	inits(1) = xrates{1}(length(xrates{1}));
 	inits(2) = xrates{2}(length(xrates{2}));
 
-	for i=1:num_models
-		figure
-		plot(oPrices{i},'b');
-		hold on
-		plot(tests{i},'r');
-		legend('original prices','simulated prices');
-		diffs(i) = mean(oPrices{i} - transpose(tests{i}));
-		%plot(oPrices{i}-transpose(tests{i}));
-	end
+	% for i=1:num_models
+	% 	figure
+	% 	plot(oPrices{i},'b');
+	% 	hold on
+	% 	plot(tests{i},'r');
+	% 	legend('original prices','simulated prices');
+	% 	diffs(i) = mean(oPrices{i} - transpose(tests{i}));
+	% 	%plot(oPrices{i}-transpose(tests{i}));
+	% end
 
-	diffs
+	% diffs
 
 	% save('Grove Price Model/ARMAModels.mat','estmdls');
 	% save('Grove Price Model/probs.mat','spikesAt','probSpike','probMonth');
