@@ -34,25 +34,25 @@ function [ ORA_demand, POJ_demand, FCOJ_demand, ROJ_demand, big_D, big_P ] = dra
     for i = 1:numel(cities)/3
        [region, region_ind] = matchCitytoRegion(cities{i,1});
        ora = oraDemand(cities{i,1}, ORA_price(region_ind), region_ind, demand_city_ORA);
-       oraParams = ORA_params(region_ind)
+       oraParams = ORA_params{region_ind};
        ora = ora + normrnd(oraParams(1),oraParams(2));
        big_D(i, 1) = big_D(i, 1) + ora; 
        big_P(i,1) = ORA_price(region_ind); 
        
        poj = pojDemand(cities{i,1}, POJ_price(region_ind), region_ind,  demand_city_POJ);
-       pojParams = POJ_params(region_ind)
+       pojParams = POJ_params{region_ind};
        poj = poj + normrnd(pojParams(1),pojParams(2));
        big_D(i, 2) = big_D(i, 2) + poj;
        big_P(i,2) = POJ_price(region_ind);
        
        fcoj = fcojDemand(cities{i,1}, FCOJ_price(region_ind), region_ind, demand_city_FCOJ);
-       fcojParams = FCOJ_params(region_ind)
+       fcojParams = FCOJ_params{region_ind};
        fcoj = poj + normrnd(fcojParams(1),fcojParams(2));
        big_D(i, 4) = big_D(i, 3) + fcoj;
        big_P(i,4) = FCOJ_price(region_ind);
        
        roj = rojDemand(cities{i,1}, ROJ_price(region_ind), region_ind, demand_city_ROJ);
-       rojParams = ROJ_params(region_ind)
+       rojParams = ROJ_params{region_ind};
        roj = roj + normrnd(rojParams(1),rojParams(2));
        big_D(i, 3) = big_D(i, 4) + roj;
        big_P(i,3) = ROJ_price(region_ind);
