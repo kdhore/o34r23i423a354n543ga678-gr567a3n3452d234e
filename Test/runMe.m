@@ -89,9 +89,116 @@ pricesORA = dec.pricing_ORA_dec;
 pricesPOJ = dec.pricing_POJ_dec;
 pricesROJ = dec.pricing_ROJ_dec;
 pricesFCOJ = dec.pricing_FCOJ_dec;
+
 decisions = Decisions(filename,ojObject,pricesORA,pricesPOJ,pricesROJ,pricesFCOJ,YearDataRecord);
 
-% run simulator
+%% Initialisation of POI Libs
+% Add Java POI Libs to matlab javapath
+javaaddpath('poi_library/poi-3.8-20120326.jar');
+javaaddpath('poi_library/poi-ooxml-3.8-20120326.jar');
+javaaddpath('poi_library/poi-ooxml-schemas-3.8-20120326.jar');
+javaaddpath('poi_library/xmlbeans-2.3.0.jar');
+javaaddpath('poi_library/dom4j-1.6.1.jar');
+javaaddpath('poi_library/stax-api-1.0.1.jar');
+
+%% Data Generation for XLSX / XLSM
+% Define an xls name
+decisionFile = strcat('Decisions/oriangagrande',num2str(decisions.year),'test_PC.xlsm');
+
+%% Facilities
+%processing plants; 10x1
+xlwrite(decisionFile, decisions.proc_plant_dec, 'facilities', 'C6:C15');
+
+%tank cars; 10x1
+xlwrite(decisionFile, decisions.tank_car_dec, 'facilities', 'C21:C30');
+
+%storage units; 71x1
+xlwrite(decisionFile, decisions.storage_dec, 'facilities', 'C36:C106');
+
+%% Raw materials
+%spot market purchases
+xlwrite(decisionFile, decisions.purchase_spotmkt_dec, 'raw_materials', 'C6:N11');
+
+%quantity multipliers
+xlwrite(decisionFile, decisions.quant_mult_dec, 'raw_materials', 'C17:H22');
+
+
+%futures purchases
+xlwrite(decisionFile, decisions.future_mark_dec_ORA, 'raw_materials', 'O31:O35');
+xlwrite(decisionFile, decisions.future_mark_dec_FCOJ, 'raw_materials', 'O37:O41');
+
+%arrival of futures distribution
+xlwrite(decisionFile, decisions.arr_future_dec_ORA, 'raw_materials', 'C47:N47');
+xlwrite(decisionFile, decisions.arr_future_dec_FCOJ, 'raw_materials', 'C48:N48');
+
+
+%% Shipping / Manufacturing
+%shipping ORA
+xlwrite(decisionFile, decisions.ship_grove_dec, 'shipping_manufacturing', 'C6:G11');
+
+%manufacturing -- process ORA --> POJ or FCOJ
+%currently 2 (each product) by 10 (all the processing plants).
+%transform into only printing each POJ fraction.
+stringIndex = 'CEGIKMOQSU'; %Excel column references
+%U is the last column in Excel that manufacturing could go to
+
+plants_open = find(ojObject.proc_plant_cap);
+
+for i = 1:length(plants_open)
+    xlwrite(decisionFile, ...
+        decisions.manufac_proc_plant_dec(1,plants_open(i)),...
+        'shipping_manufacturing', strcat(stringIndex(i),'19'));
+end
+
+%Shipping
+%Futures
+newFutures = zeros(length(stor_open),1);
+for i = 1:length(stor_open)
+    newFutures(i,1) = decisions.futures_ship_dec(stor_open(i),1);
+end
+xlwrite(decisionFile, newFutures, 'shipping_manufacturing', 'C27');
+%this prints the [length(stor_open) x 1] array downwards
+
+%POJ, FCOJ from plants to storages
+newShipping = zeros(length(stor_open), 2*length(plants_open));
+for i = 1:length(stor_open)
+    for j = 1:length(plants_open)
+        newShipping(i,2*j-1) = decisions.ship_proc_plant_storage_dec(stor_open(i),...
+            plants_open(j)).POJ;
+        newShipping(i,2*j) = decisions.ship_proc_plant_storage_dec(stor_open(i),...
+            plants_open(j)).FCOJ;
+    end
+end
+xlwrite(decisionFile, newShipping, 'shipping_manufacturing', 'D27');
+%this prints the [length(stor_open) x length(plants_open)]
+%array down and to the right.
+
+%Reconstitution
+%currently 71 x 12
+newReconst = zeros(length(stor_open), 12);
+for i = 1:length(stor_open)
+    newReconst(i,:) = decisions.reconst_storage_dec(stor_open(i),:);
+end
+
+xlwrite(decisionFile, newReconst, 'shipping_manufacturing',...
+    strcat('C',num2str(34+length(stor_open)))); %proper index
+
+%% Pricing
+%ORA prices
+xlwrite(decisionFile, decisions.pricing_ORA_dec, 'pricing', 'D6');
+
+%POJ prices
+xlwrite(decisionFile, decisions.pricing_POJ_dec, 'pricing', 'D15');
+
+%ROJ prices
+xlwrite(decisionFile, decisions.pricing_ROJ_dec, 'pricing', 'D24');
+
+%FCOJ prices
+xlwrite(decisionFile, decisions.pricing_FCOJ_dec, 'pricing', 'D33');
+
+
+
+%% run simulator
 [simResults{i, 1}, proc_plants, storage] = Simulation(ojObject, decisions, i, shippingSchedule, ROJ_temp, tankersAvailable);
 simResults{i,2} = recentYear + i;
 
