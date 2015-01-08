@@ -50,6 +50,8 @@ stor_FCOJ_demand_temp = stor_FCOJ_demand - FCOJ_arr_futures;
 c = [stor_POJ_demand'-poj_storage;(stor_FCOJ_demand_temp+stor_ROJ_demand)'-(fcoj_storage-FCOJ_arr_futures');...
     stor_ORA_demand'-ora_storage;tot_storage-storCapacities';tot_plant_temp-procCapacities_temp';ORA_futures_const];
 ceq = [];
-
+if (all(all(c<=0)) == 1)
+    display('k');
+end
 end
 
