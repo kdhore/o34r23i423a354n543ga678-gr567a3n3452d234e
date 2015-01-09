@@ -496,7 +496,10 @@ classdef Decisions
             
             decision.proc_plant_dec = zeros(10,1);% enter matrix manually here
             
-            
+            %pseudo code:
+            %for each of the plants_open
+            %see if the storages have told them to change. adjust numbers
+            %for the closest processing plant
             
             %OLD
             
