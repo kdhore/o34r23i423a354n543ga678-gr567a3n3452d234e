@@ -417,36 +417,7 @@ classdef Decisions
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % Assigning decisions to the facilities tab
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            % For processing plants, the decision is the capacity to
-            % buy/sell in each plant: [P01;P02;...;P10]
             
-            %Add a certain processing plant if:
-            %capacity sold + transportation savings > price of new
-            %plant + price of upgrading capacity + cost of tossing out
-            %current product
-            
-            %Add capacity if:
-            %storage unit capacity goes up (thanks to Pousch's demand
-            %rising)
-            
-            
-            
-            %capacity add cost + transportation add cost < total
-            %revenue gain + opp. cost of product tossed out
-            %(include parameters to set for certain # of years)
-            
-            %Reduce capacity if:
-            %excess capacity not being used, and there is no projected
-            %increase in demand or delivery
-            decision.proc_plant_dec = zeros(10,1);% enter matrix manually here
-            
-            %                 rho1 = 1.01; %parameter > 1 for buffer of processing plant
-            %                 for i = 1:length(plants_open)
-            %                     decision.proc_plant_dec(plants_open(i),1) = ...
-            %                         rho1*mean(decision.demandProcPlantORA(i,:))/4 - ...
-            %                         OJ_object.proc_plant_cap(plants_open(i),1);
-            %                     %can be positive or negative number
-            %                 end
             
             
             
@@ -466,7 +437,7 @@ classdef Decisions
             %                 end
             %
             
-            
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % For storage, the decision is the capacity to buy/sell
             % capacity at each of the storage units
             decision.storage_dec = zeros(71,1);
@@ -476,9 +447,20 @@ classdef Decisions
             %                 decision.storage_dec(4,1) = -31000;
             %                 decision.storage_dec(stor_open(3),1) = -20000;
             
-            %Add a storage capacity/unit if:
+            %Add storage capacity if:
             %projected demand goes way up based on Pousch's modeling.
+            %sell capacity if demand goes below (don't sell actual units)
             
+            %pseudo code:
+            %for each of the stor_open,
+            %check if Pousch's demand projections have changed for those
+            %areas being served by the storages
+            %if they have changed, adjust the storages correspondingly.
+            %take note of which processing plants send to the storages.
+            
+            
+            
+            %OLD
             %capacity sold + transportation savings > price of new
             %plant + price of upgrading capacity + cost of tossing out
             %current product
@@ -499,6 +481,44 @@ classdef Decisions
             %                     %can be positive or negative number
             %                 end
             %
+            
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % For processing plants, the decision is the capacity to
+            % buy/sell in each plant: [P01;P02;...;P10]
+            
+            
+            %Add capacity if:
+            %storage unit capacity changes (thanks to Pousch's demand
+            %changes) [don't change actual processing plants].
+            %Take the changes from the storage unit and apply them here in
+            %terms of gross numbers.
+            
+            
+            decision.proc_plant_dec = zeros(10,1);% enter matrix manually here
+            
+            
+            
+            %OLD
+            
+            %Add a certain processing plant if:
+            %capacity sold + transportation savings > price of new
+            %plant + price of upgrading capacity + cost of tossing out
+            %current product
+            %capacity add cost + transportation add cost < total
+            %revenue gain + opp. cost of product tossed out
+            %(include parameters to set for certain # of years)
+            
+            %Reduce capacity if:
+            %excess capacity not being used, and there is no projected
+            %increase in demand or delivery
+            %                 rho1 = 1.01; %parameter > 1 for buffer of processing plant
+            %                 for i = 1:length(plants_open)
+            %                     decision.proc_plant_dec(plants_open(i),1) = ...
+            %                         rho1*mean(decision.demandProcPlantORA(i,:))/4 - ...
+            %                         OJ_object.proc_plant_cap(plants_open(i),1);
+            %                     %can be positive or negative number
+            %                 end
+            
             
         end
         
