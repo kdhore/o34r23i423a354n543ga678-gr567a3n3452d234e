@@ -426,6 +426,11 @@ classdef Decisions
             %current product
             
             %Add capacity if:
+            %storage unit capacity goes up (thanks to Pousch's demand
+            %rising)
+            
+            
+            
             %capacity add cost + transportation add cost < total
             %revenue gain + opp. cost of product tossed out
             %(include parameters to set for certain # of years)
@@ -471,7 +476,9 @@ classdef Decisions
             %                 decision.storage_dec(4,1) = -31000;
             %                 decision.storage_dec(stor_open(3),1) = -20000;
             
-            %Add a storage unit if:
+            %Add a storage capacity/unit if:
+            %projected demand goes way up based on Pousch's modeling.
+            
             %capacity sold + transportation savings > price of new
             %plant + price of upgrading capacity + cost of tossing out
             %current product
@@ -493,114 +500,6 @@ classdef Decisions
             %                 end
             %
             
-            
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            % Code to be written to write these updates decisions in %
-            % to Excel decision file                                 %
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            
-%             %% Initialisation of POI Libs
-%             % Add Java POI Libs to matlab javapath
-%             javaaddpath('poi_library/poi-3.8-20120326.jar');
-%             javaaddpath('poi_library/poi-ooxml-3.8-20120326.jar');
-%             javaaddpath('poi_library/poi-ooxml-schemas-3.8-20120326.jar');
-%             javaaddpath('poi_library/xmlbeans-2.3.0.jar');
-%             javaaddpath('poi_library/dom4j-1.6.1.jar');
-%             javaaddpath('poi_library/stax-api-1.0.1.jar');
-%             
-%             %% Data Generation for XLSX / XLSM
-%             % Define an xls name
-%             decisionFile = strcat('Decisions/oriangagrande',num2str(decision.year),'test_PC.xlsm');
-%             decisionFile
-% 
-%             
-%             %% Facilities
-%             %processing plants; 10x1
-%             xlwrite(decisionFile, decision.proc_plant_dec, 'facilities', 'C6:C15');
-%             
-%             %tank cars; 10x1
-%             xlwrite(decisionFile, decision.tank_car_dec, 'facilities', 'C6:C15');
-%             
-%             %storage units; 71x1
-%             xlwrite(decisionFile, decision.storage_dec, 'facilities', 'C6:C15');
-%             
-%             %% Raw materials
-%             %spot market purchases
-%             xlwrite(decisionFile, decision.purchase_spotmkt_dec, 'raw_materials', 'C6:N11');
-%             
-%             %quantity multipliers
-%             xlwrite(decisionFile, decision.quant_mult_dec, 'raw_materials', 'C17:H22');
-%             
-%             
-%             %futures purchases
-%             xlwrite(decisionFile, decision.future_mark_dec_ORA, 'raw_materials', 'O31:O35');
-%             xlwrite(decisionFile, decision.future_mark_dec_FCOJ, 'raw_materials', 'O37:O41');
-%             
-%             %arrival of futures distribution
-%             xlwrite(decisionFile, decision.arr_future_dec_ORA, 'raw_materials', 'C47:N47');
-%             xlwrite(decisionFile, decision.arr_future_dec_FCOJ, 'raw_materials', 'C48:N48');
-%             
-%             
-%             %% Shipping / Manufacturing
-%             %shipping ORA
-%             xlwrite(decisionFile, decision.ship_grove_dec, 'shipping_manufacturing', 'C6:G11');
-%             
-%             %manufacturing -- process ORA --> POJ or FCOJ
-%             %currently 2 (each product) by 10 (all the processing plants).
-%             %transform into only printing each POJ fraction.
-%             stringIndex = 'CEGIKMOQSU'; %Excel column references
-%             %U is the last column in Excel that manufacturing could go to
-%             for i = 1:length(plants_open)
-%                 xlwrite(decisionFile, ...
-%                     decision.manufac_proc_plant_dec(1,plants_open(i)),...
-%                     strcat(stringIndex(i),'19'));
-%             end
-%             
-%             %Shipping
-%             %Futures
-%             newFutures = zeros(length(stor_open),1);
-%             for i = 1:length(stor_open)
-%                 newFutures(i,1) = decision.futures_ship_dec(stor_open(i),1);
-%             end
-%             xlwrite(decisionFile, newFutures, 'shipping_manufacturing', 'C27');
-%             %this prints the [length(stor_open) x 1] array downwards
-%             
-%             %POJ, FCOJ from plants to storages
-%             newShipping = zeros(length(stor_open), 2*length(plants_open));
-%             for i = 1:length(stor_open)
-%                 for j = 1:length(plants_open)
-%                     newShipping(i,2*j-1) = decision.ship_proc_plant_storage_dec(stor_open(i),...
-%                         plants_open(j)).POJ;
-%                     newShipping(i,2*j) = decision.ship_proc_plant_storage_dec(stor_open(i),...
-%                         plants_open(j)).FCOJ;
-%                 end
-%             end
-%             xlwrite(decisionFile, newShipping, 'shipping_manufacturing', 'D27');
-%             %this prints the [length(stor_open) x length(plants_open)]
-%             %array down and to the right.
-%             
-%             %Reconstitution
-%             %currently 71 x 12
-%             newReconst = zeros(length(stor_open), 12);
-%             for i = 1:length(stor_open)
-%                 newReconst(i,:) = decision.reconst_storage_dec(stor_open(i),:);
-%             end
-%             
-%             xlwrite(decisionFile, newReconst, 'shipping_manufacturing',...
-%                 strcat('C',num2str(34+length(stor_open)))); %proper index
-%             
-%             %% Pricing
-%             %ORA prices
-%             xlwrite(decisionFile, decision.pricing_ORA_dec, 'shipping_manufacturing', 'D6');
-%             
-%             %POJ prices
-%             xlwrite(decisionFile, decision.pricing_POJ_dec, 'shipping_manufacturing', 'D15');
-%             
-%             %ROJ prices
-%             xlwrite(decisionFile, decision.pricing_ROJ_dec, 'shipping_manufacturing', 'D24');
-%             
-%             %FCOJ prices
-%             xlwrite(decisionFile, decision.pricing_FCOJ_dec, 'shipping_manufacturing', 'D33');
         end
         
     end
