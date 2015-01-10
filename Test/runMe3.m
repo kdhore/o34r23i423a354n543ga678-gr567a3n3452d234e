@@ -207,7 +207,7 @@ simResults{1,2} = recentYear + 1;
 % *** Phil code here ***
 
 % moving to next year
-%currentYear = currentYear + 1;
+currentYear = currentYear + 1;
 %save('currentYear.mat','currentYear');
 
 % submit the file (written as a separate function so it can be called without having to rerun everything else)
