@@ -103,7 +103,7 @@ javaaddpath('poi_library/stax-api-1.0.1.jar');
 
 %% Data Generation for XLSX / XLSM
 % Define an xls name
-decisionFile = strcat('Decisions/oriangagrande',num2str(decisions.year),'test_PC.xlsm');
+decisionFile = strcat('Decisions/oriangagrande',num2str(decisions.year),'.xlsm');
 
 %% Facilities
 %processing plants; 10x1
