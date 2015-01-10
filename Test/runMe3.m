@@ -1,8 +1,10 @@
 % results file and new decisions file save as'd into temporary directories
 % getting the next year 
 clear;
-currentYear = load('currentYear.mat');
-currentYear = currentYear.currentYear;
+%currentYear = load('currentYear.mat');
+%currentYear = currentYear.currentYear;
+prompt = strcat('Starting year\n');
+currentYear = input(prompt);
 initial_str = 'Excel Files Orianga/oriangagrande2014Results.xlsm';
 
 % load old year data files
@@ -205,8 +207,8 @@ simResults{1,2} = recentYear + 1;
 % *** Phil code here ***
 
 % moving to next year
-currentYear = currentYear + 1;
-save('currentYear.mat','currentYear');
+%currentYear = currentYear + 1;
+%save('currentYear.mat','currentYear');
 
 % submit the file (written as a separate function so it can be called without having to rerun everything else)
 % should never need this, but I'd rather write it and not need it than the reverse

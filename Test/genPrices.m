@@ -44,9 +44,5 @@ function [pricesOut,ratesOut] = genPrices()
 	tests{6} = tests{6}.*ratesOut(2,:);
 
 	pricesOut = cell2mat(tests);
-	figure
-	plot(ratesOut(1,:))
-	hold on
-	plot(ratesOut(2,:))
 
 end
