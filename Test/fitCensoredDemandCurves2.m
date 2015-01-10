@@ -3,7 +3,7 @@ function [] = fitCensoredDemandCurves2(yearMax)
 	dist = load('Distance Data/storage2market_dist.mat');
 	dist = cell2mat(dist.storage2market_dist);
 
-	yrs = (yearMax - 9):yearMax;
+	yrs = 2004:yearMax;
 
 	c = cell(length(yrs),1);
 
@@ -177,21 +177,21 @@ function [] = fitCensoredDemandCurves2(yearMax)
 		FCOJ_sales_out = log(FCOJ_sales_out(FCOJ_sales_out_indices));
 		FCOJ_prices_out = FCOJ_prices_out(FCOJ_sales_out_indices);
 
-		figure
-		scatter(ORA_prices_out, ORA_sales_out)
-		title(strcat('ORA, ',region(i)))
+		% figure
+		% scatter(ORA_prices_out, ORA_sales_out)
+		% title(strcat('ORA, ',region(i)))
 
-		figure
-		scatter(POJ_prices_out, POJ_sales_out)
-		title(strcat('POJ, ',region(i)))
+		% figure
+		% scatter(POJ_prices_out, POJ_sales_out)
+		% title(strcat('POJ, ',region(i)))
 
-		figure
-		scatter(ROJ_prices_out, ROJ_sales_out)
-		title(strcat('ROJ, ',region(i)))
+		% figure
+		% scatter(ROJ_prices_out, ROJ_sales_out)
+		% title(strcat('ROJ, ',region(i)))
 
-		figure
-		scatter(FCOJ_prices_out, FCOJ_sales_out)
-		title(strcat('FCOJ, ',region(i)))
+		% figure
+		% scatter(FCOJ_prices_out, FCOJ_sales_out)
+		% title(strcat('FCOJ, ',region(i)))
 
 		% hardcoded, as 7 regions for 4 products
 		% manually assigned based on fits
