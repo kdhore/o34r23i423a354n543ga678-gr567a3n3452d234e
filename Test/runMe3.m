@@ -1,5 +1,6 @@
 % results file and new decisions file save as'd into temporary directories
 % getting the next year 
+clear;
 currentYear = load('currentYear.mat');
 currentYear = currentYear.currentYear;
 initial_str = 'Excel Files Orianga/oriangagrande2014Results.xlsm';
@@ -197,8 +198,8 @@ xlwrite(decisionFile, decisions.pricing_ROJ_dec, 'pricing', 'D24');
 xlwrite(decisionFile, decisions.pricing_FCOJ_dec, 'pricing', 'D33');
 
 % run simulator
-[simResults{i, 1}, proc_plants, storage] = Simulation(ojObject, decisions, i, shippingSchedule, ROJ_temp, tankersAvailable);
-simResults{i,2} = recentYear + i;
+[simResults{1, 1}, proc_plants, storage] = Simulation(ojObject, decisions, 1, shippingSchedule, ROJ_temp, tankersAvailable);
+simResults{1,2} = recentYear + 1;
 
 % xlWrite to write decisions onto spreadsheet to submit
 % *** Phil code here ***

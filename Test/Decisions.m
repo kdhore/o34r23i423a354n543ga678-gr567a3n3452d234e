@@ -24,9 +24,13 @@ classdef Decisions
         ship_proc_plant_storage_dec = struct([]);
         reconst_storage_dec = zeros(71,12);
         pricing_ORA_dec;
+        pricing_ORA_weekly_dec;
         pricing_POJ_dec;
+        pricing_POJ_weekly_dec;
         pricing_FCOJ_dec;
+        pricing_FCOJ_weekly_dec;
         pricing_ROJ_dec;
+        pricing_ROJ_weekly_dec;
         
     end
     
@@ -48,7 +52,13 @@ classdef Decisions
             decision.pricing_FCOJ_dec = pricesFCOJ;
             decision.pricing_ROJ_dec = pricesROJ;
             decision.pricing_POJ_dec = pricesPOJ;
-            
+            for i = 1:12
+                j = 4*(i-1)+1;
+                decision.pricing_ORA_weekly_dec(:,j:j+3) = repmat(decision.pricing_ORA_dec(:,i),1,4);
+                decision.pricing_POJ_weekly_dec(:,j:j+3) = repmat(decision.pricing_POJ_dec(:,i),1,4);
+                decision.pricing_ROJ_weekly_dec(:,j:j+3) = repmat(decision.pricing_ROJ_dec(:,i),1,4);
+                decision.pricing_FCOJ_weekly_dec(:,j:j+3) = repmat(decision.pricing_FCOJ_dec(:,i),1,4);
+            end 
             
             storage2market = load('Distance Data/storage2market_dist.mat');
             s2m = genvarname('storage2market_dist');
