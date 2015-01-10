@@ -81,15 +81,20 @@ classdef Decisions
             FCOJ_demand = zeros(length(stor_open),12);
             ROJ_demand = zeros(length(stor_open),12);
             cities_match_storage = matchCitiestoStorage(stor_open, storage2market.(s2m));
-            decisions = YearDataforDecisions('decisions (Excel)/oriangagrande2017_305m.xlsm', OJ_object);
+            %decisions = YearDataforDecisions('decisions (Excel)/oriangagrande2017_305m.xlsm', OJ_object);
             %decisions = YearDataforDecisions('decisions (Excel)/z-oriangagrande2017futures.xlsm', OJ_object);
-            for i = 1:12
+            %for i = 1:12
                 for j = 1:length(stor_open)
                     indicies = strcmp(char(storageNamesInUse(stor_open(j))),cities_match_storage(:,2));
                     cities = cities_match_storage(indicies,:);
-                    [ORA_demand(j,i), POJ_demand(j,i), FCOJ_demand(j,i), ROJ_demand(j,i), ~, ~] = drawDemand(decisions,cities,4*(i-1)+1, demand_city_ORA, demand_city_POJ, demand_city_ROJ, demand_city_FCOJ, pricesORA, pricesPOJ, pricesROJ, pricesFCOJ);
+                    [ORA_demand(j,1), POJ_demand(j,1), FCOJ_demand(j,1), ROJ_demand(j,1), ~, ~] = drawDemand(decision,cities,4*(i-1)+1, demand_city_ORA, demand_city_POJ, demand_city_ROJ, demand_city_FCOJ, pricesORA, pricesPOJ, pricesROJ, pricesFCOJ);
+                    ORA_demand(j,:) = ones(12,1)*ORA_demand(j,1);
+                    POJ_demand(j,:) = ones(12,1)*POJ_demand(j,1);
+                    FCOJ_demand(j,:) = ones(12,1)*FCOJ_demand(j,1);
+                    ROJ_demand(j,:) = ones(12,1)*ROJ_demand(j,1);
                 end
-            end
+                
+            %end
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % Create raw_materials tab (multipliers and futures)
