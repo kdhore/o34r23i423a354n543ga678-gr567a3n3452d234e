@@ -87,7 +87,9 @@ classdef Decisions
                 for j = 1:length(stor_open)
                     indicies = strcmp(char(storageNamesInUse(stor_open(j))),cities_match_storage(:,2));
                     cities = cities_match_storage(indicies,:);
-                    [ORA_demand(j,1), POJ_demand(j,1), FCOJ_demand(j,1), ROJ_demand(j,1), ~, ~] = drawDemand(decision,cities,4*(i-1)+1, demand_city_ORA, demand_city_POJ, demand_city_ROJ, demand_city_FCOJ, pricesORA, pricesPOJ, pricesROJ, pricesFCOJ);
+                    [ORA_demand(j,1), POJ_demand(j,1), FCOJ_demand(j,1), ROJ_demand(j,1), ~, ~] =...
+                        drawDemand(decision,cities,4*(i-1)+1, demand_city_ORA, demand_city_POJ,...
+                        demand_city_ROJ, demand_city_FCOJ, pricesORA, pricesPOJ, pricesROJ, pricesFCOJ);
                     ORA_demand(j,:) = ones(12,1)*ORA_demand(j,1);
                     POJ_demand(j,:) = ones(12,1)*POJ_demand(j,1);
                     FCOJ_demand(j,:) = ones(12,1)*FCOJ_demand(j,1);
@@ -156,8 +158,8 @@ classdef Decisions
                     % add over all months
                     % add over all products
                     cumDemandFCOJ = cumDemandFCOJ + ...
-                        getDemand(4,i,decision.pricing_FCOJ_dec(i,month)) + ...
-                        getDemand(3,i,decision.pricing_ROJ_dec(i,month));
+                        4*(getDemand(4,i,decision.pricing_FCOJ_dec(i,month)) + ...
+                        getDemand(3,i,decision.pricing_ROJ_dec(i,month)));
                 end
             end
             
@@ -224,10 +226,10 @@ classdef Decisions
                     % add over all months
                     % add over all products
                     cumDemand = cumDemand + ...
-                        getDemand(1,i,decision.pricing_ORA_dec(i,month)) + ...
+                        4*(getDemand(1,i,decision.pricing_ORA_dec(i,month)) + ...
                         getDemand(2,i,decision.pricing_POJ_dec(i,month)) + ...
                         getDemand(3,i,decision.pricing_ROJ_dec(i,month)) + ...
-                        getDemand(4,i,decision.pricing_FCOJ_dec(i,month));
+                        getDemand(4,i,decision.pricing_FCOJ_dec(i,month)));
                 end
             end
             
@@ -355,42 +357,15 @@ classdef Decisions
             for i = 1:length(plants_open)
                 for j = 1:length(stor_open)
                     plant2storage_avgcost(plants_open(i),stor_open(j)) = 0.65*plant2stor_dist(stor_open(j),plants_open(i));
-                    %                     shtname = char(plantNamesInUse(plants_open(i)));
-                    %                     start = 36 + 11*(j-1);
-                    %                     [~, ~, bytank_temp] = xlsread(filename2,shtname,strcat('D',num2str(start),':AY',num2str(start+1)));
-                    %                     bytank_temp = cell2mat(cellNaNReplace(bytank_temp,0));
-                    %                     bytank(i,j) = sum(sum(bytank_temp));
-                    %                     start = 39 + 11*(j-1);
-                    %                     [~, ~, bycarrier_temp] = xlsread(filename2,shtname,strcat('D',num2str(start),':AY',num2str(start+1)));
-                    %                     bycarrier_temp = cell2mat(cellNaNReplace(bycarrier_temp,0));
-                    %                     bycarrier(i,j) = sum(sum(bycarrier_temp));
-                    %                     start = 42 + 11*(j-1);
-                    %                     [~, ~, costbytank_temp] = xlsread(filename2,shtname,strcat('AZ',num2str(start)));
-                    %                     costbytank(i,j) = cell2mat(cellNaNReplace(costbytank_temp,0));
-                    %                     start = 43 + 11*(j-1);
-                    %                     [~, ~, costbycarrier_temp] = xlsread(filename2,shtname,strcat('AZ',num2str(start)));
-                    %                     costbycarrier(i,j) = cell2mat(cellNaNReplace(costbycarrier_temp,0));
-                    %                     if (bytank(i,j) == 0)
-                    %                         unittankcost = 0;
-                    %                     else
-                    %                         unittankcost = costbytank(i,j)/bytank(i,j);
-                    %                     end
-                    %                     if (bycarrier(i,j) == 0)
-                    %                         unitcarriercost = 0;
-                    %                     else
-                    %                         unitcarriercost = costbycarrier(i,j)/bycarrier(i,j);
-                    %                     end
-                    %                     if (bytank(i,j) + bycarrier(i,j) ~= 0)
-                    %                         plant2storage_avgcost(plants_open(i),stor_open(j)) = unittankcost*bytank(i,j)/(bytank(i,j)+bycarrier(i,j))...
-                    %                             + unitcarriercost*bycarrier(i,j)/(bytank(i,j)+bycarrier(i,j));
-                    %                     end
                 end
             end
             %plant2storage_avgcost = ...
             %    [877.3	92.83	2658.266855;
             %    866.047104	1693.640179	349.338538];
             
-            [x, fval, purchase, percentpoj, percentroj, ship_from_grove, ship_from_plants] = linearProgram(OJ_object, plant2storage_avgcost, YearDataRecord, ORA_demand, POJ_demand, ROJ_demand, FCOJ_demand, futures_arr_ORA, futures_arr_FCOJ);
+            [x, fval, purchase, percentpoj, percentroj, ship_from_grove, ship_from_plants] =...
+                linearProgram(OJ_object, plant2storage_avgcost, YearDataRecord, ...
+                ORA_demand, POJ_demand, ROJ_demand, FCOJ_demand, futures_arr_ORA, futures_arr_FCOJ);
             
             decision.reconst_storage_dec = percentroj;
             decision.manufac_proc_plant_dec = percentpoj;
