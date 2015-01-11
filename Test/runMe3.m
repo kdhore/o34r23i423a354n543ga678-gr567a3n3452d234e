@@ -215,5 +215,5 @@ currentYear = currentYear + 1;
 
 % submit the file (written as a separate function so it can be called without having to rerun everything else)
 % should never need this, but I'd rather write it and not need it than the reverse
-subname = strcat('oriangagrande',num2str(currentYear),'.xlsm');
-submit(subname); % *** Karthik, comment this out ***
+%subname = strcat('oriangagrande',num2str(currentYear),'.xlsm');
+%submit(subname); % *** Karthik, comment this out ***
