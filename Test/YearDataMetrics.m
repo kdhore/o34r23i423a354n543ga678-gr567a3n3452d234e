@@ -1,7 +1,17 @@
-function [] = YearDataMetrics(YearData, stor_open)
+function [] = YearDataMetrics(YearData, ojObject)
 
-%plants_open = find(ojObject.proc_plant_cap);
-%stor_open = find(ojObject.storage_cap);
+%create relevant oj object
+initial_str = 'Excel Files Orianga/oriangagrande2014Results.xlsm';
+yearFiles = dir('YearData Orianga/*.mat');
+ojObject = OJGame(initial_str);
+for i = 1:(length(yearFiles))
+    year = load(strcat('YearData Orianga/',yearFiles(i).name));
+    yearVar = genvarname(strrep(yearFiles(i).name,'.mat',''));
+    ojObject = ojObject.update(year.(yearVar));
+end
+
+%find storages open
+stor_open = find(ojObject.storage_cap);
 
 prompt = strcat('Report for year', YearData.year, '\n',...
     'What graph do you want to see? Options are: \n',...
@@ -31,7 +41,7 @@ if strcmp(option,'a') || strcmp(option,'d')
         xlabel('Weeks');
         ylabel('ORA Amount');
         legend('Available', 'Sold');
-
+        
         
         subplot(2,2,2);
         plot(weeks,...
@@ -45,7 +55,7 @@ if strcmp(option,'a') || strcmp(option,'d')
         xlabel('Weeks');
         ylabel('POJ Amount');
         legend('Available', 'Sold');
-
+        
         
         subplot(2,2,3);
         plot(weeks,...
@@ -59,7 +69,7 @@ if strcmp(option,'a') || strcmp(option,'d')
         xlabel('Weeks');
         ylabel('ROJ Amount');
         legend('Available', 'Sold');
-
+        
         
         subplot(2,2,4);
         plot(weeks,...
@@ -73,10 +83,10 @@ if strcmp(option,'a') || strcmp(option,'d')
         xlabel('Weeks');
         ylabel('FCOJ Amount');
         legend('Available', 'Sold');
-
+        
     end
 end
-    
+
 if strcmp(option,'b') || strcmp(option,'d')
     %plot product sales vs availability by month to visualize seasonality
     months = zeros(1,12);
@@ -200,7 +210,7 @@ if strcmp(option,'c') || strcmp(option,'d')
         ylabel('FCOJ Lost as % Available');
         ylim([-0.1,1]);
         legend('Rotted', 'Capacity', 'Total Lost');
-
+        
     end
 end
 
