@@ -88,32 +88,34 @@ if strcmp(option,'b') || strcmp(option,'d')
     for i = 1:7 %over each region
         figure();
         subplot(2,2,1);
-        plot(months,YearData.sales_tons_month_ORA_res(1,:));
+        plot(months,YearData.sales_tons_month_ORA_res(i,:));
         xlabel('Month');
         ylabel('Sales (tons)');
         title(strcat('Sales by month of ORA over region ',regions(i,1),regions(i,2)));
+        ylim([0,2000]);
         
         
         
         subplot(2,2,2);
-        plot(months,YearData.sales_tons_month_POJ_res(1,:));
+        plot(months,YearData.sales_tons_month_POJ_res(i,:));
         xlabel('Month');
         ylabel('Sales (tons)');
         title(strcat('Sales by month of POJ over region ',regions(i,1),regions(i,2)));
-        
+        ylim([0,2000]);
         
         subplot(2,2,3);
-        plot(months,YearData.sales_tons_month_ROJ_res(1,:));
+        plot(months,YearData.sales_tons_month_ROJ_res(i,:));
         xlabel('Month');
         ylabel('Sales (tons)');
         title(strcat('Sales by month of ROJ over region ',regions(i,1),regions(i,2)));
-        
+        ylim([0,2000]);
         
         subplot(2,2,4);
-        plot(months,YearData.sales_tons_month_FCOJ_res(1,:));
+        plot(months,YearData.sales_tons_month_FCOJ_res(i,:));
         xlabel('Month');
         ylabel('Sales (tons)');
         title(strcat('Sales by month of FCOJ over region ',regions(i,1),regions(i,2)));
+        ylim([0,2000]);
     end
     
 end
