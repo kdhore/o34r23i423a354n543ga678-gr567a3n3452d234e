@@ -1,7 +1,7 @@
-function [] = YearDataMetrics(YearData, ojObject)
+function [] = YearDataMetrics(YearData, stor_open)
 
 %plants_open = find(ojObject.proc_plant_cap);
-stor_open = find(ojObject.storage_cap);
+%stor_open = find(ojObject.storage_cap);
 
 prompt = strcat('Report for year', YearData.year, '\n',...
     'What graph do you want to see? Options are: \n',...

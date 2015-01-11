@@ -82,6 +82,9 @@ proc_plants = cell(10,1);
 storage = cell(3,1);
 ojObject = ojObject.update(lastYear);
 
+%metrics
+YearDataMetrics(newYr, stor_open)
+
 % run decisions
 filename = strcat('Decisions/oriangagrande',num2str(currentYear + 1),'.xlsm');
 % this is temporary way to make the prices. need to just hardcode these in
