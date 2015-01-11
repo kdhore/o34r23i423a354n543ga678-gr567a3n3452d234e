@@ -82,19 +82,15 @@ proc_plants = cell(10,1);
 storage = cell(3,1);
 ojObject = ojObject.update(lastYear);
 
-%metrics
-YearDataMetrics(newYr, stor_open)
-
 % run decisions
 filename = strcat('Decisions/oriangagrande',num2str(currentYear + 1),'.xlsm');
-% this is temporary way to make the prices. need to just hardcode these in
-% because ojobject wont match 2018 always.
-filename2 = 'Decisions/oriangagrande2018test.xlsm';
-dec = YearDataforDecisions(filename2, ojObject);
-pricesORA = dec.pricing_ORA_dec;
-pricesPOJ = dec.pricing_POJ_dec;
-pricesROJ = dec.pricing_ROJ_dec;
-pricesFCOJ = dec.pricing_FCOJ_dec;
+yr2017 = load('YearData Orianga/yr2017.mat');
+yr2017temp = genvarname('yr2017');
+yr2017 = yr2017.(yr2017temp);
+pricesORA = yr2017.pricing_ORA_dec;
+pricesPOJ = yr2017.pricing_POJ_dec;
+pricesROJ = yr2017.pricing_ROJ_dec;
+pricesFCOJ = yr2017.pricing_FCOJ_dec;
 decisions = Decisions(filename,ojObject,pricesORA,pricesPOJ,pricesROJ,pricesFCOJ,YearDataRecord);
 
 
@@ -206,8 +202,8 @@ xlwrite(decisionFile, decisions.pricing_FCOJ_dec, 'pricing', 'D33');
 [simResults{1, 1}, proc_plants, storage] = Simulation(ojObject, decisions, 1, shippingSchedule, ROJ_temp, tankersAvailable);
 simResults{1,2} = recentYear + 1;
 
-% xlWrite to write decisions onto spreadsheet to submit
-% *** Phil code here ***
+%metrics
+YearDataMetrics(newYr, stor_open)
 
 % moving to next year
 currentYear = currentYear + 1;
