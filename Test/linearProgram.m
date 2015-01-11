@@ -18,7 +18,7 @@ function [x, fval, purchase, percentpoj, percentroj, ship_from_grove, ship_from_
         %    mean_grove_prices(j) = mean_grove_prices(j) + ...
         %        mean(YearDataRecord(i).us_price_spot_res(j,:));
         %end
-        mean_grove_prices(j) = 2000*mean_grove_prices(j)/length(YearDataRecord);
+        mean_grove_prices(j) = 2000*mean_grove_prices(j)/5;
     end
           
     % rows are plant/storage, columns are grove

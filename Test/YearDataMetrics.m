@@ -25,7 +25,7 @@ if strcmp(option,'a')
             weeks,...
             YearData.storage_res(char...
             (storageNamesInUse(stor_open(i)))).ORA_Sales(2,:));
-        title(strcat('ORA Available and Sales for Storage Index ', num2str(stor_open(i))));
+        title(strcat('ORA Available and Sales for Storage',char(storageNamesInUse(stor_open(i)))));
         xlabel('Weeks');
         ylabel('ORA Amount');
         legend('Available', 'Sold');
@@ -39,7 +39,7 @@ if strcmp(option,'a')
             weeks,...
             YearData.storage_res(char...
             (storageNamesInUse(stor_open(i)))).POJ_Sales(2,:));
-        title(strcat('POJ Available and Sales for Storage Index ', num2str(stor_open(i))));
+        title(strcat('POJ Available and Sales for Storage', char(storageNamesInUse(stor_open(i)))));
         xlabel('Weeks');
         ylabel('POJ Amount');
         legend('Available', 'Sold');
@@ -53,7 +53,7 @@ if strcmp(option,'a')
             weeks,...
             YearData.storage_res(char...
             (storageNamesInUse(stor_open(i)))).ROJ_Sales(2,:));
-        title(strcat('ROJ Available and Sales for Storage Index ', num2str(stor_open(i))));
+        title(strcat('ROJ Available and Sales for Storage', char(storageNamesInUse(stor_open(i)))));
         xlabel('Weeks');
         ylabel('ROJ Amount');
         legend('Available', 'Sold');
@@ -67,7 +67,7 @@ if strcmp(option,'a')
             weeks,...
             YearData.storage_res(char...
             (storageNamesInUse(stor_open(i)))).FCOJ_Sales(2,:));
-        title(strcat('FCOJ Available and Sales for Storage Index', num2str(stor_open(i))));
+        title(strcat('FCOJ Available and Sales for Storage', char(storageNamesInUse(stor_open(i)))));
         xlabel('Weeks');
         ylabel('FCOJ Amount');
         legend('Available', 'Sold');
