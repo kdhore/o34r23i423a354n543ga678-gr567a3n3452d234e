@@ -69,6 +69,15 @@ function [x, fval, purchase, percentpoj, percentroj, ship_from_grove, ship_from_
     percentroj = zeros(71,12);
     ORA_demand(2,1) = 190;
     ORA_demand(1,1) = 160;
+    POJ_demand(1,1) = 180;
+    POJ_demand(2,1) = 170;
+    %POJ_demand(3,1) = 650;
+    %ROJ_demand(1,1) = 180;
+    %ROJ_demand(2,1) = 170;
+    %ROJ_demand(3,1) = 650;
+    %FCOJ_demand(1,1) = 180;
+    %FCOJ_demand(2,1) = 170;
+    %FCOJ_demand(3,1) = 650;
     for i = 1:numStorOpen
         if (ROJ_demand(i,1)+FCOJ_demand(i,1) == 0)
             percentroj(stor_open(i),:) = zeros(1,12);
