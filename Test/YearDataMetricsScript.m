@@ -15,11 +15,13 @@ end
 
 % generate yearData object for new results file
 
-%%%%%%%% if want to load YearData file, comment out next 3 lines
-% newYr = YearData(strcat('Excel Files Orianga/oriangagrande', num2str(currentYear),'Results.xlsm'), ojObject);
-% varName = strcat('yr',num2str(currentYear));
-% eval([varName '= newYr']);
-% save(strcat('YearData Orianga/yr',num2str(currentYear),'.mat'),strcat('yr',num2str(currentYear)));
+%%%%%%%% if want to load existing YearData file, comment out next 3 lines
+
+newYr = YearData(strcat('Excel Files Orianga/oriangagrande', num2str(currentYear),'Results.xlsm'), ojObject);
+varName = strcat('yr',num2str(currentYear));
+eval([varName '= newYr']);
+save(strcat('YearData Orianga/yr',num2str(currentYear),'.mat'),strcat('yr',num2str(currentYear)));
+
 %%%%%%%%
 
 

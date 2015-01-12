@@ -129,6 +129,8 @@ if strcmp(option,'a') || strcmp(option,'d')
         ylim([0,ojObject.storage_cap(stor_open(i)) + 1000]);
         xlabel('Weeks');
         ylabel('Product (Tons)');
+        title(strcat('Total Products for Storage ',char...
+            (storageNamesInUse(stor_open(i)))));
     end
 end
 
