@@ -1,4 +1,4 @@
-function [x, fval, purchase, percentpoj, percentroj, ship_from_grove, ship_from_plants] = linearProgram(ojObject, plant2storage_avgcost, YearDataRecord, ORA_demand, POJ_demand, ROJ_demand, FCOJ_demand, ORA_arr_futures, FCOJ_arr_futures)
+function [x, fval, purchase, percentpoj, percentroj, ship_from_grove, ship_from_plants, pricing] = linearProgram2(ojObject, plant2storage_avgcost, YearDataRecord, ORA_demand, POJ_demand, ROJ_demand, FCOJ_demand, ORA_arr_futures, FCOJ_arr_futures)
     
     plants_open = find(ojObject.proc_plant_cap);
     numPlantsOpen = length(plants_open);
@@ -14,11 +14,7 @@ function [x, fval, purchase, percentpoj, percentroj, ship_from_grove, ship_from_
             mean_grove_prices(j) = mean_grove_prices(j) + ...
                 mean(YearDataRecord(i).us_price_spot_res(j,:));
         end
-        %for i = 1:length(YearDataRecord)
-        %    mean_grove_prices(j) = mean_grove_prices(j) + ...
-        %        mean(YearDataRecord(i).us_price_spot_res(j,:));
-        %end
-        mean_grove_prices(j) = 2000*mean_grove_prices(j)/5;
+        mean_grove_prices(j) = 2000*mean_grove_prices(j)/length(YearDataRecord);
     end
           
     % rows are plant/storage, columns are grove
@@ -66,20 +62,20 @@ function [x, fval, purchase, percentpoj, percentroj, ship_from_grove, ship_from_
     
     % get percent roj (using demands from first month because that's what
     % we optimize over in the linear program)
-    percentroj = zeros(71,12);
-    for i = 1:numStorOpen
-        if (ROJ_demand(i,1)+FCOJ_demand(i,1) == 0)
-            percentroj(stor_open(i),:) = zeros(1,12);
-        else
-            percentroj(stor_open(i),:) = 100*ones(1,12)*ROJ_demand(i,1)/(ROJ_demand(i,1)+FCOJ_demand(i,1));
-        end
-    end
+    %percentroj = zeros(71,12);
+    %for i = 1:numStorOpen
+    %    if (ROJ_demand(i,1)+FCOJ_demand(i,1) == 0)
+    %        percentroj(stor_open(i),:) = zeros(1,12);
+    %    else
+    %        percentroj(stor_open(i),:) = 100*ones(1,12)*ROJ_demand(i,1)/(ROJ_demand(i,1)+FCOJ_demand(i,1));
+    %    end
+    %end
     
     
-    x0 = zeros(6,numPlantsOpen*numStorOpen*2+numStorOpen);
-    
+    %x0 = zeros(6,numPlantsOpen*numStorOpen*2+numStorOpen);
+    x0 = zeros(7,numPlantsOpen*numStorOpen*2+numStorOpen+4);
     a = @(x)cost_obj_func(x, grove2plant_unitcost, grove2storage_unitcost,...
-        plant2storage_avgcost, plants_open, stor_open, ORA_arr_futures, mean_grove_prices);
+        plant2storage_avgcost, plants_open, stor_open, ORA_arr_futures, mean_grove_prices, percentroj(stor_open));
     b = @(x)all_constraints(x, storCapacities, procCapacities,...
         numPlantsOpen,numStorOpen,POJ_demand(:,1),FCOJ_demand(:,1), ROJ_demand(:,1), ORA_demand(:,1),ORA_arr_futures,FCOJ_arr_futures);
     % here send FCOJ_demand - futures arriving... deal with futures, need
@@ -144,6 +140,12 @@ function [x, fval, purchase, percentpoj, percentroj, ship_from_grove, ship_from_
     end
     percentpoj(isnan(percentpoj)) = 0;
     percentpoj(2,:) = 100*ones(1,10)-percentpoj(1,:);
+    
+    % pricing
+    pricing = zeros(7, 12);
+    for i = 1:7
+        pricing(i,:) = ones(1,12)*x(i.1);
+    end
 
 end
 

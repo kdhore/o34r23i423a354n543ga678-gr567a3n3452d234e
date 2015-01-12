@@ -103,9 +103,9 @@ ojObject = ojObject.update(lastYear);
 
 % Running the simulation
 for i = 1:numIter
-    prompt = strcat('Type in the file path of decisions. Year: ',num2str(recentYear+i), '\n');
-    decisions = YearDataforDecisions(input(prompt), ojObject);
+    prompt = strcat('Type in the file path of decisions. Year: ',num2str(recentYear+i), '\n');   
     if i == 1
+        decisions = YearDataforDecisions(input(prompt), ojObject);
         [simResults{i, 1}, proc_plants, storage] = Simulation(ojObject, decisions, i, shippingSchedule, ROJ_temp, tankersAvailable);
         simResults{i,2} = recentYear + i;
         ojObject = ojObject.updatefromSim(decisions, proc_plants, storage);
