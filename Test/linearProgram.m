@@ -10,7 +10,7 @@ function [x, fval, purchase, percentpoj, percentroj, ship_from_grove, ship_from_
     % get grove prices
     mean_grove_prices = zeros(6,1);
     for j = 1:6
-        for i = length(YearDataRecord):-1:(length(YearDataRecord)-4)
+        for i = length(YearDataRecord):-1:(length(YearDataRecord)-9)
             mean_grove_prices(j) = mean_grove_prices(j) + ...
                 mean(YearDataRecord(i).us_price_spot_res(j,:));
         end
@@ -18,7 +18,7 @@ function [x, fval, purchase, percentpoj, percentroj, ship_from_grove, ship_from_
         %    mean_grove_prices(j) = mean_grove_prices(j) + ...
         %        mean(YearDataRecord(i).us_price_spot_res(j,:));
         %end
-        mean_grove_prices(j) = 2000*mean_grove_prices(j)/5;
+        mean_grove_prices(j) = 2000*mean_grove_prices(j)/10;
     end
           
     % rows are plant/storage, columns are grove
@@ -67,6 +67,17 @@ function [x, fval, purchase, percentpoj, percentroj, ship_from_grove, ship_from_
     % get percent roj (using demands from first month because that's what
     % we optimize over in the linear program)
     percentroj = zeros(71,12);
+    ORA_demand(2,1) = 190;
+    ORA_demand(1,1) = 140;
+    POJ_demand(1,1) = 180;
+    POJ_demand(2,1) = 170;
+    %POJ_demand(3,1) = 650;
+    %ROJ_demand(1,1) = 180;
+    ROJ_demand(2,1) = 150;
+    %ROJ_demand(3,1) = 650;
+    FCOJ_demand(1,1) = 130;
+    FCOJ_demand(2,1) = 160;
+    %FCOJ_demand(3,1) = 650;
     for i = 1:numStorOpen
         if (ROJ_demand(i,1)+FCOJ_demand(i,1) == 0)
             percentroj(stor_open(i),:) = zeros(1,12);
