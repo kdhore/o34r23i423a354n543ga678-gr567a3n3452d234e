@@ -73,7 +73,7 @@ function [x, fval, purchase, percentpoj, percentroj, ship_from_grove, ship_from_
     POJ_demand(2,1) = 170;
     %POJ_demand(3,1) = 650;
     %ROJ_demand(1,1) = 180;
-    %ROJ_demand(2,1) = 170;
+    ROJ_demand(2,1) = 120;
     %ROJ_demand(3,1) = 650;
     %FCOJ_demand(1,1) = 180;
     %FCOJ_demand(2,1) = 170;
