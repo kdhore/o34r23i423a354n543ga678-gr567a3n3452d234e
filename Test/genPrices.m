@@ -17,9 +17,9 @@ function [pricesOut,ratesOut] = genPrices()
 			for k=1:12
 				if (vals(k) < probMonth(i,k))
 					if (i ~= 5)
-						tests{i}(j+k) = 1.5*m;
+						tests{i}(j+k - 1) = 1.5*m;
 					else
-						tests{i}(j+k) = 1.1*m;
+						tests{i}(j+k - 1) = 1.1*m;
 					end
 				end
 				ra = rand;
