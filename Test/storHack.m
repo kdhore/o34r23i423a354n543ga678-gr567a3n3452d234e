@@ -37,6 +37,7 @@ for i = 1:(length(yearFiles)-1)
     ojObject = ojObject.update(year.(yearVar));
 end
 recentYear = str2double(strrep(strrep(yearFiles(length(yearFiles)).name,'.mat',''),'yr',''));
+
 % Set the number of iterations to be simulated
 prompt = strcat('How many years to simulate? Starting year: ',num2str(recentYear+1), '\n');
 numIter = input(prompt);
