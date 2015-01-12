@@ -68,14 +68,14 @@ function [x, fval, purchase, percentpoj, percentroj, ship_from_grove, ship_from_
     % we optimize over in the linear program)
     percentroj = zeros(71,12);
     ORA_demand(2,1) = 190;
-    ORA_demand(1,1) = 160;
+    ORA_demand(1,1) = 140;
     POJ_demand(1,1) = 180;
     POJ_demand(2,1) = 170;
     %POJ_demand(3,1) = 650;
     %ROJ_demand(1,1) = 180;
     ROJ_demand(2,1) = 120;
     %ROJ_demand(3,1) = 650;
-    %FCOJ_demand(1,1) = 180;
+    FCOJ_demand(1,1) = 130;
     %FCOJ_demand(2,1) = 170;
     %FCOJ_demand(3,1) = 650;
     for i = 1:numStorOpen
