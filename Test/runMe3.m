@@ -203,7 +203,7 @@ xlwrite(decisionFile, decisions.pricing_FCOJ_dec, 'pricing', 'D33');
 simResults{1,2} = recentYear + 1;
 
 %metrics
-YearDataMetrics(newYr, stor_open)
+%YearDataMetrics(newYr, ojObject)
 
 % moving to next year
 currentYear = currentYear + 1;
